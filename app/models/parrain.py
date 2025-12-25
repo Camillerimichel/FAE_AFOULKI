@@ -11,5 +11,6 @@ class Parrain(Base):
     email = Column(String(255))
     telephone = Column(String(50))
     adresse = Column(Text)
+    photo = Column(String(255))
 
     parrainages = relationship("Parrainage", back_populates="parrain")

@@ -31,8 +31,14 @@
 
     <label class="block mb-4">
         Type :
-        <input name="type" required class="border p-2 w-full"
-               value="{{ etablissement.type if etablissement }}">
+        <select name="type" required class="border p-2 w-full">
+            {% for item in etablissement_types %}
+            <option value="{{ item }}"
+                {% if etablissement and etablissement.type == item %}selected{% endif %}>
+                {{ item | capitalize }}
+            </option>
+            {% endfor %}
+        </select>
     </label>
 
     <button id="submit-btn" class="bg-blue-600 text-white px-4 py-2 rounded">{{ action }}</button>

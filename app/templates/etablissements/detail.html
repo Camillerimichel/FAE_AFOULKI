@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}Détail Établissement{% endblock %}
+
+{% block content %}
+<div class="flex flex-col gap-4 mb-6 sm:flex-row sm:items-center sm:justify-between">
+    <div>
+        <p class="text-sm uppercase tracking-[0.2em] text-[#F2932B] font-semibold">Établissement</p>
+        <h2 class="font-display text-2xl">{{ etablissement.nom }}</h2>
+        <p class="text-slate-600 text-sm">Informations détaillées sur l'établissement.</p>
+    </div>
+    <a href="/etablissements/html" class="inline-flex items-center px-4 py-2 rounded-2xl border border-[#F2932B33] text-[#F2932B] font-semibold hover:bg-[#F2932B10] transition">
+        Retour à la liste
+    </a>
+</div>
+
+<div class="bg-white/95 border border-[#F2932B1f] rounded-2xl shadow-soft p-6">
+    <dl class="grid gap-4 sm:grid-cols-2">
+        <div>
+            <dt class="text-xs uppercase tracking-wide text-slate-500">ID</dt>
+            <dd class="font-semibold text-slate-800">{{ etablissement.id_etablissement }}</dd>
+        </div>
+        <div>
+            <dt class="text-xs uppercase tracking-wide text-slate-500">Type</dt>
+            <dd class="font-semibold text-slate-800">{{ etablissement.type if etablissement.type else "-" }}</dd>
+        </div>
+        <div>
+            <dt class="text-xs uppercase tracking-wide text-slate-500">Adresse</dt>
+            <dd class="font-semibold text-slate-800">{{ etablissement.adresse if etablissement.adresse else "-" }}</dd>
+        </div>
+        <div>
+            <dt class="text-xs uppercase tracking-wide text-slate-500">Ville</dt>
+            <dd class="font-semibold text-slate-800">{{ etablissement.ville if etablissement.ville else "-" }}</dd>
+        </div>
+    </dl>
+</div>
+{% endblock %}

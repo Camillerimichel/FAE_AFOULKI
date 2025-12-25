@@ -14,6 +14,10 @@
         <th class="p-3">Nom</th>
         <th class="p-3">Prénom</th>
         <th class="p-3">Village</th>
+        <th class="p-3">Email</th>
+        <th class="p-3">Téléphone</th>
+        <th class="p-3">WhatsApp</th>
+        <th class="p-3">Année d'entrée au FAE</th>
         <th></th>
     </tr>
 
@@ -23,6 +27,10 @@
         <td class="p-3">{{ f.nom }}</td>
         <td class="p-3">{{ f.prenom }}</td>
         <td class="p-3">{{ f.village }}</td>
+        <td class="p-3">{{ f.email if f.email else "-" }}</td>
+        <td class="p-3">{{ f.telephone if f.telephone else "-" }}</td>
+        <td class="p-3">{{ f.whatsapp if f.whatsapp else "-" }}</td>
+        <td class="p-3">{{ f.annee_rentree if f.annee_rentree else "-" }}</td>
         <td class="p-3 text-right">
             <a href="/admin/filleules/{{ f.id_filleule }}" class="text-blue-600">Voir</a>
         </td>

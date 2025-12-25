@@ -3,18 +3,87 @@
 {% block title %}Parrain {{ parrain.id_parrain }}{% endblock %}
 
 {% block content %}
-<div class="flex items-center gap-3 mb-6">
-    <div class="h-12 w-12 rounded-2xl bg-[#F2932B14] text-[#F2932B] flex items-center justify-center text-2xl shadow-soft">🤝</div>
-    <div>
-        <p class="text-sm uppercase tracking-[0.2em] text-[#F2932B] font-semibold">Parrain</p>
-        <h2 class="font-display text-2xl">#{{ parrain.id_parrain }}</h2>
+<div class="flex flex-col gap-4 mb-6 sm:flex-row sm:items-center sm:justify-between">
+    <div class="flex items-center gap-3">
+        <div class="h-12 w-12 rounded-2xl bg-[#F2932B14] text-[#F2932B] flex items-center justify-center text-2xl shadow-soft">🤝</div>
+        <div>
+            <p class="text-sm uppercase tracking-[0.2em] text-[#F2932B] font-semibold">Parrain</p>
+            <h2 class="font-display text-2xl">#{{ parrain.id_parrain }}</h2>
+        </div>
+    </div>
+    <a href="/parrains/html/{{ parrain.id_parrain }}/vcard"
+       class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#F2932B14] text-[#F2932B] border border-[#F2932B30] hover:-translate-y-0.5 transition shadow-soft">
+        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M12 3v12"></path>
+            <path d="M7 10l5 5 5-5"></path>
+            <path d="M5 21h14"></path>
+        </svg>
+        Exporter vCard
+    </a>
+</div>
+
+<div class="grid gap-6 lg:grid-cols-[240px_1fr]">
+    <div class="bg-white/95 rounded-2xl border border-[#F2932B1f] shadow-soft p-4 flex items-center justify-center">
+        {% if parrain.photo %}
+            <img src="/{{ parrain.photo }}" alt="Photo parrain" class="h-52 w-52 object-cover rounded-2xl border">
+        {% else %}
+            <div class="h-52 w-52 rounded-2xl border border-dashed border-[#F2932B55] flex items-center justify-center text-slate-500 text-sm">
+                Pas de photo
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="bg-white/95 rounded-2xl border border-[#F2932B1f] shadow-soft p-6 space-y-3">
+        <p class="text-slate-700"><span class="font-semibold text-slate-900">Nom :</span> {{ parrain.nom }}</p>
+        <p class="text-slate-700"><span class="font-semibold text-slate-900">Prénom :</span> {{ parrain.prenom }}</p>
+        <p class="text-slate-700"><span class="font-semibold text-slate-900">Email :</span>
+            {% if parrain.email %}
+                <a href="mailto:{{ parrain.email }}" class="text-[#F2932B] hover:underline">{{ parrain.email }}</a>
+            {% else %}
+                -
+            {% endif %}
+        </p>
+        <p class="text-slate-700"><span class="font-semibold text-slate-900">Téléphone :</span> {{ parrain.telephone if parrain.telephone else "-" }}</p>
+        <p class="text-slate-700"><span class="font-semibold text-slate-900">Adresse :</span> {{ parrain.adresse if parrain.adresse else "-" }}</p>
     </div>
 </div>
 
-<div class="bg-white/95 rounded-2xl border border-[#F2932B1f] shadow-soft p-6 space-y-3">
-    <p class="text-slate-700"><span class="font-semibold text-slate-900">Nom :</span> {{ parrain.nom }}</p>
-    <p class="text-slate-700"><span class="font-semibold text-slate-900">Prénom :</span> {{ parrain.prenom }}</p>
-    <p class="text-slate-700"><span class="font-semibold text-slate-900">Email :</span> {{ parrain.email }}</p>
+<div class="mt-8 bg-white/95 rounded-2xl border border-[#F2932B1f] shadow-soft p-6">
+    <h3 class="font-display text-xl mb-4">Filleules parrainées</h3>
+    {% if filleules %}
+    <div class="overflow-hidden rounded-2xl border border-[#F2932B1f]">
+        <table class="min-w-full text-left">
+            <thead class="bg-gradient-to-r from-[#F2932B14] via-[#F2A75A20] to-[#4969A420] text-slate-700">
+                <tr>
+                    <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide">Filleule</th>
+                    <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide">Période</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-[#F2932B14]">
+                {% for item in filleules %}
+                <tr class="hover:bg-[#F2932B0f] transition">
+                    <td class="px-4 py-3">
+                        <a href="/filleules/html/{{ item.filleule.id_filleule }}" class="text-[#F2932B] hover:underline">
+                            {{ item.filleule.prenom }} {{ item.filleule.nom }}
+                        </a>
+                    </td>
+                    <td class="px-4 py-3">
+                        {% if item.parrainage.date_debut or item.parrainage.date_fin %}
+                            {{ item.parrainage.date_debut if item.parrainage.date_debut else "-" }}
+                            →
+                            {{ item.parrainage.date_fin if item.parrainage.date_fin else "-" }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="text-slate-500 text-sm">Aucune filleule associée.</p>
+    {% endif %}
 </div>
 
 <div class="mt-6">

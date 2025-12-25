@@ -11,6 +11,10 @@
     <p><strong>Prénom :</strong> {{ filleule.prenom }}</p>
     <p><strong>Date de naissance :</strong> {{ filleule.date_naissance if filleule.date_naissance else "-" }}</p>
     <p><strong>Village :</strong> {{ filleule.village }}</p>
+    <p><strong>Email :</strong> {{ filleule.email if filleule.email else "-" }}</p>
+    <p><strong>Téléphone :</strong> {{ filleule.telephone if filleule.telephone else "-" }}</p>
+    <p><strong>WhatsApp :</strong> {{ filleule.whatsapp if filleule.whatsapp else "-" }}</p>
+    <p><strong>Année d'entrée au FAE :</strong> {{ filleule.annee_rentree if filleule.annee_rentree else "-" }}</p>
     <p><strong>Photo :</strong>
         {% if filleule.photo %}
             <img src="/{{ filleule.photo }}" alt="Photo filleule" class="mt-2 h-32 w-32 object-cover rounded-xl border">

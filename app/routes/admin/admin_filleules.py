@@ -1,5 +1,6 @@
 from datetime import date
 import os
+import shutil
 from pathlib import Path
 from uuid import uuid4
 
@@ -9,9 +10,10 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
 from app.authz import ADMIN_ROLES, has_any_role
-from app.database import get_db
+from app.database import BASE_DIR, get_db
 from app.models.correspondant import Correspondant
 from app.models.document import Document
+from app.models.etablissement import Etablissement
 from app.models.filleule import Filleule
 from app.models.parrainage import Parrainage
 from app.models.scolarite import Scolarite
@@ -19,17 +21,27 @@ from app.models.suivisocial import SuiviSocial
 
 router = APIRouter(prefix="/filleules", tags=["Admin - Filleules"])
 templates = Jinja2Templates(directory="app/templates")
-UPLOAD_DIR = Path("uploads/filleules")
+DOCUMENTS_DIR = BASE_DIR / "Documents" / "Filleules"
 
 
-def save_photo_file(photo: UploadFile) -> str:
-    UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+def filleule_dir_path(filleule_id: int) -> Path:
+    return DOCUMENTS_DIR / str(filleule_id)
+
+
+def ensure_filleule_dir(filleule_id: int) -> Path:
+    file_dir = filleule_dir_path(filleule_id)
+    file_dir.mkdir(parents=True, exist_ok=True)
+    return file_dir
+
+
+def save_photo_file(filleule_id: int, photo: UploadFile) -> str:
+    file_dir = ensure_filleule_dir(filleule_id)
     ext = Path(photo.filename or "").suffix
-    filename = f"{uuid4().hex}{ext}"
-    file_path = UPLOAD_DIR / filename
+    filename = f"photo_{uuid4().hex}{ext}"
+    file_path = file_dir / filename
     with file_path.open("wb") as buffer:
         buffer.write(photo.file.read())
-    return str(file_path)
+    return file_path.relative_to(BASE_DIR).as_posix()
 
 
 def remove_photo_file(photo_path: str | None) -> None:
@@ -37,9 +49,16 @@ def remove_photo_file(photo_path: str | None) -> None:
         return
     path = Path(photo_path)
     if not path.is_absolute():
-        path = Path.cwd() / path
+        path = BASE_DIR / path
     if path.exists():
         os.remove(path)
+
+
+def normalize_optional(value: str | None) -> str | None:
+    if value is None:
+        return None
+    value = value.strip()
+    return value or None
 
 
 # --- MIDDLEWARE DE SECURITE ---
@@ -67,13 +86,20 @@ def admin_filleules_list(request: Request, db: Session = Depends(get_db)):
 
 # --- PAGE CREER ---
 @router.get("/new")
-def admin_filleule_new(request: Request):
+def admin_filleule_new(request: Request, db: Session = Depends(get_db)):
     if not check_session(request):
         return RedirectResponse("/auth/login")
 
+    etablissements = db.query(Etablissement).all()
+
     return templates.TemplateResponse(
         "admin/filleules/form.html",
-        {"request": request, "action": "Créer", "filleule": None},
+        {
+            "request": request,
+            "action": "Créer",
+            "filleule": None,
+            "etablissements": etablissements,
+        },
     )
 
 
@@ -84,22 +110,40 @@ def admin_filleule_create(
     prenom: str = Form(...),
     date_naissance: str = Form(...),
     village: str = Form(...),
+    ville: str | None = Form(None),
+    email: str | None = Form(None),
+    telephone: str | None = Form(None),
+    whatsapp: str | None = Form(None),
+    etat_civil: str | None = Form(None),
+    annee_rentree: str | None = Form(None),
+    etablissement_id: int = Form(...),
     photo: UploadFile | None = File(None),
     db: Session = Depends(get_db),
 ):
     photo_path = None
-    if photo and photo.filename:
-        photo_path = save_photo_file(photo)
-
     obj = Filleule(
         nom=nom,
         prenom=prenom,
         date_naissance=date.fromisoformat(date_naissance) if date_naissance else None,
         village=village,
-        photo=photo_path,
+        ville=normalize_optional(ville),
+        email=normalize_optional(email),
+        telephone=normalize_optional(telephone),
+        whatsapp=normalize_optional(whatsapp),
+        etat_civil=normalize_optional(etat_civil),
+        annee_rentree=normalize_optional(annee_rentree),
+        etablissement_id=etablissement_id,
     )
     db.add(obj)
     db.commit()
+    db.refresh(obj)
+
+    ensure_filleule_dir(obj.id_filleule)
+
+    if photo and photo.filename:
+        photo_path = save_photo_file(obj.id_filleule, photo)
+        obj.photo = photo_path
+        db.commit()
 
     return RedirectResponse("/admin/filleules", status_code=302)
 
@@ -130,9 +174,16 @@ def admin_filleule_edit(filleule_id: int, request: Request, db: Session = Depend
     if not obj:
         raise HTTPException(404, "Filleule non trouvée")
 
+    etablissements = db.query(Etablissement).all()
+
     return templates.TemplateResponse(
         "admin/filleules/form.html",
-        {"request": request, "action": "Modifier", "filleule": obj},
+        {
+            "request": request,
+            "action": "Modifier",
+            "filleule": obj,
+            "etablissements": etablissements,
+        },
     )
 
 
@@ -144,6 +195,13 @@ def admin_filleule_update(
     prenom: str = Form(...),
     date_naissance: str = Form(...),
     village: str = Form(...),
+    ville: str | None = Form(None),
+    email: str | None = Form(None),
+    telephone: str | None = Form(None),
+    whatsapp: str | None = Form(None),
+    etat_civil: str | None = Form(None),
+    annee_rentree: str | None = Form(None),
+    etablissement_id: int = Form(...),
     photo: UploadFile | None = File(None),
     remove_photo: str | None = Form(None),
     db: Session = Depends(get_db),
@@ -156,9 +214,16 @@ def admin_filleule_update(
     obj.prenom = prenom
     obj.date_naissance = date.fromisoformat(date_naissance) if date_naissance else None
     obj.village = village
+    obj.ville = normalize_optional(ville)
+    obj.email = normalize_optional(email)
+    obj.telephone = normalize_optional(telephone)
+    obj.whatsapp = normalize_optional(whatsapp)
+    obj.etat_civil = normalize_optional(etat_civil)
+    obj.annee_rentree = normalize_optional(annee_rentree)
+    obj.etablissement_id = etablissement_id
     if photo and photo.filename:
         remove_photo_file(obj.photo)
-        obj.photo = save_photo_file(photo)
+        obj.photo = save_photo_file(obj.id_filleule, photo)
     elif remove_photo:
         remove_photo_file(obj.photo)
         obj.photo = None
@@ -192,5 +257,9 @@ def admin_filleule_delete(filleule_id: int, request: Request, db: Session = Depe
 
     db.delete(obj)
     db.commit()
+
+    filleule_dir = filleule_dir_path(filleule_id)
+    if filleule_dir.exists():
+        shutil.rmtree(filleule_dir)
 
     return RedirectResponse("/admin/filleules", status_code=302)

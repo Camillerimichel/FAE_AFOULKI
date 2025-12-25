@@ -13,6 +13,13 @@
     <p><strong>Téléphone :</strong> {{ parrain.telephone }}</p>
     <p><strong>Email :</strong> {{ parrain.email }}</p>
     <p><strong>Adresse :</strong> {{ parrain.adresse }}</p>
+    <p><strong>Photo :</strong>
+        {% if parrain.photo %}
+            <img src="/{{ parrain.photo }}" alt="Photo parrain" class="mt-2 h-32 w-32 object-cover rounded-xl border">
+        {% else %}
+            -
+        {% endif %}
+    </p>
 </div>
 
 {% set back_url = request.headers.get('referer', '/admin/parrains') %}

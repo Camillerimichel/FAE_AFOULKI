@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Date, DateTime
+from sqlalchemy import Column, Integer, String, Date, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
 from app.database import Base
 import datetime
@@ -17,6 +17,7 @@ class Filleule(Base):
     email = Column(String(255))
     etat_civil = Column(String(100))
     annee_rentree = Column(String(20))
+    etablissement_id = Column(Integer, ForeignKey("Etablissements.id_etablissement"))
     photo = Column(String(255))
     date_creation = Column(DateTime, default=datetime.datetime.utcnow)
 
@@ -25,3 +26,4 @@ class Filleule(Base):
     correspondants = relationship("Correspondant", back_populates="filleule")
     documents = relationship("Document", back_populates="filleule")
     suivis = relationship("SuiviSocial", back_populates="filleule")
+    etablissement = relationship("Etablissement", back_populates="filleules")

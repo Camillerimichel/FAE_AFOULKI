@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Liste des Établissements{% endblock %}
+
+{% block content %}
+<div class="flex flex-col gap-4 mb-6 sm:flex-row sm:items-center sm:justify-between">
+    <div>
+        <p class="text-sm uppercase tracking-[0.2em] text-[#F2932B] font-semibold">Établissements</p>
+        <h2 class="font-display text-2xl">Réseau scolaire Afoulki 🏫</h2>
+        <p class="text-slate-600 text-sm">Vue d'ensemble des écoles partenaires.</p>
+    </div>
+    <div class="bg-[#F2932B10] border border-[#F2932B20] text-[#F2932B] px-4 py-3 rounded-2xl shadow-soft text-sm">
+        📚 Des lieux d'apprentissage engagés.
+    </div>
+</div>
+
+<div class="overflow-hidden rounded-2xl bg-white/95 border border-[#F2932B1f] shadow-soft">
+    <table class="min-w-full text-left">
+        <thead class="bg-gradient-to-r from-[#F2932B14] via-[#F2A75A20] to-[#4969A420] text-slate-700">
+            <tr>
+                <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide">ID</th>
+                <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide">Nom</th>
+                <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide">Ville</th>
+                <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide">Type</th>
+                <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-right">Actions</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-[#F2932B14]">
+            {% for e in etablissements %}
+            <tr class="hover:bg-[#F2932B0f] transition">
+                <td class="px-4 py-3 font-semibold text-slate-800">{{ e.id_etablissement }}</td>
+                <td class="px-4 py-3">{{ e.nom }}</td>
+                <td class="px-4 py-3">{{ e.ville if e.ville else "-" }}</td>
+                <td class="px-4 py-3">{{ e.type if e.type else "-" }}</td>
+                <td class="px-4 py-3 text-right">
+                    <a href="/etablissements/html/{{ e.id_etablissement }}" class="inline-flex items-center gap-2 text-[#F2932B] font-semibold hover:translate-x-1 transition">
+                        Voir <span>→</span>
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

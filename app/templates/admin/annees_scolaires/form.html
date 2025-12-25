@@ -1,0 +1,62 @@
+{% extends "admin/admin_base.html" %}
+
+{% block title %}Formulaire année scolaire{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <a href="/admin/users" class="inline-flex items-center px-3 py-2 rounded border border-slate-200 text-slate-700 hover:bg-slate-100 transition">Retour Administration</a>
+</div>
+
+<h2 class="text-2xl font-bold mb-6">{{ action }} une période scolaire</h2>
+
+<form method="post" class="bg-white shadow p-6 rounded max-w-lg">
+    <label class="block mb-4">
+        Première année :
+        <div class="flex items-center gap-3">
+            <input id="annee-input" name="annee_debut" type="number" min="1000" max="9999" required
+                   class="border p-2 w-full"
+                   value="{{ annee_debut }}">
+            <span id="periode-preview" class="text-slate-500 whitespace-nowrap">{{ periode_preview }}</span>
+        </div>
+    </label>
+
+    <button id="submit-btn" class="bg-blue-600 text-white px-4 py-2 rounded">{{ action }}</button>
+</form>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const input = document.getElementById("annee-input");
+        const preview = document.getElementById("periode-preview");
+        const submitBtn = document.getElementById("submit-btn");
+
+        const updatePreview = () => {
+            const raw = input.value.trim();
+            if (!raw) {
+                preview.textContent = "AAAA/AAAA+1";
+                return;
+            }
+            const year = Number.parseInt(raw, 10);
+            if (Number.isNaN(year)) {
+                preview.textContent = "AAAA/AAAA+1";
+                return;
+            }
+            preview.textContent = `${year}/${year + 1}`;
+        };
+
+        const updateState = () => {
+            const filled = input.value.trim().length > 0;
+            submitBtn.disabled = !filled;
+            submitBtn.classList.toggle("opacity-50", !filled);
+            submitBtn.classList.toggle("cursor-not-allowed", !filled);
+        };
+
+        updatePreview();
+        updateState();
+        input.addEventListener("input", () => {
+            updatePreview();
+            updateState();
+        });
+    });
+</script>
+
+{% endblock %}

@@ -8,6 +8,7 @@ class Scolarite(Base):
     id_scolarite = Column(Integer, primary_key=True, index=True)
     id_filleule = Column(Integer, ForeignKey("Filleules.id_filleule"))
     id_etablissement = Column(Integer, ForeignKey("Etablissements.id_etablissement"))
+    id_annee_scolaire = Column(Integer, ForeignKey("Annee_scolaire.id_annee_scolaire"))
 
     annee_scolaire = Column(String(20))
     niveau = Column(String(100))
@@ -22,3 +23,4 @@ class Scolarite(Base):
 
     filleule = relationship("Filleule", back_populates="scolarites")
     etablissement = relationship("Etablissement", back_populates="scolarites")
+    annee_scolaire_ref = relationship("AnneeScolaire", back_populates="scolarites")

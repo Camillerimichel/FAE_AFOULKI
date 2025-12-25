@@ -9,7 +9,7 @@
 <div class="bg-white p-6 shadow rounded">
     <p><strong>Filleule :</strong> {{ scolarite.filleule.prenom }} {{ scolarite.filleule.nom }}</p>
     <p><strong>Établissement :</strong> {{ scolarite.etablissement.nom }}</p>
-    <p><strong>Année scolaire :</strong> {{ scolarite.annee_scolaire }}</p>
+    <p><strong>Année scolaire :</strong> {{ scolarite.annee_scolaire_ref.periode if scolarite.annee_scolaire_ref else scolarite.annee_scolaire }}</p>
     <p><strong>Niveau :</strong> {{ scolarite.niveau }}</p>
     <p><strong>Résultats :</strong> {{ scolarite.resultats }}</p>
     <p><strong>Diplôme obtenu :</strong> {{ scolarite.diplome_obtenu }}</p>

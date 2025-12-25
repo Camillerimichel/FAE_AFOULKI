@@ -16,4 +16,4 @@ class DocumentResponse(DocumentBase):
     date_upload: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True

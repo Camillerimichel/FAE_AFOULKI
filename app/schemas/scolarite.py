@@ -4,6 +4,7 @@ from typing import Optional
 class ScolariteBase(BaseModel):
     id_filleule: int
     id_etablissement: int
+    id_annee_scolaire: Optional[int] = None
     annee_scolaire: Optional[str] = None
     niveau: Optional[str] = None
     filiere: Optional[str] = None
@@ -22,4 +23,4 @@ class ScolariteResponse(ScolariteBase):
     id_scolarite: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True

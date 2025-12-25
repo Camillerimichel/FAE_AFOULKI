@@ -22,16 +22,29 @@
                 <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide">Nom</th>
                 <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide">Prénom</th>
                 <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide">Village</th>
+                <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide">Email</th>
+                <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide">Téléphone</th>
+                <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide">WhatsApp</th>
+                <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide">Année d'entrée au FAE</th>
+                <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide">Établissement</th>
+                <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide">Période</th>
                 <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-right">Actions</th>
             </tr>
         </thead>
         <tbody class="divide-y divide-[#F2932B14]">
             {% for f in filleules %}
+            {% set latest = recent_scolarite.get(f.id_filleule) %}
             <tr class="hover:bg-[#F2932B0f] transition">
                 <td class="px-4 py-3 font-semibold text-slate-800">{{ f.id_filleule }}</td>
                 <td class="px-4 py-3">{{ f.nom }}</td>
                 <td class="px-4 py-3">{{ f.prenom }}</td>
                 <td class="px-4 py-3">{{ f.village }}</td>
+                <td class="px-4 py-3">{{ f.email if f.email else "-" }}</td>
+                <td class="px-4 py-3">{{ f.telephone if f.telephone else "-" }}</td>
+                <td class="px-4 py-3">{{ f.whatsapp if f.whatsapp else "-" }}</td>
+                <td class="px-4 py-3">{{ f.annee_rentree if f.annee_rentree else "-" }}</td>
+                <td class="px-4 py-3">{{ latest.etablissement if latest else "-" }}</td>
+                <td class="px-4 py-3">{{ latest.periode if latest else "-" }}</td>
                 <td class="px-4 py-3 text-right">
                     <a href="/filleules/html/{{ f.id_filleule }}" class="inline-flex items-center gap-2 text-[#F2932B] font-semibold hover:translate-x-1 transition">
                         Voir <span>→</span>

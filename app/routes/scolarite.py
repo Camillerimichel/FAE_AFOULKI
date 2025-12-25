@@ -4,6 +4,7 @@ from fastapi.templating import Jinja2Templates
 
 from app.database import get_db
 from app.models.scolarite import Scolarite
+from app.models.annee_scolaire import AnneeScolaire
 from app.schemas.scolarite import ScolariteCreate, ScolariteResponse
 
 router = APIRouter(prefix="/scolarite", tags=["Scolarité"])
@@ -39,7 +40,19 @@ def get_scolarite(scolarite_id: int, db: Session = Depends(get_db)):
 
 @router.post("/", response_model=ScolariteResponse)
 def create_scolarite(data: ScolariteCreate, db: Session = Depends(get_db)):
-    record = Scolarite(**data.dict())
+    payload = data.dict()
+    annee_id = payload.get("id_annee_scolaire")
+    if annee_id and not payload.get("annee_scolaire"):
+        annee = (
+            db.query(AnneeScolaire)
+            .filter(AnneeScolaire.id_annee_scolaire == annee_id)
+            .first()
+        )
+        if not annee:
+            raise HTTPException(status_code=400, detail="Année scolaire invalide")
+        payload["annee_scolaire"] = annee.periode
+
+    record = Scolarite(**payload)
     db.add(record)
     db.commit()
     db.refresh(record)
@@ -52,7 +65,19 @@ def update_scolarite(scolarite_id: int, data: ScolariteCreate, db: Session = Dep
     if not record:
         raise HTTPException(status_code=404, detail="Enregistrement de scolarité introuvable")
 
-    for key, value in data.dict().items():
+    payload = data.dict()
+    annee_id = payload.get("id_annee_scolaire")
+    if annee_id and not payload.get("annee_scolaire"):
+        annee = (
+            db.query(AnneeScolaire)
+            .filter(AnneeScolaire.id_annee_scolaire == annee_id)
+            .first()
+        )
+        if not annee:
+            raise HTTPException(status_code=400, detail="Année scolaire invalide")
+        payload["annee_scolaire"] = annee.periode
+
+    for key, value in payload.items():
         setattr(record, key, value)
 
     db.commit()

@@ -14,4 +14,4 @@ class EtablissementResponse(EtablissementBase):
     id_etablissement: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True

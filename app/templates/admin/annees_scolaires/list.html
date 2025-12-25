@@ -1,0 +1,30 @@
+{% extends "admin/admin_base.html" %}
+
+{% block title %}Années scolaires - Admin{% endblock %}
+
+{% block content %}
+
+<h2 class="text-2xl font-bold mb-4">Gestion des années scolaires</h2>
+
+<a href="/admin/annees-scolaires/new"
+   class="bg-blue-600 text-white px-4 py-2 rounded">Créer une période</a>
+
+<table class="w-full mt-6 bg-white shadow">
+    <tr class="bg-gray-200 text-left">
+        <th class="p-3">ID</th>
+        <th class="p-3">Période</th>
+        <th class="p-3"></th>
+    </tr>
+
+    {% for a in annees %}
+    <tr class="border-b">
+        <td class="p-3">{{ a.id_annee_scolaire }}</td>
+        <td class="p-3">{{ a.periode }}</td>
+        <td class="p-3 text-right">
+            <a href="/admin/annees-scolaires/{{ a.id_annee_scolaire }}" class="text-blue-600">Voir</a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}

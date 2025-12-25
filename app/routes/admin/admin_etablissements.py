@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.authz import ADMIN_ROLES, has_any_role
 from app.database import get_db
-from app.models.etablissement import Etablissement
+from app.models.etablissement import ETABLISSEMENT_TYPES, Etablissement
 
 router = APIRouter(prefix="/etablissements", tags=["Admin - Etablissements"])
 templates = Jinja2Templates(directory="app/templates")
@@ -42,7 +42,12 @@ def admin_etablissement_new(request: Request):
 
     return templates.TemplateResponse(
         "admin/etablissements/form.html",
-        {"request": request, "action": "Créer", "etablissement": None},
+        {
+            "request": request,
+            "action": "Créer",
+            "etablissement": None,
+            "etablissement_types": ETABLISSEMENT_TYPES,
+        },
     )
 
 
@@ -55,6 +60,9 @@ def admin_etablissement_create(
     type: str = Form(...),
     db: Session = Depends(get_db),
 ):
+    if type not in ETABLISSEMENT_TYPES:
+        raise HTTPException(400, "Type d'établissement invalide")
+
     etab = Etablissement(
         nom=nom,
         adresse=adresse,
@@ -103,7 +111,12 @@ def admin_etablissement_edit(id_etablissement: int, request: Request, db: Sessio
 
     return templates.TemplateResponse(
         "admin/etablissements/form.html",
-        {"request": request, "action": "Modifier", "etablissement": etab},
+        {
+            "request": request,
+            "action": "Modifier",
+            "etablissement": etab,
+            "etablissement_types": ETABLISSEMENT_TYPES,
+        },
     )
 
 
@@ -124,6 +137,9 @@ def admin_etablissement_update(
     )
     if not etab:
         raise HTTPException(404, "Établissement non trouvé")
+
+    if type not in ETABLISSEMENT_TYPES:
+        raise HTTPException(400, "Type d'établissement invalide")
 
     etab.nom = nom
     etab.adresse = adresse

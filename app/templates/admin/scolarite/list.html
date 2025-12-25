@@ -24,7 +24,7 @@
         <td class="p-3">{{ s.id_scolarite }}</td>
         <td class="p-3">{{ s.filleule.prenom }} {{ s.filleule.nom }}</td>
         <td class="p-3">{{ s.etablissement.nom }}</td>
-        <td class="p-3">{{ s.annee_scolaire }}</td>
+        <td class="p-3">{{ s.annee_scolaire_ref.periode if s.annee_scolaire_ref else s.annee_scolaire }}</td>
         <td class="p-3">{{ s.niveau }}</td>
         <td class="p-3 text-right">
             <a href="/admin/scolarite/{{ s.id_scolarite }}" class="text-blue-600">Voir</a>

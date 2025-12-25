@@ -1,14 +1,51 @@
-from fastapi import APIRouter, Request, Depends, Form, HTTPException
+import os
+import shutil
+from pathlib import Path
+from uuid import uuid4
+
+from fastapi import APIRouter, Request, Depends, Form, HTTPException, UploadFile, File
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
 from app.authz import ADMIN_ROLES, has_any_role
-from app.database import get_db
+from app.database import BASE_DIR, get_db
 from app.models.parrain import Parrain
+from app.models.parrainage import Parrainage
 
 router = APIRouter(prefix="/parrains", tags=["Admin - Parrains"])
 templates = Jinja2Templates(directory="app/templates")
+DOCUMENTS_DIR = BASE_DIR / "Documents" / "Parrains"
+
+
+def parrain_dir_path(parrain_id: int) -> Path:
+    return DOCUMENTS_DIR / str(parrain_id)
+
+
+def ensure_parrain_dir(parrain_id: int) -> Path:
+    file_dir = parrain_dir_path(parrain_id)
+    file_dir.mkdir(parents=True, exist_ok=True)
+    return file_dir
+
+
+def save_photo_file(parrain_id: int, photo: UploadFile) -> str:
+    file_dir = ensure_parrain_dir(parrain_id)
+    ext = Path(photo.filename or "").suffix
+    filename = f"photo_{uuid4().hex}{ext}"
+    file_path = file_dir / filename
+    with file_path.open("wb") as buffer:
+        buffer.write(photo.file.read())
+    return file_path.relative_to(BASE_DIR).as_posix()
+
+
+def remove_photo_file(photo_path: str | None) -> None:
+    if not photo_path:
+        return
+    path = Path(photo_path)
+    if not path.is_absolute():
+        path = BASE_DIR / path
+    if path.exists():
+        os.remove(path)
 
 
 # --- Vérification session ---
@@ -54,6 +91,7 @@ def admin_parrain_create(
     telephone: str = Form(...),
     email: str = Form(...),
     adresse: str = Form(...),
+    photo: UploadFile | None = File(None),
     db: Session = Depends(get_db),
 ):
     parrain = Parrain(
@@ -65,6 +103,12 @@ def admin_parrain_create(
     )
     db.add(parrain)
     db.commit()
+    db.refresh(parrain)
+
+    ensure_parrain_dir(parrain.id_parrain)
+    if photo and photo.filename:
+        parrain.photo = save_photo_file(parrain.id_parrain, photo)
+        db.commit()
 
     return RedirectResponse("/admin/parrains", status_code=302)
 
@@ -110,6 +154,8 @@ def admin_parrain_update(
     telephone: str = Form(...),
     email: str = Form(...),
     adresse: str = Form(...),
+    photo: UploadFile | None = File(None),
+    remove_photo: str | None = Form(None),
     db: Session = Depends(get_db),
 ):
     parrain = db.query(Parrain).filter(Parrain.id_parrain == parrain_id).first()
@@ -121,6 +167,12 @@ def admin_parrain_update(
     parrain.telephone = telephone
     parrain.email = email
     parrain.adresse = adresse
+    if photo and photo.filename:
+        remove_photo_file(parrain.photo)
+        parrain.photo = save_photo_file(parrain.id_parrain, photo)
+    elif remove_photo:
+        remove_photo_file(parrain.photo)
+        parrain.photo = None
 
     db.commit()
 
@@ -137,7 +189,13 @@ def admin_parrain_delete(parrain_id: int, request: Request, db: Session = Depend
     if not parrain:
         raise HTTPException(404, "Parrain non trouvé")
 
+    remove_photo_file(parrain.photo)
+    db.query(Parrainage).filter(Parrainage.id_parrain == parrain_id).delete(synchronize_session=False)
     db.delete(parrain)
     db.commit()
+
+    parrain_dir = parrain_dir_path(parrain_id)
+    if parrain_dir.exists():
+        shutil.rmtree(parrain_dir)
 
     return RedirectResponse("/admin/parrains", status_code=302)

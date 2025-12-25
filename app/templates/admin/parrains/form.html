@@ -9,7 +9,7 @@
 
 <h2 class="text-2xl font-bold mb-6">{{ action }} un Parrain</h2>
 
-<form method="post" class="bg-white shadow p-6 rounded max-w-lg">
+<form method="post" enctype="multipart/form-data" class="bg-white shadow p-6 rounded max-w-lg">
 
     <label class="block mb-4">
         Nom :
@@ -34,6 +34,25 @@
     <label class="block mb-4">
         Adresse :
         <input name="adresse" required class="border p-2 w-full" value="{{ parrain.adresse if parrain }}">
+    </label>
+
+    {% if parrain and parrain.photo %}
+    <div class="mb-4">
+        <p class="text-sm text-slate-600 mb-2">Photo actuelle :</p>
+        <img src="/{{ parrain.photo }}" alt="Photo parrain" class="h-32 w-32 object-cover rounded-xl border">
+        <label class="flex items-center gap-2 text-sm mt-2">
+            <input type="checkbox" name="remove_photo" value="1">
+            Supprimer la photo actuelle
+        </label>
+    </div>
+    {% endif %}
+
+    <label class="block mb-4">
+        Photo :
+        <input name="photo" type="file" accept="image/*" class="border p-2 w-full">
+        {% if parrain and parrain.photo %}
+        <p class="text-xs text-slate-500 mt-1">Choisir une nouvelle photo pour remplacer l'actuelle.</p>
+        {% endif %}
     </label>
 
     <button id="submit-btn" class="bg-blue-600 text-white px-4 py-2 rounded">{{ action }}</button>

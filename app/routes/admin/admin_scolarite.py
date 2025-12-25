@@ -8,6 +8,7 @@ from app.database import get_db
 from app.models.scolarite import Scolarite
 from app.models.filleule import Filleule
 from app.models.etablissement import Etablissement
+from app.models.annee_scolaire import AnneeScolaire
 
 router = APIRouter(prefix="/scolarite", tags=["Admin - Scolarité"])
 templates = Jinja2Templates(directory="app/templates")
@@ -44,6 +45,7 @@ def admin_scolarite_new(request: Request, db: Session = Depends(get_db)):
 
     filleules = db.query(Filleule).all()
     etablissements = db.query(Etablissement).all()
+    annees = db.query(AnneeScolaire).order_by(AnneeScolaire.periode).all()
 
     return templates.TemplateResponse(
         "admin/scolarite/form.html",
@@ -53,6 +55,8 @@ def admin_scolarite_new(request: Request, db: Session = Depends(get_db)):
             "scolarite": None,
             "filleules": filleules,
             "etablissements": etablissements,
+            "annees": annees,
+            "selected_annee_id": None,
         },
     )
 
@@ -62,16 +66,25 @@ def admin_scolarite_create(
     request: Request,
     id_filleule: int = Form(...),
     id_etablissement: int = Form(...),
-    annee_scolaire: str = Form(...),
+    id_annee_scolaire: int = Form(...),
     niveau: str = Form(...),
     resultats: str = Form(...),
     diplome_obtenu: str = Form(...),
     db: Session = Depends(get_db),
 ):
+    annee = (
+        db.query(AnneeScolaire)
+        .filter(AnneeScolaire.id_annee_scolaire == id_annee_scolaire)
+        .first()
+    )
+    if not annee:
+        raise HTTPException(400, "Année scolaire invalide")
+
     s = Scolarite(
         id_filleule=id_filleule,
         id_etablissement=id_etablissement,
-        annee_scolaire=annee_scolaire,
+        id_annee_scolaire=id_annee_scolaire,
+        annee_scolaire=annee.periode,
         niveau=niveau,
         resultats=resultats,
         diplome_obtenu=diplome_obtenu,
@@ -111,6 +124,24 @@ def admin_scolarite_edit(id_scolarite: int, request: Request, db: Session = Depe
 
     filleules = db.query(Filleule).all()
     etablissements = db.query(Etablissement).all()
+    annees = db.query(AnneeScolaire).order_by(AnneeScolaire.periode).all()
+    selected_annee_id = s.id_annee_scolaire
+    if not selected_annee_id and s.annee_scolaire:
+        periode = s.annee_scolaire
+        matched = (
+            db.query(AnneeScolaire)
+            .filter(AnneeScolaire.periode == periode)
+            .first()
+        )
+        if not matched and "-" in periode:
+            normalized = periode.replace("-", "/")
+            matched = (
+                db.query(AnneeScolaire)
+                .filter(AnneeScolaire.periode == normalized)
+                .first()
+            )
+        if matched:
+            selected_annee_id = matched.id_annee_scolaire
 
     return templates.TemplateResponse(
         "admin/scolarite/form.html",
@@ -120,6 +151,8 @@ def admin_scolarite_edit(id_scolarite: int, request: Request, db: Session = Depe
             "scolarite": s,
             "filleules": filleules,
             "etablissements": etablissements,
+            "annees": annees,
+            "selected_annee_id": selected_annee_id,
         },
     )
 
@@ -130,7 +163,7 @@ def admin_scolarite_update(
     request: Request,
     id_filleule: int = Form(...),
     id_etablissement: int = Form(...),
-    annee_scolaire: str = Form(...),
+    id_annee_scolaire: int = Form(...),
     niveau: str = Form(...),
     resultats: str = Form(...),
     diplome_obtenu: str = Form(...),
@@ -140,9 +173,18 @@ def admin_scolarite_update(
     if not s:
         raise HTTPException(404, "Enregistrement scolarité non trouvé")
 
+    annee = (
+        db.query(AnneeScolaire)
+        .filter(AnneeScolaire.id_annee_scolaire == id_annee_scolaire)
+        .first()
+    )
+    if not annee:
+        raise HTTPException(400, "Année scolaire invalide")
+
     s.id_filleule = id_filleule
     s.id_etablissement = id_etablissement
-    s.annee_scolaire = annee_scolaire
+    s.id_annee_scolaire = id_annee_scolaire
+    s.annee_scolaire = annee.periode
     s.niveau = niveau
     s.resultats = resultats
     s.diplome_obtenu = diplome_obtenu

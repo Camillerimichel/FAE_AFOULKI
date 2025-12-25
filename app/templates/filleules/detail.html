@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}Détail Filleule{% endblock %}
+
+{% block content %}
+<div class="flex flex-col gap-4 mb-6 sm:flex-row sm:items-center sm:justify-between">
+    <div>
+        <p class="text-sm uppercase tracking-[0.2em] text-[#F2932B] font-semibold">Filleule</p>
+        <h2 class="font-display text-2xl">{{ filleule.prenom }} {{ filleule.nom }}</h2>
+        <p class="text-slate-600 text-sm">Profil détaillé de la filleule.</p>
+    </div>
+    <a href="/filleules/html" class="inline-flex items-center px-4 py-2 rounded-2xl border border-[#F2932B33] text-[#F2932B] font-semibold hover:bg-[#F2932B10] transition">
+        Retour à la liste
+    </a>
+</div>
+
+<div class="grid gap-6 lg:grid-cols-[240px_1fr]">
+    <div class="bg-white/95 border border-[#F2932B1f] rounded-2xl shadow-soft p-4 flex items-center justify-center">
+        {% if filleule.photo %}
+            <img src="/{{ filleule.photo }}" alt="Photo filleule" class="h-52 w-52 object-cover rounded-2xl border">
+        {% else %}
+            <div class="h-52 w-52 rounded-2xl border border-dashed border-[#F2932B55] flex items-center justify-center text-slate-500 text-sm">
+                Pas de photo
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="bg-white/95 border border-[#F2932B1f] rounded-2xl shadow-soft p-6">
+        <dl class="grid gap-4 sm:grid-cols-2">
+            <div>
+                <dt class="text-xs uppercase tracking-wide text-slate-500">ID</dt>
+                <dd class="font-semibold text-slate-800">{{ filleule.id_filleule }}</dd>
+            </div>
+            <div>
+                <dt class="text-xs uppercase tracking-wide text-slate-500">Village</dt>
+                <dd class="font-semibold text-slate-800">{{ filleule.village if filleule.village else "-" }}</dd>
+            </div>
+            <div>
+                <dt class="text-xs uppercase tracking-wide text-slate-500">Date de naissance</dt>
+                <dd class="font-semibold text-slate-800">{{ filleule.date_naissance if filleule.date_naissance else "-" }}</dd>
+            </div>
+            <div>
+                <dt class="text-xs uppercase tracking-wide text-slate-500">Email</dt>
+                <dd class="font-semibold text-slate-800">{{ filleule.email if filleule.email else "-" }}</dd>
+            </div>
+            <div>
+                <dt class="text-xs uppercase tracking-wide text-slate-500">Téléphone</dt>
+                <dd class="font-semibold text-slate-800">{{ filleule.telephone if filleule.telephone else "-" }}</dd>
+            </div>
+            <div>
+                <dt class="text-xs uppercase tracking-wide text-slate-500">WhatsApp</dt>
+                <dd class="font-semibold text-slate-800">{{ filleule.whatsapp if filleule.whatsapp else "-" }}</dd>
+            </div>
+            <div>
+                <dt class="text-xs uppercase tracking-wide text-slate-500">Etat civil</dt>
+                <dd class="font-semibold text-slate-800">{{ filleule.etat_civil if filleule.etat_civil else "-" }}</dd>
+            </div>
+            <div>
+                <dt class="text-xs uppercase tracking-wide text-slate-500">Année d'entrée au FAE</dt>
+                <dd class="font-semibold text-slate-800">{{ filleule.annee_rentree if filleule.annee_rentree else "-" }}</dd>
+            </div>
+            <div class="sm:col-span-2">
+                <dt class="text-xs uppercase tracking-wide text-slate-500">Parrain</dt>
+                <dd class="font-semibold text-slate-800">
+                    {% if parrains %}
+                        {% for p in parrains %}
+                            <a href="/parrains/html/{{ p.id_parrain }}" class="text-[#F2932B] hover:underline">
+                                {{ p.prenom }} {{ p.nom }}
+                            </a>{% if not loop.last %}, {% endif %}
+                        {% endfor %}
+                    {% else %}
+                        -
+                    {% endif %}
+                </dd>
+            </div>
+        </dl>
+    </div>
+</div>
+
+<div class="mt-8 bg-white/95 border border-[#F2932B1f] rounded-2xl shadow-soft p-6">
+    <h3 class="font-display text-xl mb-4">Scolarité</h3>
+    {% if scolarites %}
+    <div class="overflow-hidden rounded-2xl border border-[#F2932B1f]">
+        <table class="min-w-full text-left">
+            <thead class="bg-gradient-to-r from-[#F2932B14] via-[#F2A75A20] to-[#4969A420] text-slate-700">
+                <tr>
+                    <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide">Année scolaire</th>
+                    <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide">Établissement</th>
+                    <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide">Niveau</th>
+                    <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide">Résultats</th>
+                    <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide">Diplôme</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-[#F2932B14]">
+                {% for s in scolarites %}
+                <tr class="hover:bg-[#F2932B0f] transition">
+                    <td class="px-4 py-3">
+                        {{ s.annee_scolaire_ref.periode if s.annee_scolaire_ref else s.annee_scolaire if s.annee_scolaire else "-" }}
+                    </td>
+                    <td class="px-4 py-3">{{ s.etablissement.nom if s.etablissement else "-" }}</td>
+                    <td class="px-4 py-3">{{ s.niveau if s.niveau else "-" }}</td>
+                    <td class="px-4 py-3">{{ s.resultats if s.resultats else "-" }}</td>
+                    <td class="px-4 py-3">{{ s.diplome_obtenu if s.diplome_obtenu else "-" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="text-slate-500 text-sm">Aucune scolarité enregistrée.</p>
+    {% endif %}
+</div>
+{% endblock %}

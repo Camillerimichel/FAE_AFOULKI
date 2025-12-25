@@ -37,8 +37,14 @@
 
     <label class="block mb-4">
         Année scolaire :
-        <input name="annee_scolaire" required class="border p-2 w-full"
-               value="{{ scolarite.annee_scolaire if scolarite }}">
+        <select name="id_annee_scolaire" required class="border p-2 w-full">
+            {% for a in annees %}
+            <option value="{{ a.id_annee_scolaire }}"
+                {% if selected_annee_id == a.id_annee_scolaire %}selected{% endif %}>
+                {{ a.periode }}
+            </option>
+            {% endfor %}
+        </select>
     </label>
 
     <label class="block mb-4">

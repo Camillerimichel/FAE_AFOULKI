@@ -13,6 +13,7 @@ class FilleuleBase(BaseModel):
     email: Optional[str] = None
     etat_civil: Optional[str] = None
     annee_rentree: Optional[str] = None
+    etablissement_id: Optional[int] = None
     photo: Optional[str] = None
 
 class FilleuleCreate(FilleuleBase):
@@ -23,4 +24,4 @@ class FilleuleResponse(FilleuleBase):
     date_creation: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True

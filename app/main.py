@@ -28,7 +28,14 @@ from app.routes.admin.dashboard_api_router import router as dashboard_api_router
 from app.routes.admin.export_excel_router import router as export_excel_router
 from app.routes.admin.admin_router import router as admin_router
 from app.services.roles_service import ensure_default_roles
-from app.services.schema_service import ensure_filleule_photo_column
+from app.services.annees_scolaires_service import ensure_annees_scolaires_seed
+from app.services.schema_service import (
+    ensure_filleule_photo_column,
+    ensure_filleule_etablissement_column,
+    ensure_parrain_photo_column,
+    ensure_etablissement_type_enum,
+    ensure_scolarite_annee_scolaire_column,
+)
 
 
 # --------------------------------------------------
@@ -44,6 +51,11 @@ app.add_middleware(SessionMiddleware)
 Base.metadata.create_all(bind=engine)
 ensure_default_roles()
 ensure_filleule_photo_column()
+ensure_filleule_etablissement_column()
+ensure_parrain_photo_column()
+ensure_etablissement_type_enum()
+ensure_annees_scolaires_seed()
+ensure_scolarite_annee_scolaire_column()
 
 
 # --------------------------------------------------

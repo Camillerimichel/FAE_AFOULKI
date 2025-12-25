@@ -16,4 +16,4 @@ class CorrespondantResponse(CorrespondantBase):
     id_correspondant: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
