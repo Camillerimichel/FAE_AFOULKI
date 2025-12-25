@@ -1,0 +1,65 @@
+{% extends "admin/admin_base.html" %}
+
+{% block title %}Formulaire Établissement{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <a href="/admin/users" class="inline-flex items-center px-3 py-2 rounded border border-slate-200 text-slate-700 hover:bg-slate-100 transition">Retour Administration</a>
+</div>
+
+<h2 class="text-2xl font-bold mb-6">{{ action }} un Établissement</h2>
+
+<form method="post" class="bg-white shadow p-6 rounded max-w-lg">
+
+    <label class="block mb-4">
+        Nom :
+        <input name="nom" required class="border p-2 w-full"
+               value="{{ etablissement.nom if etablissement }}">
+    </label>
+
+    <label class="block mb-4">
+        Adresse :
+        <input name="adresse" required class="border p-2 w-full"
+               value="{{ etablissement.adresse if etablissement }}">
+    </label>
+
+    <label class="block mb-4">
+        Ville :
+        <input name="ville" required class="border p-2 w-full"
+               value="{{ etablissement.ville if etablissement }}">
+    </label>
+
+    <label class="block mb-4">
+        Type :
+        <input name="type" required class="border p-2 w-full"
+               value="{{ etablissement.type if etablissement }}">
+    </label>
+
+    <button id="submit-btn" class="bg-blue-600 text-white px-4 py-2 rounded">{{ action }}</button>
+
+</form>
+
+{% if action == "Créer" %}
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const form = document.querySelector("form");
+        const submitBtn = document.getElementById("submit-btn");
+        const requiredFields = Array.from(
+            form.querySelectorAll("input[required], select[required], textarea[required]")
+        );
+
+        const updateState = () => {
+            const allFilled = requiredFields.every((field) => field.value.trim().length > 0);
+            submitBtn.disabled = !allFilled;
+            submitBtn.classList.toggle("opacity-50", !allFilled);
+            submitBtn.classList.toggle("cursor-not-allowed", !allFilled);
+        };
+
+        updateState();
+        form.addEventListener("input", updateState);
+        form.addEventListener("change", updateState);
+    });
+</script>
+{% endif %}
+
+{% endblock %}

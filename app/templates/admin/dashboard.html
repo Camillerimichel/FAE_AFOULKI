@@ -1,0 +1,186 @@
+{% extends "admin/admin_base.html" %}
+
+{% block content %}
+<div class="space-y-8">
+    <div class="bg-gradient-to-r from-[#F2932B] via-[#F2A75A] to-[#4969A4] text-white rounded-3xl p-8 shadow-2xl shadow-[rgba(73,105,164,0.35)]">
+        <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div>
+                <p class="text-sm uppercase tracking-[0.25em] text-white/80 font-semibold">Dashboard admin</p>
+                <h1 class="font-display text-3xl">Suivi joyeux des indicateurs 🎉</h1>
+                <p class="text-white/85 mt-2 max-w-2xl">Visualisez l'activité des filleuls, parrains et documents en gardant une touche colorée.</p>
+            </div>
+            <div class="flex items-center gap-3 bg-white/15 rounded-2xl px-4 py-3 shadow-soft">
+                <span class="text-3xl">📈</span>
+                <div class="text-sm">
+                    <p class="font-semibold">Vue d'ensemble</p>
+                    <p class="text-white/80">Mettez à jour vos filtres selon vos besoins.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid gap-4 md:grid-cols-4">
+        <div class="rounded-2xl bg-white/95 border border-[#F2932B1f] shadow-soft p-5">
+            <p class="text-sm text-slate-500">Filleuls</p>
+            <p class="text-3xl font-display text-[#F2932B]">{{ stats.filleules }}</p>
+        </div>
+        <div class="rounded-2xl bg-white/95 border border-[#F2932B1f] shadow-soft p-5">
+            <p class="text-sm text-slate-500">Parrains</p>
+            <p class="text-3xl font-display text-[#4969A4]">{{ stats.parrains }}</p>
+        </div>
+        <div class="rounded-2xl bg-white/95 border border-[#F2932B1f] shadow-soft p-5">
+            <p class="text-sm text-slate-500">Parrainages</p>
+            <p class="text-3xl font-display text-[#F2932B]">{{ stats.parrainages }}</p>
+        </div>
+        <div class="rounded-2xl bg-white/95 border border-[#F2932B1f] shadow-soft p-5">
+            <p class="text-sm text-slate-500">Documents</p>
+            <p class="text-3xl font-display text-[#4969A4]">{{ stats.documents }}</p>
+        </div>
+    </div>
+
+    <div class="grid gap-6 md:grid-cols-2">
+        <div class="space-y-2">
+            <label class="text-sm font-semibold text-slate-700">Filtrer par établissement (multi-sélection)</label>
+            <select id="filterEtab" class="w-full px-4 py-3 rounded-2xl border border-[#F2932B1f] bg-white/90 focus:ring-2 focus:ring-[#F2932B33] focus:outline-none" multiple size="6">
+                {% for nom, id in charts.etablissements %}
+                <option value="{{ id }}">{{ nom }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="space-y-2">
+            <label class="text-sm font-semibold text-slate-700">Filtrer par année</label>
+            <select id="filterYear" class="w-full px-4 py-3 rounded-2xl border border-[#F2932B1f] bg-white/90 focus:ring-2 focus:ring-[#F2932B33] focus:outline-none">
+                <option value="">Toutes</option>
+                {% for year in charts.annees %}
+                <option value="{{ year }}">{{ year }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+
+    <button id="exportExcel" class="w-full inline-flex justify-center items-center gap-2 px-4 py-3 rounded-2xl bg-gradient-to-r from-[#4969A4] to-[#F2932B] text-white font-semibold shadow-2xl shadow-[rgba(73,105,164,0.35)] hover:-translate-y-0.5 transition">
+        📥 Exporter en Excel
+    </button>
+
+    <div class="grid gap-6 md:grid-cols-2">
+        <div class="bg-white/95 rounded-2xl border border-[#F2932B1f] shadow-soft p-6 space-y-3">
+            <h4 class="font-semibold text-lg flex items-center gap-2">👩‍🎓 Filleuls par établissement</h4>
+            <canvas id="filleulsChart"></canvas>
+        </div>
+
+        <div class="bg-white/95 rounded-2xl border border-[#F2932B1f] shadow-soft p-6 space-y-3">
+            <h4 class="font-semibold text-lg flex items-center gap-2">📅 Parrainages par année</h4>
+            <canvas id="parrainagesChart"></canvas>
+        </div>
+
+        <div class="bg-white/95 rounded-2xl border border-[#F2932B1f] shadow-soft p-6 space-y-3 md:col-span-2">
+            <h4 class="font-semibold text-lg flex items-center gap-2">📚 Répartition des filleuls par niveau scolaire</h4>
+            <canvas id="niveauxChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- =======================
+     LOAD CHART.JS
+======================== -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    let filleulsChart, parrainagesChart, niveauxChart;
+
+    // ================================
+    //  RENDER FUNCTIONS
+    // ================================
+    function renderFilleulsChart(labels, data) {
+        if (filleulsChart) filleulsChart.destroy();
+        filleulsChart = new Chart(document.getElementById('filleulsChart'), {
+            type: 'bar',
+            data: { labels, datasets: [{ label: "Nombre de filleuls", data, backgroundColor: "#F2932B" }] }
+        });
+    }
+
+    function renderParrainagesChart(labels, data) {
+        if (parrainagesChart) parrainagesChart.destroy();
+        parrainagesChart = new Chart(document.getElementById('parrainagesChart'), {
+            type: 'line',
+            data: { labels, datasets: [{ label: "Parrainages", data, borderColor: "#4969A4", backgroundColor: "rgba(73,105,164,0.18)" }] }
+        });
+    }
+
+    function renderNiveauxChart(labels, data) {
+        if (niveauxChart) niveauxChart.destroy();
+        niveauxChart = new Chart(document.getElementById('niveauxChart'), {
+            type: 'pie',
+            data: { labels, datasets: [{ label: "Niveaux scolaires", data, backgroundColor: ["#F2932B", "rgba(242,147,43,0.65)", "#4969A4", "rgba(73,105,164,0.6)", "#000000"] }] }
+        });
+    }
+
+    // ================================
+    //  INITIAL DATA
+    // ================================
+    renderFilleulsChart(
+        {{ charts.filleuls_par_etab | map(attribute=0) | list }},
+        {{ charts.filleuls_par_etab | map(attribute=1) | list }}
+    );
+
+    renderParrainagesChart(
+        {{ charts.parrainages_par_annee | map(attribute=0) | list }},
+        {{ charts.parrainages_par_annee | map(attribute=1) | list }}
+    );
+
+    renderNiveauxChart(
+        {{ charts.niveaux_labels | list }},
+        {{ charts.niveaux_data | list }}
+    );
+
+    // ================================
+    //  FILTRE MULTIPLE ÉTABLISSEMENT
+    // ================================
+    document.getElementById('filterEtab').addEventListener('change', async (e) => {
+
+        const selected = Array.from(e.target.selectedOptions).map(o => o.value);
+        const query = selected.map(id => `etablissement_id=${id}`).join("&");
+
+        const res = await fetch(`/admin/api/filleuls-par-etab?${query}`);
+        const json = await res.json();
+
+        renderFilleulsChart(json.labels, json.data);
+    });
+
+    // ================================
+    //  FILTRE ANNÉE
+    // ================================
+    document.getElementById('filterYear').addEventListener('change', async (e) => {
+
+        const year = e.target.value;
+        const res = await fetch(`/admin/api/parrainages-par-annee?annee=${year}`);
+        const json = await res.json();
+
+        renderParrainagesChart(json.labels, json.data);
+    });
+
+// ================================
+// EXPORT EXCEL
+// ================================
+document.getElementById('exportExcel').addEventListener('click', () => {
+
+    // Récupération des établissements sélectionnés
+    const etabSelect = document.getElementById('filterEtab');
+    const selectedEtabs = Array.from(etabSelect.selectedOptions).map(o => o.value);
+    const queryEtab = selectedEtabs.map(id => `etablissement_id=${id}`).join("&");
+
+    // Récupération de l'année sélectionnée
+    const year = document.getElementById('filterYear').value;
+    const queryYear = year ? `&annee=${year}` : "";
+
+    // Construction de l'URL finale
+    const url = `/admin/export/excel?${queryEtab}${queryYear}`;
+
+    // Lancement du téléchargement
+    window.location = url;
+});
+
+
+</script>
+
+{% endblock %}

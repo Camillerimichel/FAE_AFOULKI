@@ -1,0 +1,40 @@
+{% extends "admin/admin_base.html" %}
+
+{% block title %}Documents{% endblock %}
+
+{% block content %}
+<h2 class="text-2xl font-bold mb-4">Documents</h2>
+
+<a href="/admin/documents/new"
+   class="bg-blue-600 text-white px-4 py-2 rounded">
+   Nouveau document
+</a>
+
+<table class="w-full mt-6 bg-white shadow">
+    <tr class="bg-gray-200">
+        <th class="p-3">ID</th>
+        <th class="p-3">Titre</th>
+        <th class="p-3">Filleule</th>
+        <th class="p-3">Type</th>
+        <th class="p-3">Fichier</th>
+        <th class="p-3"></th>
+    </tr>
+
+    {% for d in documents %}
+    <tr class="border-b">
+        <td class="p-3">{{ d.id_document }}</td>
+        <td class="p-3">{{ d.titre }}</td>
+        <td class="p-3">{{ d.filleule.prenom }} {{ d.filleule.nom }}</td>
+        <td class="p-3">{{ d.type_document.libelle }}</td>
+        <td class="p-3">
+            <a href="/{{ d.chemin_fichier }}" class="text-blue-600" target="_blank">Voir fichier</a>
+        </td>
+        <td class="p-3 text-right">
+            <a href="/admin/documents/{{ d.id_document }}" class="text-blue-600">Voir</a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}
+

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Admin{% endblock %}</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brandOrange: "#F2932B",
+                        brandBlue: "#4969A4",
+                        brandBlack: "#000000",
+                        brandWhite: "#FFFFFF",
+                    },
+                    fontFamily: {
+                        display: ['"Baloo 2"', "cursive"],
+                        body: ['"Nunito"', "system-ui", "sans-serif"],
+                    },
+                    boxShadow: {
+                        soft: "0 10px 40px -18px rgba(15,23,42,0.35)",
+                    },
+                },
+            },
+        }
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: "Nunito", system-ui, sans-serif; }
+    </style>
+</head>
+
+<body class="min-h-screen bg-gradient-to-br from-[#F2932B0d] via-[#ffffff] to-[#4969A40f] text-slate-800 relative">
+<div class="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_15%_15%,rgba(242,147,43,0.22),transparent_35%),radial-gradient(circle_at_85%_8%,rgba(73,105,164,0.22),transparent_32%),radial-gradient(circle_at_60%_85%,rgba(0,0,0,0.06),transparent_30%)]"></div>
+
+<div class="flex min-h-screen">
+
+    <!-- SIDEBAR -->
+    <aside class="w-72 bg-gradient-to-b from-[#4969A4] via-[#3f5d91] to-[#F2932B] text-white p-6 shadow-2xl shadow-[rgba(73,105,164,0.35)]">
+        <div class="flex items-center gap-3 mb-8">
+            <div class="h-11 w-11 rounded-2xl bg-white/15 flex items-center justify-center shadow-soft">
+                <span class="text-2xl">🧭</span>
+            </div>
+            <div>
+                <p class="text-xs uppercase tracking-[0.25em] text-white/80 font-semibold">Admin</p>
+                <h2 class="text-xl font-display leading-tight">AFoulki</h2>
+            </div>
+        </div>
+
+        <nav class="flex flex-col gap-2">
+            <a href="/admin/filleules" class="flex items-center justify-between px-3 py-2 rounded-xl hover:bg-white/15 transition">
+                <span>Filleules</span><span class="text-white/70">✨</span>
+            </a>
+            <a href="/admin/parrains" class="flex items-center justify-between px-3 py-2 rounded-xl hover:bg-white/15 transition">
+                <span>Parrains</span><span class="text-white/70">🤝</span>
+            </a>
+            <a href="/admin/parrainages" class="flex items-center justify-between px-3 py-2 rounded-xl hover:bg-white/15 transition">
+                <span>Parrainages</span><span class="text-white/70">🌱</span>
+            </a>
+            <a href="/admin/etablissements" class="flex items-center justify-between px-3 py-2 rounded-xl hover:bg-white/15 transition">
+                <span>Établissements</span><span class="text-white/70">🏫</span>
+            </a>
+            <a href="/admin/scolarite" class="flex items-center justify-between px-3 py-2 rounded-xl hover:bg-white/15 transition">
+                <span>Scolarité</span><span class="text-white/70">📘</span>
+            </a>
+            <a href="/admin/correspondants" class="flex items-center justify-between px-3 py-2 rounded-xl hover:bg-white/15 transition">
+                <span>Correspondants</span><span class="text-white/70">✉️</span>
+            </a>
+            <a href="/admin/typesdocuments" class="flex items-center justify-between px-3 py-2 rounded-xl hover:bg-white/15 transition">
+                <span>Types de documents</span><span class="text-white/70">📁</span>
+            </a>
+            <a href="/admin/documents" class="flex items-center justify-between px-3 py-2 rounded-xl hover:bg-white/15 transition">
+                <span>Documents</span><span class="text-white/70">🗂️</span>
+            </a>
+            <a href="/admin/suivisocial" class="flex items-center justify-between px-3 py-2 rounded-xl hover:bg-white/15 transition">
+                <span>Suivi social</span><span class="text-white/70">💬</span>
+            </a>
+            <a href="/admin/users" class="flex items-center justify-between px-3 py-2 rounded-xl hover:bg-white/15 transition">
+                <span>Administration</span><span class="text-white/70">🛠️</span>
+            </a>
+
+            <a href="/auth/logout" class="mt-6 px-3 py-2 rounded-xl bg-white/15 hover:bg-white/25 text-center font-semibold transition">
+                Déconnexion
+            </a>
+        </nav>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <div class="flex-1 p-6 sm:p-10">
+        <div class="bg-white/85 backdrop-blur border border-[#F2932B1f] rounded-3xl shadow-[0_18px_60px_-28px_rgba(73,105,164,0.35)] p-6 sm:p-8">
+            {% block content %}
+            {% endblock %}
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

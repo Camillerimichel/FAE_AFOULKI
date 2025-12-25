@@ -1,0 +1,41 @@
+{% extends "admin/admin_base.html" %}
+
+{% block title %}Parrainages - Admin{% endblock %}
+
+{% block content %}
+
+<h2 class="text-2xl font-bold mb-4">Liste des Parrainages</h2>
+
+<a href="/admin/parrainages/new" class="bg-blue-600 text-white px-4 py-2 rounded">Créer un parrainage</a>
+
+<table class="w-full mt-6 bg-white shadow">
+    <tr class="bg-gray-200">
+        <th class="p-3">ID</th>
+        <th class="p-3">Parrain</th>
+        <th class="p-3">Filleule</th>
+        <th class="p-3">Début</th>
+        <th class="p-3">Fin</th>
+        <th class="p-3">Statut</th>
+        <th class="p-3">Bourse centre</th>
+        <th class="p-3">Bourse RW</th>
+        <th></th>
+    </tr>
+
+    {% for p in parrainages %}
+    <tr class="border-b">
+        <td class="p-3">{{ p.id_parrainage }}</td>
+        <td class="p-3">{{ p.parrain.prenom }} {{ p.parrain.nom }}</td>
+        <td class="p-3">{{ p.filleule.prenom }} {{ p.filleule.nom }}</td>
+        <td class="p-3">{{ p.date_debut }}</td>
+        <td class="p-3">{{ p.date_fin }}</td>
+        <td class="p-3">{{ p.statut }}</td>
+        <td class="p-3">{{ p.bourse_centre or "—" }}</td>
+        <td class="p-3">{{ p.bourse_rw or "—" }}</td>
+        <td class="p-3 text-right">
+            <a href="/admin/parrainages/{{ p.id_parrainage }}" class="text-blue-600">Voir</a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}

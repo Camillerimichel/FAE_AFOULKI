@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    <div class="bg-gradient-to-r from-[#F2932B] via-[#F2A75A] to-[#4969A4] text-white rounded-3xl p-8 shadow-2xl shadow-[rgba(73,105,164,0.35)]">
+        <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div>
+                <p class="text-sm uppercase tracking-[0.25em] text-white/80 font-semibold">Tableau de bord</p>
+                <h2 class="font-display text-3xl mt-1">Bienvenu(e) sur la pateforme du FAE</h2>
+                <p class="text-white/85 mt-3 max-w-2xl">Accès rapide aux filleules, parrains et documents pour garder le suivi chaleureux et efficace.</p>
+            </div>
+            <div class="flex items-center gap-3 bg-white/15 rounded-2xl px-4 py-3 shadow-soft">
+                <span class="text-3xl">🌞</span>
+                <div class="text-sm">
+                    <p class="font-semibold">Quelle belle journée</p>
+                    <p class="text-white/80">Merci pour vos actions solidaires.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid gap-6 md:grid-cols-3">
+        <a href="/filleules/html" class="group block p-6 rounded-2xl bg-white/90 border border-[#F2932B1f] shadow-soft hover:-translate-y-1 hover:shadow-2xl transition">
+            <div class="flex items-center justify-between">
+                <span class="text-2xl">👧</span>
+                <span class="text-sm text-[#F2932B] font-semibold group-hover:translate-x-1 transition">Voir</span>
+            </div>
+            <h3 class="font-display text-xl mt-3">Filleules</h3>
+            <p class="text-slate-600 text-sm mt-2">Les profils et informations des filleules à accompagner.</p>
+        </a>
+
+        <a href="/parrains/html" class="group block p-6 rounded-2xl bg-white/90 border border-[#F2932B1f] shadow-soft hover:-translate-y-1 hover:shadow-2xl transition">
+            <div class="flex items-center justify-between">
+                <span class="text-2xl">🤝</span>
+                <span class="text-sm text-[#F2932B] font-semibold group-hover:translate-x-1 transition">Voir</span>
+            </div>
+            <h3 class="font-display text-xl mt-3">Parrains</h3>
+            <p class="text-slate-600 text-sm mt-2">Suivez les parrains engagés aux côtés de l'association.</p>
+        </a>
+
+        <a href="/documents/html" class="group block p-6 rounded-2xl bg-white/90 border border-[#F2932B1f] shadow-soft hover:-translate-y-1 hover:shadow-2xl transition">
+            <div class="flex items-center justify-between">
+                <span class="text-2xl">📁</span>
+                <span class="text-sm text-[#F2932B] font-semibold group-hover:translate-x-1 transition">Voir</span>
+            </div>
+            <h3 class="font-display text-xl mt-3">Documents</h3>
+            <p class="text-slate-600 text-sm mt-2">Centralisez les fichiers utiles et gardez-les bien rangés.</p>
+        </a>
+    </div>
+
+    <div class="grid gap-6 md:grid-cols-2">
+        <div class="p-6 rounded-2xl bg-white/90 border border-[#F2932B1f] shadow-soft">
+            <div class="flex items-center gap-3 mb-2">
+                <span class="text-2xl">🌱</span>
+                <h3 class="font-semibold text-lg">Une plateforme qui fait du bien</h3>
+            </div>
+            <p class="text-slate-600 text-sm leading-relaxed">Chaque action ici soutient un parcours scolaire, rapproche un parrain d'une filleule et rend les échanges plus simples. On garde le sourire tout en travaillant sérieusement.</p>
+        </div>
+
+        <div class="p-6 rounded-2xl bg-white/90 border border-[#F2932B1f] shadow-soft">
+            <div class="flex items-center gap-3 mb-2">
+                <span class="text-2xl">🎯</span>
+                <h3 class="font-semibold text-lg">Prochaines étapes</h3>
+            </div>
+            <ul class="space-y-2 text-sm text-slate-700">
+                <li class="flex items-center gap-2"><span class="text-[#F2932B]">•</span>Vérifier les nouvelles filleules et leur village d'origine.</li>
+                <li class="flex items-center gap-2"><span class="text-[#F2932B]">•</span>Mettre à jour les documents et justificatifs importants.</li>
+                <li class="flex items-center gap-2"><span class="text-[#F2932B]">•</span>Envoyer un message chaleureux aux parrains actifs.</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

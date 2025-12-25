@@ -1,0 +1,37 @@
+{% extends "admin/admin_base.html" %}
+
+{% block title %}Détail Filleule{% endblock %}
+
+{% block content %}
+<h2 class="text-2xl font-bold mb-4">Filleule : {{ filleule.prenom }} {{ filleule.nom }}</h2>
+
+<div class="bg-white p-6 shadow rounded">
+    <p><strong>ID :</strong> {{ filleule.id_filleule }}</p>
+    <p><strong>Nom :</strong> {{ filleule.nom }}</p>
+    <p><strong>Prénom :</strong> {{ filleule.prenom }}</p>
+    <p><strong>Date de naissance :</strong> {{ filleule.date_naissance if filleule.date_naissance else "-" }}</p>
+    <p><strong>Village :</strong> {{ filleule.village }}</p>
+    <p><strong>Photo :</strong>
+        {% if filleule.photo %}
+            <img src="/{{ filleule.photo }}" alt="Photo filleule" class="mt-2 h-32 w-32 object-cover rounded-xl border">
+        {% else %}
+            -
+        {% endif %}
+    </p>
+</div>
+
+{% set back_url = request.headers.get('referer', '/admin/filleules') %}
+<div class="mt-6 flex space-x-4">
+    <a href="/admin/filleules/{{ filleule.id_filleule }}/edit"
+       class="bg-yellow-500 text-white px-4 py-2 rounded">Modifier</a>
+
+    <a href="/admin/filleules/{{ filleule.id_filleule }}/delete"
+       class="bg-red-600 text-white px-4 py-2 rounded"
+       onclick="return confirm('Supprimer cette filleule ?');">
+       Supprimer
+    </a>
+    <a href="{{ back_url }}"
+       class="bg-slate-200 text-slate-700 px-4 py-2 rounded">Annuler</a>
+</div>
+
+{% endblock %}

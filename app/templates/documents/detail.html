@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Document {{ document.id_document }}{% endblock %}
+
+{% block content %}
+<div class="flex items-center gap-3 mb-6">
+    <div class="h-12 w-12 rounded-2xl bg-[#4969A415] text-[#4969A4] flex items-center justify-center text-2xl shadow-soft">📄</div>
+    <div>
+        <p class="text-sm uppercase tracking-[0.2em] text-[#F2932B] font-semibold">Document</p>
+        <h2 class="font-display text-2xl">#{{ document.id_document }}</h2>
+    </div>
+</div>
+
+<div class="bg-white/95 rounded-2xl border border-[#F2932B1f] shadow-soft p-6 space-y-3">
+    <p class="text-slate-700"><span class="font-semibold text-slate-900">Nom :</span> {{ document.nom_document }}</p>
+    <p class="text-slate-700"><span class="font-semibold text-slate-900">Type :</span> {{ document.id_type_document }}</p>
+    <p class="text-slate-700"><span class="font-semibold text-slate-900">Filleule :</span> {{ document.id_filleule }}</p>
+</div>
+
+<div class="mt-6">
+    <a href="/documents/html" class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#F2932B14] text-[#F2932B] border border-[#F2932B30] hover:-translate-y-0.5 transition shadow-soft">
+        ← Retour aux documents
+    </a>
+</div>
+{% endblock %}

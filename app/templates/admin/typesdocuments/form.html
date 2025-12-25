@@ -1,0 +1,52 @@
+{% extends "admin/admin_base.html" %}
+
+{% block title %}Formulaire Type Document{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <a href="/admin/users" class="inline-flex items-center px-3 py-2 rounded border border-slate-200 text-slate-700 hover:bg-slate-100 transition">Retour Administration</a>
+</div>
+
+<h2 class="text-2xl font-bold mb-6">{{ action }} un type de document</h2>
+
+<form method="post" class="bg-white shadow p-6 rounded max-w-xl">
+
+    <label class="block mb-4">
+        Libellé :
+        <input name="libelle" required class="border p-2 w-full"
+               value="{{ type_document.libelle if type_document }}">
+    </label>
+
+    <label class="block mb-4">
+        Description :
+        <textarea name="description" required class="border p-2 w-full">{{ type_document.description if type_document }}</textarea>
+    </label>
+
+    <button id="submit-btn" class="bg-blue-600 text-white px-4 py-2 rounded">{{ action }}</button>
+
+</form>
+
+{% if action == "Créer" %}
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const form = document.querySelector("form");
+        const submitBtn = document.getElementById("submit-btn");
+        const requiredFields = Array.from(
+            form.querySelectorAll("input[required], select[required], textarea[required]")
+        );
+
+        const updateState = () => {
+            const allFilled = requiredFields.every((field) => field.value.trim().length > 0);
+            submitBtn.disabled = !allFilled;
+            submitBtn.classList.toggle("opacity-50", !allFilled);
+            submitBtn.classList.toggle("cursor-not-allowed", !allFilled);
+        };
+
+        updateState();
+        form.addEventListener("input", updateState);
+        form.addEventListener("change", updateState);
+    });
+</script>
+{% endif %}
+
+{% endblock %}

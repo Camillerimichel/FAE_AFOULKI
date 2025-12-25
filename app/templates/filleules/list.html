@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Liste des Filleules{% endblock %}
+
+{% block content %}
+<div class="flex flex-col gap-4 mb-6 sm:flex-row sm:items-center sm:justify-between">
+    <div>
+        <p class="text-sm uppercase tracking-[0.2em] text-[#F2932B] font-semibold">Filleules</p>
+        <h2 class="font-display text-2xl">Les protégées Afoulki 👧</h2>
+        <p class="text-slate-600 text-sm">Un aperçu rapide des profils et villages.</p>
+    </div>
+    <div class="bg-[#F2932B10] border border-[#F2932B20] text-[#F2932B] px-4 py-3 rounded-2xl shadow-soft text-sm">
+        🌼 Merci pour votre accompagnement bienveillant.
+    </div>
+</div>
+
+<div class="overflow-hidden rounded-2xl bg-white/95 border border-[#F2932B1f] shadow-soft">
+    <table class="min-w-full text-left">
+        <thead class="bg-gradient-to-r from-[#F2932B14] via-[#F2A75A20] to-[#4969A420] text-slate-700">
+            <tr>
+                <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide">ID</th>
+                <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide">Nom</th>
+                <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide">Prénom</th>
+                <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide">Village</th>
+                <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-right">Actions</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-[#F2932B14]">
+            {% for f in filleules %}
+            <tr class="hover:bg-[#F2932B0f] transition">
+                <td class="px-4 py-3 font-semibold text-slate-800">{{ f.id_filleule }}</td>
+                <td class="px-4 py-3">{{ f.nom }}</td>
+                <td class="px-4 py-3">{{ f.prenom }}</td>
+                <td class="px-4 py-3">{{ f.village }}</td>
+                <td class="px-4 py-3 text-right">
+                    <a href="/filleules/html/{{ f.id_filleule }}" class="inline-flex items-center gap-2 text-[#F2932B] font-semibold hover:translate-x-1 transition">
+                        Voir <span>→</span>
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

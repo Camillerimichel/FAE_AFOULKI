@@ -1,0 +1,83 @@
+{% extends "admin/admin_base.html" %}
+
+{% block title %}Formulaire Correspondant{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <a href="/admin/users" class="inline-flex items-center px-3 py-2 rounded border border-slate-200 text-slate-700 hover:bg-slate-100 transition">Retour Administration</a>
+</div>
+
+<h2 class="text-2xl font-bold mb-6">{{ action }} un correspondant</h2>
+
+<form method="post" class="bg-white shadow p-6 rounded max-w-xl">
+
+    <label class="block mb-4">
+        Filleule :
+        <select name="id_filleule" required class="border p-2 w-full">
+            {% for f in filleules %}
+            <option value="{{ f.id_filleule }}"
+                {% if correspondant and correspondant.id_filleule == f.id_filleule %}selected{% endif %}>
+                {{ f.prenom }} {{ f.nom }}
+            </option>
+            {% endfor %}
+        </select>
+    </label>
+
+    <label class="block mb-4">
+        Nom :
+        <input name="nom" required class="border p-2 w-full"
+               value="{{ correspondant.nom if correspondant }}">
+    </label>
+
+    <label class="block mb-4">
+        Prénom :
+        <input name="prenom" required class="border p-2 w-full"
+               value="{{ correspondant.prenom if correspondant }}">
+    </label>
+
+    <label class="block mb-4">
+        Téléphone :
+        <input name="telephone" required class="border p-2 w-full"
+               value="{{ correspondant.telephone if correspondant }}">
+    </label>
+
+    <label class="block mb-4">
+        Email :
+        <input name="email" type="email" required class="border p-2 w-full"
+               value="{{ correspondant.email if correspondant }}">
+    </label>
+
+    <label class="block mb-4">
+        Lien :
+        <input name="lien" required class="border p-2 w-full"
+               value="{{ correspondant.lien if correspondant }}">
+    </label>
+
+    <button id="submit-btn" class="bg-blue-600 text-white px-4 py-2 rounded">{{ action }}</button>
+
+</form>
+
+{% if action == "Créer" %}
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const form = document.querySelector("form");
+        const submitBtn = document.getElementById("submit-btn");
+        const requiredFields = Array.from(
+            form.querySelectorAll("input[required], select[required], textarea[required]")
+        );
+
+        const updateState = () => {
+            const allFilled = requiredFields.every((field) => field.value.trim().length > 0);
+            submitBtn.disabled = !allFilled;
+            submitBtn.classList.toggle("opacity-50", !allFilled);
+            submitBtn.classList.toggle("cursor-not-allowed", !allFilled);
+        };
+
+        updateState();
+        form.addEventListener("input", updateState);
+        form.addEventListener("change", updateState);
+    });
+</script>
+{% endif %}
+
+{% endblock %}

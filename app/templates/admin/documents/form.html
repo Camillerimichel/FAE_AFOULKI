@@ -1,0 +1,87 @@
+{% extends "admin/admin_base.html" %}
+
+{% block title %}Formulaire Document{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <a href="/admin/users" class="inline-flex items-center px-3 py-2 rounded border border-slate-200 text-slate-700 hover:bg-slate-100 transition">Retour Administration</a>
+</div>
+
+<h2 class="text-2xl font-bold mb-6">{{ action }} un document</h2>
+
+<form method="post" enctype="multipart/form-data"
+      class="bg-white shadow p-6 rounded max-w-xl">
+
+    <label class="block mb-4">
+        Filleule :
+        <select name="id_filleule" required class="border p-2 w-full">
+            {% for f in filleules %}
+            <option value="{{ f.id_filleule }}"
+                {% if document and document.id_filleule == f.id_filleule %}selected{% endif %}>
+                {{ f.prenom }} {{ f.nom }}
+            </option>
+            {% endfor %}
+        </select>
+    </label>
+
+    <label class="block mb-4">
+        Type :
+        <select name="id_type" required class="border p-2 w-full">
+            {% for t in types %}
+            <option value="{{ t.id_type }}"
+                {% if document and document.id_type == t.id_type %}selected{% endif %}>
+                {{ t.libelle }}
+            </option>
+            {% endfor %}
+        </select>
+    </label>
+
+    <label class="block mb-4">
+        Titre :
+        <input name="titre" required class="border p-2 w-full"
+               value="{{ document.titre if document }}">
+    </label>
+
+    {% if document %}
+    <p class="text-gray-700 mb-4">Fichier actuel :
+        <a href="/{{ document.chemin_fichier }}" target="_blank" class="text-blue-600">
+            Voir / Télécharger
+        </a>
+    </p>
+    {% endif %}
+
+    {% if not document %}
+    <label class="block mb-4">
+        Fichier :
+        <input type="file" name="fichier" required class="border p-2 w-full">
+    </label>
+    {% endif %}
+
+    <button id="submit-btn" class="bg-blue-600 text-white px-4 py-2 rounded">{{ action }}</button>
+
+</form>
+
+{% if action == "Créer" %}
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const form = document.querySelector("form");
+        const submitBtn = document.getElementById("submit-btn");
+        const requiredFields = Array.from(
+            form.querySelectorAll("input[required], select[required], textarea[required]")
+        );
+
+        const updateState = () => {
+            const allFilled = requiredFields.every((field) => field.value.trim().length > 0);
+            submitBtn.disabled = !allFilled;
+            submitBtn.classList.toggle("opacity-50", !allFilled);
+            submitBtn.classList.toggle("cursor-not-allowed", !allFilled);
+        };
+
+        updateState();
+        form.addEventListener("input", updateState);
+        form.addEventListener("change", updateState);
+    });
+</script>
+{% endif %}
+
+{% endblock %}

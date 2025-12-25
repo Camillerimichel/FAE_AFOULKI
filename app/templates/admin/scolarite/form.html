@@ -1,0 +1,88 @@
+{% extends "admin/admin_base.html" %}
+
+{% block title %}Formulaire Scolarité{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <a href="/admin/users" class="inline-flex items-center px-3 py-2 rounded border border-slate-200 text-slate-700 hover:bg-slate-100 transition">Retour Administration</a>
+</div>
+
+<h2 class="text-2xl font-bold mb-6">{{ action }} un enregistrement de scolarité</h2>
+
+<form method="post" class="bg-white shadow p-6 rounded max-w-xl">
+
+    <label class="block mb-4">
+        Filleule :
+        <select name="id_filleule" required class="border p-2 w-full">
+            {% for f in filleules %}
+            <option value="{{ f.id_filleule }}"
+                {% if scolarite and scolarite.id_filleule == f.id_filleule %}selected{% endif %}>
+                {{ f.prenom }} {{ f.nom }}
+            </option>
+            {% endfor %}
+        </select>
+    </label>
+
+    <label class="block mb-4">
+        Établissement :
+        <select name="id_etablissement" required class="border p-2 w-full">
+            {% for e in etablissements %}
+            <option value="{{ e.id_etablissement }}"
+                {% if scolarite and scolarite.id_etablissement == e.id_etablissement %}selected{% endif %}>
+                {{ e.nom }}
+            </option>
+            {% endfor %}
+        </select>
+    </label>
+
+    <label class="block mb-4">
+        Année scolaire :
+        <input name="annee_scolaire" required class="border p-2 w-full"
+               value="{{ scolarite.annee_scolaire if scolarite }}">
+    </label>
+
+    <label class="block mb-4">
+        Niveau :
+        <input name="niveau" required class="border p-2 w-full"
+               value="{{ scolarite.niveau if scolarite }}">
+    </label>
+
+    <label class="block mb-4">
+        Résultats :
+        <textarea name="resultats" required class="border p-2 w-full">{{ scolarite.resultats if scolarite }}</textarea>
+    </label>
+
+    <label class="block mb-4">
+        Diplôme obtenu :
+        <input name="diplome_obtenu" required class="border p-2 w-full"
+               value="{{ scolarite.diplome_obtenu if scolarite }}">
+    </label>
+
+    <button id="submit-btn" class="bg-blue-600 text-white px-4 py-2 rounded">{{ action }}</button>
+
+</form>
+
+{% if action == "Créer" %}
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const form = document.querySelector("form");
+        const submitBtn = document.getElementById("submit-btn");
+        const requiredFields = Array.from(
+            form.querySelectorAll("input[required], select[required], textarea[required]")
+        );
+
+        const updateState = () => {
+            const allFilled = requiredFields.every((field) => field.value.trim().length > 0);
+            submitBtn.disabled = !allFilled;
+            submitBtn.classList.toggle("opacity-50", !allFilled);
+            submitBtn.classList.toggle("cursor-not-allowed", !allFilled);
+        };
+
+        updateState();
+        form.addEventListener("input", updateState);
+        form.addEventListener("change", updateState);
+    });
+</script>
+{% endif %}
+
+{% endblock %}

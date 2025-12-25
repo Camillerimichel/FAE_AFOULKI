@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Parrains{% endblock %}
+
+{% block content %}
+<div class="flex flex-col gap-4 mb-6 sm:flex-row sm:items-center sm:justify-between">
+    <div>
+        <p class="text-sm uppercase tracking-[0.2em] text-[#F2932B] font-semibold">Parrains</p>
+        <h2 class="font-display text-2xl">Merci aux soutiens 🤝</h2>
+        <p class="text-slate-600 text-sm">Les parrains qui permettent aux filleules d'avancer sereinement.</p>
+    </div>
+    <div class="bg-sky-50 border border-sky-100 text-sky-700 px-4 py-3 rounded-2xl shadow-soft text-sm">
+        🎁 Une présence chaleureuse fait toute la différence.
+    </div>
+</div>
+
+<div class="overflow-hidden rounded-2xl bg-white/95 border border-[#F2932B1f] shadow-soft">
+    <table class="min-w-full text-left">
+        <thead class="bg-gradient-to-r from-[#F2932B14] via-[#F2A75A20] to-[#4969A420] text-slate-700">
+            <tr>
+                <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide">ID</th>
+                <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide">Nom</th>
+                <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-right">Actions</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-[#F2932B14]">
+            {% for p in parrains %}
+            <tr class="hover:bg-[#F2932B0f] transition">
+                <td class="px-4 py-3 font-semibold text-slate-800">{{ p.id_parrain }}</td>
+                <td class="px-4 py-3">{{ p.nom }} {{ p.prenom }}</td>
+                <td class="px-4 py-3 text-right">
+                    <a href="/parrains/html/{{ p.id_parrain }}" class="inline-flex items-center gap-2 text-[#F2932B] font-semibold hover:translate-x-1 transition">
+                        Voir <span>→</span>
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

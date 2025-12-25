@@ -1,0 +1,46 @@
+{% extends "admin/admin_base.html" %}
+
+{% block title %}Administration - Utilisateur{% endblock %}
+
+{% block content %}
+
+<h2 class="text-2xl font-bold mb-6">{{ action }} un utilisateur</h2>
+
+<form method="post" class="bg-white shadow p-6 rounded max-w-lg">
+
+    <label class="block mb-4">
+        Nom complet :
+        <input name="fullname" class="border p-2 w-full" value="{{ user.fullname if user and user.fullname else '' }}">
+    </label>
+
+    <label class="block mb-4">
+        Email :
+        <input name="email" type="email" required class="border p-2 w-full" value="{{ user.email if user }}">
+    </label>
+
+    <label class="block mb-4">
+        Mot de passe :
+        <input name="password" type="password" {% if action == "Créer" %}required{% endif %} class="border p-2 w-full">
+        {% if action == "Modifier" %}
+        <p class="text-xs text-slate-500 mt-1">Laisser vide pour conserver le mot de passe actuel.</p>
+        {% endif %}
+    </label>
+
+    <div class="mb-4">
+        <p class="font-semibold mb-2">Rôles :</p>
+        <div class="grid gap-2 sm:grid-cols-2">
+            {% for role in roles %}
+            <label class="flex items-center gap-2 text-sm">
+                <input type="checkbox" name="roles" value="{{ role.name }}"
+                       {% if role.name in user_role_names %}checked{% endif %}>
+                <span>{{ role.label }}</span>
+            </label>
+            {% endfor %}
+        </div>
+    </div>
+
+    <button class="bg-blue-600 text-white px-4 py-2 rounded">{{ action }}</button>
+
+</form>
+
+{% endblock %}

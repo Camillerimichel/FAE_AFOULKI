@@ -1,0 +1,30 @@
+{% extends "admin/admin_base.html" %}
+
+{% block title %}Types de documents{% endblock %}
+
+{% block content %}
+
+<h2 class="text-2xl font-bold mb-4">Types de documents</h2>
+
+<a href="/admin/typesdocuments/new"
+   class="bg-blue-600 text-white px-4 py-2 rounded">Nouveau type</a>
+
+<table class="w-full mt-6 bg-white shadow">
+    <tr class="bg-gray-200">
+        <th class="p-3">ID</th>
+        <th class="p-3">Libellé</th>
+        <th class="p-3"></th>
+    </tr>
+
+    {% for t in typesdocs %}
+    <tr class="border-b">
+        <td class="p-3">{{ t.id_type }}</td>
+        <td class="p-3">{{ t.libelle }}</td>
+        <td class="p-3 text-right">
+            <a href="/admin/typesdocuments/{{ t.id_type }}" class="text-blue-600">Voir</a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}

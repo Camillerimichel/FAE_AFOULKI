@@ -1,0 +1,36 @@
+{% extends "admin/admin_base.html" %}
+
+{% block title %}Scolarité - Admin{% endblock %}
+
+{% block content %}
+
+<h2 class="text-2xl font-bold mb-4">Suivi de scolarité</h2>
+
+<a href="/admin/scolarite/new"
+   class="bg-blue-600 text-white px-4 py-2 rounded">Nouvel enregistrement</a>
+
+<table class="w-full mt-6 bg-white shadow">
+    <tr class="bg-gray-200">
+        <th class="p-3">ID</th>
+        <th class="p-3">Filleule</th>
+        <th class="p-3">Établissement</th>
+        <th class="p-3">Année scolaire</th>
+        <th class="p-3">Niveau</th>
+        <th class="p-3"></th>
+    </tr>
+
+    {% for s in scolarites %}
+    <tr class="border-b">
+        <td class="p-3">{{ s.id_scolarite }}</td>
+        <td class="p-3">{{ s.filleule.prenom }} {{ s.filleule.nom }}</td>
+        <td class="p-3">{{ s.etablissement.nom }}</td>
+        <td class="p-3">{{ s.annee_scolaire }}</td>
+        <td class="p-3">{{ s.niveau }}</td>
+        <td class="p-3 text-right">
+            <a href="/admin/scolarite/{{ s.id_scolarite }}" class="text-blue-600">Voir</a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}

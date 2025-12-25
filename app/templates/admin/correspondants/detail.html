@@ -1,0 +1,32 @@
+{% extends "admin/admin_base.html" %}
+
+{% block title %}Détail Correspondant{% endblock %}
+
+{% block content %}
+
+<h2 class="text-2xl font-bold mb-4">Correspondant #{{ c.id_correspondant }}</h2>
+
+<div class="bg-white p-6 shadow rounded">
+
+    <p><strong>Filleule :</strong> {{ c.filleule.prenom }} {{ c.filleule.nom }}</p>
+    <p><strong>Nom :</strong> {{ c.nom }}</p>
+    <p><strong>Prénom :</strong> {{ c.prenom }}</p>
+    <p><strong>Téléphone :</strong> {{ c.telephone }}</p>
+    <p><strong>Email :</strong> {{ c.email }}</p>
+    <p><strong>Lien :</strong> {{ c.lien }}</p>
+
+</div>
+
+{% set back_url = request.headers.get('referer', '/admin/correspondants') %}
+<div class="mt-6 flex space-x-4">
+    <a href="/admin/correspondants/{{ c.id_correspondant }}/edit"
+       class="bg-yellow-500 text-white px-4 py-2 rounded">Modifier</a>
+
+    <a href="/admin/correspondants/{{ c.id_correspondant }}/delete"
+       onclick="return confirm('Supprimer ce correspondant ?');"
+       class="bg-red-600 text-white px-4 py-2 rounded">Supprimer</a>
+    <a href="{{ back_url }}"
+       class="bg-slate-200 text-slate-700 px-4 py-2 rounded">Annuler</a>
+</div>
+
+{% endblock %}

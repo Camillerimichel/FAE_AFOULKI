@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Afoulki{% endblock %}</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brandOrange: "#F2932B",
+                        brandBlue: "#4969A4",
+                        brandBlack: "#000000",
+                        brandWhite: "#FFFFFF",
+                    },
+                    fontFamily: {
+                        display: ['"Baloo 2"', "cursive"],
+                        body: ['"Nunito"', "system-ui", "sans-serif"],
+                    },
+                    boxShadow: {
+                        soft: "0 10px 40px -18px rgba(15,23,42,0.35)",
+                    },
+                },
+            },
+        }
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: "Nunito", system-ui, sans-serif; }
+    </style>
+</head>
+
+<body class="min-h-screen bg-gradient-to-br from-[#F2932B0d] via-[#ffffff] to-[#4969A40f] text-slate-800 relative">
+<div class="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_20%_18%,rgba(242,147,43,0.22),transparent_35%),radial-gradient(circle_at_78%_0%,rgba(73,105,164,0.22),transparent_32%),radial-gradient(circle_at_52%_78%,rgba(0,0,0,0.06),transparent_30%)]"></div>
+
+<!-- HEADER PUBLIC -->
+<header class="bg-gradient-to-r from-[#F2932B] via-[#F2A75A] to-[#4969A4] text-white shadow-xl">
+    <div class="max-w-6xl mx-auto px-6 py-4 flex flex-wrap items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+            <div class="h-11 w-11 rounded-2xl bg-white/20 flex items-center justify-center shadow-soft">
+                <span class="text-2xl">🌼</span>
+            </div>
+            <div>
+                <p class="text-xs uppercase tracking-[0.25em] text-white/80 font-semibold">Afoulki</p>
+                <h1 class="font-display text-2xl leading-tight">FAE</h1>
+            </div>
+        </div>
+
+        <nav class="flex flex-wrap items-center gap-2 text-sm sm:text-base">
+            <a href="/" class="px-4 py-2 rounded-full text-white/90 hover:bg-white/15 transition">Dashboard</a>
+            <a href="/filleules/html" class="px-4 py-2 rounded-full text-white/90 hover:bg-white/15 transition">Filleules</a>
+            <a href="/parrains/html" class="px-4 py-2 rounded-full text-white/90 hover:bg-white/15 transition">Parrains</a>
+            <a href="/scolarite/html" class="px-4 py-2 rounded-full text-white/90 hover:bg-white/15 transition">Scolarité</a>
+            <a href="/admin/users" class="px-4 py-2 rounded-full text-white/90 hover:bg-white/15 transition">Administration</a>
+        </nav>
+    </div>
+</header>
+
+<!-- MAIN CONTENT -->
+<main class="max-w-6xl mx-auto px-4 py-10">
+    <div class="bg-white/85 backdrop-blur border border-[#F2932B1f] rounded-3xl shadow-[0_18px_60px_-28px_rgba(73,105,164,0.35)] p-6 sm:p-8">
+        {% block content %}{% endblock %}
+    </div>
+</main>
+
+</body>
+</html>

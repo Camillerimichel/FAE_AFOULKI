@@ -1,0 +1,35 @@
+{% extends "admin/admin_base.html" %}
+
+{% block title %}Parrains - Admin{% endblock %}
+
+{% block content %}
+
+<h2 class="text-2xl font-bold mb-4">Liste des Parrains</h2>
+
+<a href="/admin/parrains/new" class="bg-blue-600 text-white px-4 py-2 rounded">Ajouter un parrain</a>
+
+<table class="w-full mt-6 bg-white shadow">
+    <tr class="bg-gray-200 text-left">
+        <th class="p-3">ID</th>
+        <th class="p-3">Nom</th>
+        <th class="p-3">Prénom</th>
+        <th class="p-3">Téléphone</th>
+        <th class="p-3">Email</th>
+        <th></th>
+    </tr>
+
+    {% for p in parrains %}
+    <tr class="border-b">
+        <td class="p-3">{{ p.id_parrain }}</td>
+        <td class="p-3">{{ p.nom }}</td>
+        <td class="p-3">{{ p.prenom }}</td>
+        <td class="p-3">{{ p.telephone }}</td>
+        <td class="p-3">{{ p.email }}</td>
+        <td class="p-3 text-right">
+            <a href="/admin/parrains/{{ p.id_parrain }}" class="text-blue-600">Voir</a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}

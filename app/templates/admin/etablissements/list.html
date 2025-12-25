@@ -1,0 +1,34 @@
+{% extends "admin/admin_base.html" %}
+
+{% block title %}Établissements - Admin{% endblock %}
+
+{% block content %}
+
+<h2 class="text-2xl font-bold mb-4">Liste des Établissements</h2>
+
+<a href="/admin/etablissements/new"
+   class="bg-blue-600 text-white px-4 py-2 rounded">Créer un établissement</a>
+
+<table class="w-full mt-6 bg-white shadow">
+    <tr class="bg-gray-200">
+        <th class="p-3">ID</th>
+        <th class="p-3">Nom</th>
+        <th class="p-3">Ville</th>
+        <th class="p-3">Type</th>
+        <th class="p-3"></th>
+    </tr>
+
+    {% for e in etablissements %}
+    <tr class="border-b">
+        <td class="p-3">{{ e.id_etablissement }}</td>
+        <td class="p-3">{{ e.nom }}</td>
+        <td class="p-3">{{ e.ville }}</td>
+        <td class="p-3">{{ e.type }}</td>
+        <td class="p-3 text-right">
+            <a href="/admin/etablissements/{{ e.id_etablissement }}" class="text-blue-600">Voir</a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}

@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Documents{% endblock %}
+
+{% block content %}
+<div class="flex flex-col gap-4 mb-6 sm:flex-row sm:items-center sm:justify-between">
+    <div>
+        <p class="text-sm uppercase tracking-[0.2em] text-[#F2932B] font-semibold">Documents</p>
+        <h2 class="font-display text-2xl">Tout est rangé 📁</h2>
+        <p class="text-slate-600 text-sm">Accédez rapidement aux fichiers importants.</p>
+    </div>
+    <div class="bg-[#4969A410] border border-[#4969A420] text-[#4969A4] px-4 py-3 rounded-2xl shadow-soft text-sm">
+        📎 Glissez votre souris pour consulter les détails.
+    </div>
+</div>
+
+<div class="overflow-hidden rounded-2xl bg-white/95 border border-[#F2932B1f] shadow-soft">
+    <table class="min-w-full text-left">
+        <thead class="bg-gradient-to-r from-[#F2932B14] via-[#F2A75A20] to-[#4969A420] text-slate-700">
+            <tr>
+                <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide">ID</th>
+                <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide">Nom</th>
+                <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-right">Actions</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-[#F2932B14]">
+            {% for d in documents %}
+            <tr class="hover:bg-[#F2932B0f] transition">
+                <td class="px-4 py-3 font-semibold text-slate-800">{{ d.id_document }}</td>
+                <td class="px-4 py-3">{{ d.nom_document }}</td>
+                <td class="px-4 py-3 text-right">
+                    <a href="/documents/html/{{ d.id_document }}" class="inline-flex items-center gap-2 text-[#F2932B] font-semibold hover:translate-x-1 transition">
+                        Voir <span>→</span>
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}
