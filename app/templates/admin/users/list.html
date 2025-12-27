@@ -13,7 +13,6 @@
 
 <table class="w-full mt-6 bg-white shadow">
     <tr class="bg-gray-200 text-left">
-        <th class="p-3">ID</th>
         <th class="p-3">Nom complet</th>
         <th class="p-3">Email</th>
         <th class="p-3">Rôles</th>
@@ -22,7 +21,6 @@
 
     {% for u in users %}
     <tr class="border-b">
-        <td class="p-3">{{ u.id }}</td>
         <td class="p-3">{{ u.fullname if u.fullname else "-" }}</td>
         <td class="p-3">{{ u.email }}</td>
         <td class="p-3">

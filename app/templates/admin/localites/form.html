@@ -1,0 +1,39 @@
+{% extends "admin/admin_base.html" %}
+
+{% block title %}Formulaire Localité{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <a href="/admin/localites" class="inline-flex items-center px-3 py-2 rounded border border-slate-200 text-slate-700 hover:bg-slate-100 transition">Retour Localités</a>
+</div>
+
+<h2 class="text-2xl font-bold mb-6">{{ action }} une localité</h2>
+
+<form method="post" class="bg-white shadow p-6 rounded max-w-xl">
+    <label class="block mb-4">
+        Nom :
+        <input name="nom" required class="border p-2 w-full"
+               value="{{ localite.nom if localite }}">
+    </label>
+
+    <label class="block mb-4">
+        Latitude :
+        <input name="latitude" type="number" step="0.0001" required class="border p-2 w-full"
+               value="{{ localite.latitude if localite }}">
+    </label>
+
+    <label class="block mb-4">
+        Longitude :
+        <input name="longitude" type="number" step="0.0001" required class="border p-2 w-full"
+               value="{{ localite.longitude if localite }}">
+    </label>
+
+    <label class="block mb-4">
+        Alias (variantes) :
+        <textarea name="aliases" class="border p-2 w-full" rows="3">{{ localite.aliases if localite and localite.aliases else "" }}</textarea>
+    </label>
+
+    <button class="bg-blue-600 text-white px-4 py-2 rounded">{{ action }}</button>
+</form>
+
+{% endblock %}

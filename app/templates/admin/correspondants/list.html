@@ -1,34 +1,35 @@
 {% extends "admin/admin_base.html" %}
 
-{% block title %}Correspondants{% endblock %}
+{% block title %}Référents{% endblock %}
 
 {% block content %}
 
-<h2 class="text-2xl font-bold mb-4">Correspondants</h2>
+<h2 class="text-2xl font-bold mb-4">Référents</h2>
 
 <a href="/admin/correspondants/new"
-   class="bg-blue-600 text-white px-4 py-2 rounded">Nouveau correspondant</a>
+   class="bg-blue-600 text-white px-4 py-2 rounded">Nouveau référent</a>
 
 <table class="w-full mt-6 bg-white shadow">
-    <tr class="bg-gray-200">
-        <th class="p-3">ID</th>
-        <th class="p-3">Filleule</th>
-        <th class="p-3">Nom</th>
-        <th class="p-3">Téléphone</th>
-        <th class="p-3"></th>
-    </tr>
-
-    {% for c in correspondants %}
-    <tr class="border-b">
-        <td class="p-3">{{ c.id_correspondant }}</td>
-        <td class="p-3">{{ c.filleule.prenom }} {{ c.filleule.nom }}</td>
-        <td class="p-3">{{ c.nom }} {{ c.prenom }}</td>
-        <td class="p-3">{{ c.telephone }}</td>
-        <td class="p-3 text-right">
-            <a href="/admin/correspondants/{{ c.id_correspondant }}" class="text-blue-600">Voir</a>
-        </td>
-    </tr>
-    {% endfor %}
+    <thead class="bg-gray-200 text-left">
+        <tr>
+            <th class="p-3">Nom</th>
+            <th class="p-3">Téléphone</th>
+            <th class="p-3">Email</th>
+            <th class="p-3"></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for c in correspondants %}
+        <tr class="border-b">
+            <td class="p-3">{{ c.nom }} {{ c.prenom }}</td>
+            <td class="p-3">{{ c.telephone if c.telephone else "-" }}</td>
+            <td class="p-3">{{ c.email if c.email else "-" }}</td>
+            <td class="p-3 text-right">
+                <a href="/admin/correspondants/{{ c.id_correspondant }}" class="text-blue-600">Voir</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
 </table>
 
 {% endblock %}

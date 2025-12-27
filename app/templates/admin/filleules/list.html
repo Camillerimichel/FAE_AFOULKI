@@ -9,33 +9,153 @@
 <a href="/admin/filleules/new" class="bg-blue-600 text-white px-4 py-2 rounded">Ajouter une filleule</a>
 
 <table class="w-full mt-6 bg-white shadow">
-    <tr class="bg-gray-200 text-left">
-        <th class="p-3">ID</th>
-        <th class="p-3">Nom</th>
-        <th class="p-3">Prénom</th>
-        <th class="p-3">Village</th>
-        <th class="p-3">Email</th>
-        <th class="p-3">Téléphone</th>
-        <th class="p-3">WhatsApp</th>
-        <th class="p-3">Année d'entrée au FAE</th>
-        <th></th>
-    </tr>
-
-    {% for f in filleules %}
-    <tr class="border-b">
-        <td class="p-3">{{ f.id_filleule }}</td>
-        <td class="p-3">{{ f.nom }}</td>
-        <td class="p-3">{{ f.prenom }}</td>
-        <td class="p-3">{{ f.village }}</td>
-        <td class="p-3">{{ f.email if f.email else "-" }}</td>
-        <td class="p-3">{{ f.telephone if f.telephone else "-" }}</td>
-        <td class="p-3">{{ f.whatsapp if f.whatsapp else "-" }}</td>
-        <td class="p-3">{{ f.annee_rentree if f.annee_rentree else "-" }}</td>
-        <td class="p-3 text-right">
-            <a href="/admin/filleules/{{ f.id_filleule }}" class="text-blue-600">Voir</a>
-        </td>
-    </tr>
-    {% endfor %}
+    <thead class="bg-gray-200 text-left">
+        <tr>
+            <th class="p-3">
+                <button type="button" class="admin-sort font-semibold" data-col="0" data-type="text">
+                    Nom <span class="sort-indicator text-xs text-slate-500 ml-1"></span>
+                </button>
+                <input data-col="0" class="filleules-filter mt-2 w-full rounded border border-slate-200 px-2 py-1 text-xs"
+                       placeholder="Filtrer">
+            </th>
+            <th class="p-3">
+                <button type="button" class="admin-sort font-semibold" data-col="1" data-type="text">
+                    Prénom <span class="sort-indicator text-xs text-slate-500 ml-1"></span>
+                </button>
+                <input data-col="1" class="filleules-filter mt-2 w-full rounded border border-slate-200 px-2 py-1 text-xs"
+                       placeholder="Filtrer">
+            </th>
+            <th class="p-3">
+                <button type="button" class="admin-sort font-semibold" data-col="2" data-type="text">
+                    WhatsApp <span class="sort-indicator text-xs text-slate-500 ml-1"></span>
+                </button>
+                <input data-col="2" class="filleules-filter mt-2 w-full rounded border border-slate-200 px-2 py-1 text-xs"
+                       placeholder="Filtrer">
+            </th>
+            <th class="p-3 text-center">
+                <button type="button" class="admin-sort font-semibold" data-col="3" data-type="text">
+                    Entrée au FAE <span class="sort-indicator text-xs text-slate-500 ml-1"></span>
+                </button>
+                <input data-col="3" class="filleules-filter mt-2 w-full rounded border border-slate-200 px-2 py-1 text-xs"
+                       placeholder="Filtrer">
+            </th>
+            <th class="p-3">
+                <button type="button" class="admin-sort font-semibold" data-col="4" data-type="text">
+                    Référent <span class="sort-indicator text-xs text-slate-500 ml-1"></span>
+                </button>
+                <input data-col="4" class="filleules-filter mt-2 w-full rounded border border-slate-200 px-2 py-1 text-xs"
+                       placeholder="Filtrer">
+            </th>
+            <th class="p-3"></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for f in filleules %}
+        <tr class="border-b">
+            <td class="p-3">{{ f.nom }}</td>
+            <td class="p-3">{{ f.prenom }}</td>
+            <td class="p-3">{{ f.whatsapp if f.whatsapp else "-" }}</td>
+            <td class="p-3 text-center">{{ f.annee_rentree if f.annee_rentree else "-" }}</td>
+            <td class="p-3">
+                {% if f.correspondant %}
+                    {{ f.correspondant.prenom }} {{ f.correspondant.nom }}
+                {% else %}
+                    -
+                {% endif %}
+            </td>
+            <td class="p-3 text-right">
+                <a href="/admin/filleules/{{ f.id_filleule }}" class="text-blue-600">Voir</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
 </table>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const table = document.querySelector("table");
+        if (!table) {
+            return;
+        }
+        const tbody = table.querySelector("tbody");
+        const rows = Array.from(tbody.querySelectorAll("tr"));
+        const filters = Array.from(table.querySelectorAll(".filleules-filter"));
+        const sortButtons = Array.from(table.querySelectorAll(".admin-sort"));
+        let sortState = { col: null, dir: "asc" };
+
+        const normalize = (value) => value.toLowerCase().trim();
+        const applyFilters = () => {
+            rows.forEach((row) => {
+                const cells = row.querySelectorAll("td");
+                const matches = filters.every((input) => {
+                    const query = normalize(input.value);
+                    if (!query) {
+                        return true;
+                    }
+                    const col = Number(input.dataset.col);
+                    const cell = cells[col];
+                    if (!cell) {
+                        return true;
+                    }
+                    return normalize(cell.textContent).includes(query);
+                });
+                row.classList.toggle("hidden", !matches);
+            });
+        };
+
+        const parseValue = (value, type) => {
+            if (type === "number") {
+                const parsed = Number(value.replace(/[^\d.-]/g, ""));
+                return Number.isNaN(parsed) ? 0 : parsed;
+            }
+            return normalize(value);
+        };
+
+        const updateIndicators = () => {
+            sortButtons.forEach((button) => {
+                const indicator = button.querySelector(".sort-indicator");
+                if (!indicator) {
+                    return;
+                }
+                const col = Number(button.dataset.col);
+                if (sortState.col === col) {
+                    indicator.textContent = sortState.dir === "asc" ? "^" : "v";
+                } else {
+                    indicator.textContent = "";
+                }
+            });
+        };
+
+        const applySort = (col, type) => {
+            sortState = {
+                col,
+                dir: sortState.col === col && sortState.dir === "asc" ? "desc" : "asc",
+            };
+            rows.sort((a, b) => {
+                const aText = a.querySelectorAll("td")[col]?.textContent ?? "";
+                const bText = b.querySelectorAll("td")[col]?.textContent ?? "";
+                const aVal = parseValue(aText, type);
+                const bVal = parseValue(bText, type);
+                if (aVal === bVal) {
+                    return 0;
+                }
+                const result = aVal > bVal ? 1 : -1;
+                return sortState.dir === "asc" ? result : -result;
+            });
+            rows.forEach((row) => tbody.appendChild(row));
+            updateIndicators();
+        };
+
+        filters.forEach((input) => {
+            input.addEventListener("input", applyFilters);
+        });
+        sortButtons.forEach((button) => {
+            button.addEventListener("click", () => {
+                applySort(Number(button.dataset.col), button.dataset.type);
+            });
+        });
+        updateIndicators();
+    });
+</script>
 
 {% endblock %}

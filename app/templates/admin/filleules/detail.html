@@ -5,27 +5,49 @@
 {% block content %}
 <h2 class="text-2xl font-bold mb-4">Filleule : {{ filleule.prenom }} {{ filleule.nom }}</h2>
 
-<div class="bg-white p-6 shadow rounded">
-    <p><strong>ID :</strong> {{ filleule.id_filleule }}</p>
-    <p><strong>Nom :</strong> {{ filleule.nom }}</p>
-    <p><strong>Prénom :</strong> {{ filleule.prenom }}</p>
-    <p><strong>Date de naissance :</strong> {{ filleule.date_naissance if filleule.date_naissance else "-" }}</p>
-    <p><strong>Village :</strong> {{ filleule.village }}</p>
-    <p><strong>Email :</strong> {{ filleule.email if filleule.email else "-" }}</p>
-    <p><strong>Téléphone :</strong> {{ filleule.telephone if filleule.telephone else "-" }}</p>
-    <p><strong>WhatsApp :</strong> {{ filleule.whatsapp if filleule.whatsapp else "-" }}</p>
-    <p><strong>Année d'entrée au FAE :</strong> {{ filleule.annee_rentree if filleule.annee_rentree else "-" }}</p>
-    <p><strong>Photo :</strong>
+<div class="grid gap-6 lg:grid-cols-[240px_1fr]">
+    <div class="bg-white p-5 shadow rounded-2xl border border-slate-100">
+        <p class="text-sm text-slate-600 mb-3">Photo</p>
         {% if filleule.photo %}
-            <img src="/{{ filleule.photo }}" alt="Photo filleule" class="mt-2 h-32 w-32 object-cover rounded-xl border">
+            <img src="/{{ filleule.photo }}" alt="Photo filleule" class="h-48 w-48 object-cover rounded-2xl border mx-auto">
         {% else %}
-            -
+            <div class="h-48 w-48 rounded-2xl border border-dashed border-slate-300 flex items-center justify-center text-slate-500 text-sm mx-auto">
+                Pas de photo
+            </div>
         {% endif %}
-    </p>
+    </div>
+
+    <div class="bg-white p-6 shadow rounded-2xl border border-slate-100">
+        <p><strong>Nom :</strong> {{ filleule.nom }}</p>
+        <p><strong>Prénom :</strong> {{ filleule.prenom }}</p>
+        <p><strong>Date de naissance :</strong> {{ filleule.date_naissance if filleule.date_naissance else "-" }}</p>
+        <p><strong>Village :</strong> {{ filleule.village }}</p>
+        <p><strong>Email :</strong> {{ filleule.email if filleule.email else "-" }}</p>
+        <p><strong>Téléphone :</strong> {{ filleule.telephone if filleule.telephone else "-" }}</p>
+        <p><strong>WhatsApp :</strong> {{ filleule.whatsapp if filleule.whatsapp else "-" }}</p>
+        <p><strong>Année d'entrée au FAE :</strong> {{ filleule.annee_rentree if filleule.annee_rentree else "-" }}</p>
+        <p><strong>Référent :</strong>
+            {% if filleule.correspondant %}
+                {{ filleule.correspondant.prenom }} {{ filleule.correspondant.nom }}
+            {% else %}
+                -
+            {% endif %}
+        </p>
+    </div>
 </div>
 
 {% set back_url = request.headers.get('referer', '/admin/filleules') %}
 <div class="mt-6 flex space-x-4">
+    {% if previous_filleule_id %}
+    <a href="/admin/filleules/{{ previous_filleule_id }}"
+       class="bg-slate-200 text-slate-700 px-4 py-2 rounded">Précédente</a>
+    {% endif %}
+
+    {% if next_filleule_id %}
+    <a href="/admin/filleules/{{ next_filleule_id }}"
+       class="bg-slate-200 text-slate-700 px-4 py-2 rounded">Suivante</a>
+    {% endif %}
+
     <a href="/admin/filleules/{{ filleule.id_filleule }}/edit"
        class="bg-yellow-500 text-white px-4 py-2 rounded">Modifier</a>
 

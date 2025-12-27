@@ -1,27 +1,15 @@
 {% extends "admin/admin_base.html" %}
 
-{% block title %}Formulaire Correspondant{% endblock %}
+{% block title %}Formulaire Référent{% endblock %}
 
 {% block content %}
 <div class="mb-4">
     <a href="/admin/users" class="inline-flex items-center px-3 py-2 rounded border border-slate-200 text-slate-700 hover:bg-slate-100 transition">Retour Administration</a>
 </div>
 
-<h2 class="text-2xl font-bold mb-6">{{ action }} un correspondant</h2>
+<h2 class="text-2xl font-bold mb-6">{{ action }} un référent</h2>
 
 <form method="post" class="bg-white shadow p-6 rounded max-w-xl">
-
-    <label class="block mb-4">
-        Filleule :
-        <select name="id_filleule" required class="border p-2 w-full">
-            {% for f in filleules %}
-            <option value="{{ f.id_filleule }}"
-                {% if correspondant and correspondant.id_filleule == f.id_filleule %}selected{% endif %}>
-                {{ f.prenom }} {{ f.nom }}
-            </option>
-            {% endfor %}
-        </select>
-    </label>
 
     <label class="block mb-4">
         Nom :
@@ -37,13 +25,13 @@
 
     <label class="block mb-4">
         Téléphone :
-        <input name="telephone" required class="border p-2 w-full"
+        <input name="telephone" class="border p-2 w-full"
                value="{{ correspondant.telephone if correspondant }}">
     </label>
 
     <label class="block mb-4">
         Email :
-        <input name="email" type="email" required class="border p-2 w-full"
+        <input name="email" type="email" class="border p-2 w-full"
                value="{{ correspondant.email if correspondant }}">
     </label>
 

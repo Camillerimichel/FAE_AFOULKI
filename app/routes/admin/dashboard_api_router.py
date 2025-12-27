@@ -1,20 +1,19 @@
 from fastapi import APIRouter, Request, HTTPException
 from fastapi.responses import JSONResponse
 from sqlalchemy import func
+from sqlalchemy.orm import aliased
 
-from app.authz import ADMIN_ROLES, has_any_role
 from app.database import SessionLocal
 from app.models.filleule import Filleule
 from app.models.etablissement import Etablissement
 from app.models.parrainage import Parrainage
+from app.models.scolarite import Scolarite
 
 router = APIRouter(prefix="/admin/api", tags=["Admin API"])
 
 def require_admin(request: Request):
     if not request.state.user:
         raise HTTPException(401, "Non authentifié")
-    if not has_any_role(request, ADMIN_ROLES):
-        raise HTTPException(403, "Accès refusé")
 
 
 @router.get("/filleuls-par-etab")
@@ -24,12 +23,12 @@ async def api_filleuls_par_etab(request: Request, etablissement_id: list[int] = 
     db = SessionLocal()
 
     query = (
-        db.query(Etablissement.nom, func.count(Filleule.id))
-        .join(Filleule, Filleule.etablissement_id == Etablissement.id)
+        db.query(Etablissement.nom, func.count(Filleule.id_filleule))
+        .join(Filleule, Filleule.etablissement_id == Etablissement.id_etablissement)
     )
 
     if etablissement_id:
-       query = query.filter(Etablissement.id.in_(etablissement_id))
+       query = query.filter(Etablissement.id_etablissement.in_(etablissement_id))
 
     rows = query.group_by(Etablissement.nom).all()
     db.close()
@@ -48,7 +47,7 @@ async def api_parrainages_par_annee(request: Request, annee: int = None):
     query = (
         db.query(
             func.extract('year', Parrainage.date_debut).label("annee"),
-            func.count(Parrainage.id)
+            func.count(Parrainage.id_parrainage)
         )
     )
 
@@ -67,9 +66,16 @@ async def api_parrainages_par_annee(request: Request, annee: int = None):
 async def api_niveau_scolaire(request: Request):
     require_admin(request)
     db = SessionLocal()
+    latest_scolarite = (
+        db.query(Scolarite.id_filleule, func.max(Scolarite.id_scolarite).label("max_id"))
+        .group_by(Scolarite.id_filleule)
+        .subquery()
+    )
+    ScolariteLatest = aliased(Scolarite)
     rows = (
-        db.query(Filleule.niveau_scolaire, func.count(Filleule.id))
-        .group_by(Filleule.niveau_scolaire)
+        db.query(ScolariteLatest.niveau, func.count(ScolariteLatest.id_scolarite))
+        .join(latest_scolarite, ScolariteLatest.id_scolarite == latest_scolarite.c.max_id)
+        .group_by(ScolariteLatest.niveau)
         .all()
     )
     db.close()

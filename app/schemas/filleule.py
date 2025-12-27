@@ -14,6 +14,7 @@ class FilleuleBase(BaseModel):
     etat_civil: Optional[str] = None
     annee_rentree: Optional[str] = None
     etablissement_id: Optional[int] = None
+    id_correspondant: Optional[int] = None
     photo: Optional[str] = None
 
 class FilleuleCreate(FilleuleBase):

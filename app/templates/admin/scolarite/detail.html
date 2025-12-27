@@ -4,15 +4,52 @@
 
 {% block content %}
 
-<h2 class="text-2xl font-bold mb-4">Scolarité #{{ scolarite.id_scolarite }}</h2>
+<h2 class="text-2xl font-bold mb-4">
+    Scolarité
+    {% if scolarite.filleule %}
+        {{ scolarite.filleule.prenom }} {{ scolarite.filleule.nom }}
+    {% else %}
+        -
+    {% endif %}
+</h2>
 
-<div class="bg-white p-6 shadow rounded">
-    <p><strong>Filleule :</strong> {{ scolarite.filleule.prenom }} {{ scolarite.filleule.nom }}</p>
-    <p><strong>Établissement :</strong> {{ scolarite.etablissement.nom }}</p>
-    <p><strong>Année scolaire :</strong> {{ scolarite.annee_scolaire_ref.periode if scolarite.annee_scolaire_ref else scolarite.annee_scolaire }}</p>
-    <p><strong>Niveau :</strong> {{ scolarite.niveau }}</p>
-    <p><strong>Résultats :</strong> {{ scolarite.resultats }}</p>
-    <p><strong>Diplôme obtenu :</strong> {{ scolarite.diplome_obtenu }}</p>
+<div class="grid gap-6 lg:grid-cols-3">
+    <section class="bg-white p-5 shadow rounded-2xl border border-slate-100">
+        <h3 class="text-lg font-semibold mb-4">Année en cours</h3>
+        <div class="space-y-2 text-sm">
+            <p><strong>Période :</strong> {{ scolarite.annee_scolaire_ref.periode if scolarite.annee_scolaire_ref else (scolarite.annee_scolaire if scolarite.annee_scolaire else "-") }}</p>
+        </div>
+    </section>
+
+    <section class="bg-white p-5 shadow rounded-2xl border border-slate-100">
+        <h3 class="text-lg font-semibold mb-4">Filleule</h3>
+        <div class="space-y-2 text-sm">
+            <p><strong>Filleule :</strong>
+                {% if scolarite.filleule %}
+                    {{ scolarite.filleule.prenom }} {{ scolarite.filleule.nom }}
+                {% else %}
+                    -
+                {% endif %}
+            </p>
+            <p><strong>Référent A :</strong> {{ referent_a_label if referent_a_label else "-" }}</p>
+            <p><strong>Référent B :</strong> {{ referent_b_label if referent_b_label else "-" }}</p>
+        </div>
+    </section>
+
+    <section class="bg-white p-5 shadow rounded-2xl border border-slate-100">
+        <h3 class="text-lg font-semibold mb-4">Établissement et niveau</h3>
+        <div class="space-y-2 text-sm">
+            <p><strong>Année scolaire :</strong> {{ scolarite.annee_scolaire_ref.periode if scolarite.annee_scolaire_ref else (scolarite.annee_scolaire if scolarite.annee_scolaire else "-") }}</p>
+            <p><strong>Établissement :</strong> {{ scolarite.etablissement.nom if scolarite.etablissement else "-" }}</p>
+            <p><strong>Ville :</strong> {{ scolarite.etablissement.ville if scolarite.etablissement and scolarite.etablissement.ville else "-" }}</p>
+            <p><strong>Niveau :</strong> {{ scolarite.niveau if scolarite.niveau else "-" }}</p>
+            <p><strong>Filière :</strong> {{ scolarite.filiere if scolarite.filiere else "-" }}</p>
+            <p><strong>Section :</strong> {{ scolarite.section if scolarite.section else "-" }}</p>
+            <p><strong>Sous-groupe :</strong> {{ scolarite.sous_groupe if scolarite.sous_groupe else "-" }}</p>
+            <p><strong>Résultats :</strong> <span class="whitespace-pre-line">{{ scolarite.resultats if scolarite.resultats else "-" }}</span></p>
+            <p><strong>Diplôme obtenu :</strong> {{ scolarite.diplome_obtenu if scolarite.diplome_obtenu else "-" }}</p>
+        </div>
+    </section>
 </div>
 
 {% set back_url = request.headers.get('referer', '/admin/scolarite') %}

@@ -7,7 +7,6 @@
 <h2 class="text-2xl font-bold mb-4">Utilisateur : {{ user.fullname if user.fullname else user.email }}</h2>
 
 <div class="bg-white p-6 shadow rounded">
-    <p><strong>ID :</strong> {{ user.id }}</p>
     <p><strong>Nom complet :</strong> {{ user.fullname if user.fullname else "-" }}</p>
     <p><strong>Email :</strong> {{ user.email }}</p>
     <p><strong>Rôles :</strong>

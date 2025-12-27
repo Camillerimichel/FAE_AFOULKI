@@ -5,6 +5,7 @@ from datetime import datetime
 class DocumentBase(BaseModel):
     id_filleule: int
     id_type: int
+    id_annee_scolaire: int | None = None
     titre: Optional[str] = None
     chemin_fichier: Optional[str] = None
 

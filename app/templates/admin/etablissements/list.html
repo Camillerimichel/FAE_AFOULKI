@@ -11,7 +11,6 @@
 
 <table class="w-full mt-6 bg-white shadow">
     <tr class="bg-gray-200 text-left">
-        <th class="p-3">ID</th>
         <th class="p-3">Nom</th>
         <th class="p-3">Ville</th>
         <th class="p-3">Type</th>
@@ -20,7 +19,6 @@
 
     {% for e in etablissements %}
     <tr class="border-b">
-        <td class="p-3">{{ e.id_etablissement }}</td>
         <td class="p-3">{{ e.nom }}</td>
         <td class="p-3">{{ e.ville }}</td>
         <td class="p-3">{{ e.type }}</td>

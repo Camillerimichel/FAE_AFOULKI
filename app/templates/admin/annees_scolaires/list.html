@@ -11,14 +11,12 @@
 
 <table class="w-full mt-6 bg-white shadow">
     <tr class="bg-gray-200 text-left">
-        <th class="p-3">ID</th>
         <th class="p-3">Période</th>
         <th class="p-3"></th>
     </tr>
 
     {% for a in annees %}
     <tr class="border-b">
-        <td class="p-3">{{ a.id_annee_scolaire }}</td>
         <td class="p-3">{{ a.periode }}</td>
         <td class="p-3 text-right">
             <a href="/admin/annees-scolaires/{{ a.id_annee_scolaire }}" class="text-blue-600">Voir</a>

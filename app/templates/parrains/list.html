@@ -14,20 +14,63 @@
     </div>
 </div>
 
+<div class="flex flex-wrap items-center gap-3 mb-6">
+    <a href="/parrains/html?sans_filleules=1"
+       class="inline-flex items-center gap-2 rounded-full border border-[#F2932B30] bg-[#F2932B14] px-4 py-2 text-sm font-semibold text-[#F2932B] hover:-translate-y-0.5 transition shadow-soft">
+        Parrains/Marraines sans filleules ({{ count_without_filleules }})
+    </a>
+    {% if showing_without_filleules %}
+    <a href="/parrains/html"
+       class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 hover:-translate-y-0.5 transition shadow-soft">
+        Voir tous les parrains
+    </a>
+    {% endif %}
+</div>
+
 <div class="overflow-hidden rounded-2xl bg-white/95 border border-[#F2932B1f] shadow-soft">
     <table class="min-w-full text-left">
         <thead class="bg-gradient-to-r from-[#F2932B14] via-[#F2A75A20] to-[#4969A420] text-slate-700">
             <tr>
-                <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide">ID</th>
-                <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide">Nom</th>
+                <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide">
+                    <div class="flex flex-col gap-2">
+                        <span>Nom</span>
+                        <input data-col="0" class="parrains-filter w-full rounded-lg border border-slate-200 bg-white/80 px-2 py-1 text-xs normal-case font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#F2932B40]" placeholder="Filtrer">
+                    </div>
+                </th>
+                <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide">
+                    <div class="flex flex-col gap-2">
+                        <span>Prénom</span>
+                        <input data-col="1" class="parrains-filter w-full rounded-lg border border-slate-200 bg-white/80 px-2 py-1 text-xs normal-case font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#F2932B40]" placeholder="Filtrer">
+                    </div>
+                </th>
+                <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide">
+                    <div class="flex flex-col gap-2">
+                        <span>Téléphone</span>
+                        <input data-col="2" class="parrains-filter w-full rounded-lg border border-slate-200 bg-white/80 px-2 py-1 text-xs normal-case font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#F2932B40]" placeholder="Filtrer">
+                    </div>
+                </th>
+                <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide">
+                    <div class="flex flex-col gap-2">
+                        <span>Email</span>
+                        <input data-col="3" class="parrains-filter w-full rounded-lg border border-slate-200 bg-white/80 px-2 py-1 text-xs normal-case font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#F2932B40]" placeholder="Filtrer">
+                    </div>
+                </th>
                 <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-right">Actions</th>
             </tr>
         </thead>
         <tbody class="divide-y divide-[#F2932B14]">
             {% for p in parrains %}
             <tr class="hover:bg-[#F2932B0f] transition">
-                <td class="px-4 py-3 font-semibold text-slate-800">{{ p.id_parrain }}</td>
-                <td class="px-4 py-3">{{ p.nom }} {{ p.prenom }}</td>
+                <td class="px-4 py-3">{{ p.nom }}</td>
+                <td class="px-4 py-3">{{ p.prenom }}</td>
+                <td class="px-4 py-3">{{ p.telephone if p.telephone else "-" }}</td>
+                <td class="px-4 py-3">
+                    {% if p.email %}
+                        <a href="mailto:{{ p.email }}" class="text-[#F2932B] hover:underline">{{ p.email }}</a>
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
                 <td class="px-4 py-3 text-right">
                     <a href="/parrains/html/{{ p.id_parrain }}" class="inline-flex items-center gap-2 text-[#F2932B] font-semibold hover:translate-x-1 transition">
                         Voir <span>→</span>
@@ -38,5 +81,37 @@
         </tbody>
     </table>
 </div>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const table = document.querySelector("table");
+        if (!table) {
+            return;
+        }
+        const rows = Array.from(table.querySelectorAll("tbody tr"));
+        const filters = Array.from(table.querySelectorAll(".parrains-filter"));
+        const normalize = (value) => value.toLowerCase().trim();
+        const applyFilters = () => {
+            rows.forEach((row) => {
+                const cells = row.querySelectorAll("td");
+                const matches = filters.every((input) => {
+                    const query = normalize(input.value);
+                    if (!query) {
+                        return true;
+                    }
+                    const col = Number(input.dataset.col);
+                    const cell = cells[col];
+                    if (!cell) {
+                        return true;
+                    }
+                    return normalize(cell.textContent).includes(query);
+                });
+                row.classList.toggle("hidden", !matches);
+            });
+        };
+        filters.forEach((input) => {
+            input.addEventListener("input", applyFilters);
+        });
+    });
+</script>
 
 {% endblock %}

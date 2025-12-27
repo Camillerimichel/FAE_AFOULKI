@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Référent {{ correspondant.id_correspondant }}{% endblock %}
+
+{% block content %}
+<div class="flex flex-col gap-4 mb-6 sm:flex-row sm:items-center sm:justify-between">
+    <div class="flex items-center gap-3">
+        <div class="h-12 w-12 rounded-2xl bg-[#F2932B14] text-[#F2932B] flex items-center justify-center text-2xl shadow-soft">✉️</div>
+        <div>
+            <p class="text-sm uppercase tracking-[0.2em] text-[#F2932B] font-semibold">Référent</p>
+            <h2 class="font-display text-2xl">#{{ correspondant.id_correspondant }}</h2>
+        </div>
+    </div>
+    <a href="/correspondants/html" class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#F2932B14] text-[#F2932B] border border-[#F2932B30] hover:-translate-y-0.5 transition shadow-soft">
+        ← Retour à la liste
+    </a>
+</div>
+
+<div class="bg-white/95 rounded-2xl border border-[#F2932B1f] shadow-soft p-6 space-y-3">
+    <p class="text-slate-700"><span class="font-semibold text-slate-900">Nom :</span> {{ correspondant.nom }}</p>
+    <p class="text-slate-700"><span class="font-semibold text-slate-900">Prénom :</span> {{ correspondant.prenom }}</p>
+    <p class="text-slate-700"><span class="font-semibold text-slate-900">Téléphone :</span> {{ correspondant.telephone if correspondant.telephone else "-" }}</p>
+    <p class="text-slate-700"><span class="font-semibold text-slate-900">Email :</span>
+        {% if correspondant.email %}
+            <a href="mailto:{{ correspondant.email }}" class="text-[#F2932B] hover:underline">{{ correspondant.email }}</a>
+        {% else %}
+            -
+        {% endif %}
+    </p>
+    <p class="text-slate-700"><span class="font-semibold text-slate-900">Lien :</span> {{ correspondant.lien if correspondant.lien else "-" }}</p>
+</div>
+
+<div class="mt-8 bg-white/95 rounded-2xl border border-[#F2932B1f] shadow-soft p-6">
+    <h3 class="font-display text-xl mb-4">Filleules suivies</h3>
+    {% if filleules %}
+    <div class="overflow-hidden rounded-2xl border border-[#F2932B1f]">
+        <table class="min-w-full text-left">
+            <thead class="bg-gradient-to-r from-[#F2932B14] via-[#F2A75A20] to-[#4969A420] text-slate-700">
+                <tr>
+                    <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide">Filleule</th>
+                    <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide">Village</th>
+                    <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-right">Fiche</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-[#F2932B14]">
+                {% for f in filleules %}
+                <tr class="hover:bg-[#F2932B0f] transition">
+                    <td class="px-4 py-3">{{ f.prenom }} {{ f.nom }}</td>
+                    <td class="px-4 py-3">{{ f.village if f.village else "-" }}</td>
+                    <td class="px-4 py-3 text-right">
+                        <a href="/filleules/html/{{ f.id_filleule }}" class="inline-flex items-center gap-2 text-[#F2932B] font-semibold hover:translate-x-1 transition">
+                            Voir <span>→</span>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="text-slate-500 text-sm">Aucune filleule associée.</p>
+    {% endif %}
+</div>
+{% endblock %}

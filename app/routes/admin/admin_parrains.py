@@ -8,7 +8,6 @@ from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
-from app.authz import ADMIN_ROLES, has_any_role
 from app.database import BASE_DIR, get_db
 from app.models.parrain import Parrain
 from app.models.parrainage import Parrainage
@@ -48,12 +47,17 @@ def remove_photo_file(photo_path: str | None) -> None:
         os.remove(path)
 
 
+def normalize_optional(value: str | None) -> str | None:
+    if value is None:
+        return None
+    value = value.strip()
+    return value or None
+
+
 # --- Vérification session ---
 def check_session(request: Request):
     if not request.state.user:
         return False
-    if not has_any_role(request, ADMIN_ROLES):
-        raise HTTPException(403, "Accès refusé")
     return True
 
 
@@ -88,8 +92,8 @@ def admin_parrain_create(
     request: Request,
     nom: str = Form(...),
     prenom: str = Form(...),
-    telephone: str = Form(...),
-    email: str = Form(...),
+    telephone: str | None = Form(None),
+    email: str | None = Form(None),
     adresse: str = Form(...),
     photo: UploadFile | None = File(None),
     db: Session = Depends(get_db),
@@ -97,8 +101,8 @@ def admin_parrain_create(
     parrain = Parrain(
         nom=nom,
         prenom=prenom,
-        telephone=telephone,
-        email=email,
+        telephone=normalize_optional(telephone),
+        email=normalize_optional(email),
         adresse=adresse,
     )
     db.add(parrain)
@@ -151,8 +155,8 @@ def admin_parrain_update(
     request: Request,
     nom: str = Form(...),
     prenom: str = Form(...),
-    telephone: str = Form(...),
-    email: str = Form(...),
+    telephone: str | None = Form(None),
+    email: str | None = Form(None),
     adresse: str = Form(...),
     photo: UploadFile | None = File(None),
     remove_photo: str | None = Form(None),
@@ -164,8 +168,8 @@ def admin_parrain_update(
 
     parrain.nom = nom
     parrain.prenom = prenom
-    parrain.telephone = telephone
-    parrain.email = email
+    parrain.telephone = normalize_optional(telephone)
+    parrain.email = normalize_optional(email)
     parrain.adresse = adresse
     if photo and photo.filename:
         remove_photo_file(parrain.photo)

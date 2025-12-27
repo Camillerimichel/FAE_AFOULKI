@@ -38,17 +38,32 @@ def remove_parrain_assets(parrain: Parrain) -> None:
 # --------------------------------------------------------
 
 @router.get("/html")
-def liste_parrains_html(request: Request, db: Session = Depends(get_db)):
+def liste_parrains_html(
+    request: Request,
+    sans_filleules: int | None = None,
+    db: Session = Depends(get_db),
+):
     """
     Affiche la liste des parrains (HTML)
     """
     if not request.state.user:
         return RedirectResponse("/auth/login")
 
-    data = db.query(Parrain).all()
+    without_filleules_query = db.query(Parrain).filter(~Parrain.parrainages.any())
+    count_without_filleules = without_filleules_query.count()
+
+    query = db.query(Parrain)
+    if sans_filleules:
+        query = without_filleules_query
+    data = query.all()
     return templates.TemplateResponse(
         "parrains/list.html",
-        {"request": request, "parrains": data}
+        {
+            "request": request,
+            "parrains": data,
+            "showing_without_filleules": bool(sans_filleules),
+            "count_without_filleules": count_without_filleules,
+        }
     )
 
 

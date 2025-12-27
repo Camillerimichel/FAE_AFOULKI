@@ -2,7 +2,6 @@ from pydantic import BaseModel
 from typing import Optional
 
 class CorrespondantBase(BaseModel):
-    id_filleule: int
     nom: str
     prenom: str
     telephone: Optional[str] = None

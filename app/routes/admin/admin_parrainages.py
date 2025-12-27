@@ -4,7 +4,6 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from datetime import date
 
-from app.authz import ADMIN_ROLES, has_any_role
 from app.database import get_db
 from app.models.parrainage import Parrainage
 from app.models.parrain import Parrain
@@ -18,8 +17,6 @@ templates = Jinja2Templates(directory="app/templates")
 def check_session(request: Request):
     if not request.state.user:
         return False
-    if not has_any_role(request, ADMIN_ROLES):
-        raise HTTPException(403, "Accès refusé")
     return True
 
 

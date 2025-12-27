@@ -1,12 +1,17 @@
-from fastapi import APIRouter, Depends, HTTPException, Request
+from datetime import datetime
+
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
+from sqlalchemy import func
 from sqlalchemy.orm import Session, joinedload
 
 from app.database import get_db
+from app.models.document import Document
 from app.models.filleule import Filleule
 from app.models.parrainage import Parrainage
 from app.models.scolarite import Scolarite
+from app.models.correspondant import Correspondant
 from app.schemas.filleule import FilleuleCreate, FilleuleResponse
 
 router = APIRouter(prefix="/filleules", tags=["Filleules"])
@@ -19,7 +24,12 @@ templates = Jinja2Templates(directory="app/templates")
 # --------------------------------------------------------
 
 @router.get("/html")
-def liste_filleules_html(request: Request, db: Session = Depends(get_db)):
+def liste_filleules_html(
+    request: Request,
+    filiere: str | None = Query(default=None),
+    sans_parrains: int | None = None,
+    db: Session = Depends(get_db),
+):
     """
     Affiche la liste des filleules en HTML.
     Page protégée : nécessite une session utilisateur.
@@ -27,14 +37,33 @@ def liste_filleules_html(request: Request, db: Session = Depends(get_db)):
     if not request.state.user:
         return RedirectResponse("/auth/login")
 
-    data = (
+    count_without_parrains = (
         db.query(Filleule)
-        .options(
-            joinedload(Filleule.scolarites).joinedload(Scolarite.etablissement),
-            joinedload(Filleule.scolarites).joinedload(Scolarite.annee_scolaire_ref),
-        )
-        .all()
+        .filter(~Filleule.parrainages.any())
+        .count()
     )
+
+    query = db.query(Filleule).options(
+        joinedload(Filleule.scolarites).joinedload(Scolarite.etablissement),
+        joinedload(Filleule.scolarites).joinedload(Scolarite.annee_scolaire_ref),
+        joinedload(Filleule.correspondant),
+    )
+    if filiere:
+        filiere_value = filiere.strip().lower()
+        if filiere_value:
+            ids_subquery = (
+                db.query(Scolarite.id_filleule)
+                .filter(Scolarite.filiere.isnot(None))
+                .filter(func.trim(Scolarite.filiere) != "")
+                .filter(func.lower(Scolarite.filiere) == filiere_value)
+                .distinct()
+                .subquery()
+            )
+            query = query.filter(Filleule.id_filleule.in_(ids_subquery))
+    if sans_parrains:
+        query = query.filter(~Filleule.parrainages.any())
+
+    data = query.all()
 
     def periode_from_scolarite(record: Scolarite) -> str | None:
         if record.annee_scolaire_ref and record.annee_scolaire_ref.periode:
@@ -72,7 +101,13 @@ def liste_filleules_html(request: Request, db: Session = Depends(get_db)):
 
     return templates.TemplateResponse(
         "filleules/list.html",
-        {"request": request, "filleules": data, "recent_scolarite": recent_scolarite}
+        {
+            "request": request,
+            "filleules": data,
+            "recent_scolarite": recent_scolarite,
+            "showing_without_parrains": bool(sans_parrains),
+            "count_without_parrains": count_without_parrains,
+        }
     )
 
 
@@ -91,6 +126,9 @@ def detail_filleule_html(filleule_id: int, request: Request, db: Session = Depen
             joinedload(Filleule.scolarites).joinedload(Scolarite.etablissement),
             joinedload(Filleule.scolarites).joinedload(Scolarite.annee_scolaire_ref),
             joinedload(Filleule.parrainages).joinedload(Parrainage.parrain),
+            joinedload(Filleule.correspondant),
+            joinedload(Filleule.documents).joinedload(Document.type_document),
+            joinedload(Filleule.documents).joinedload(Document.annee_scolaire_ref),
         )
         .filter(Filleule.id_filleule == filleule_id)
         .first()
@@ -130,9 +168,33 @@ def detail_filleule_html(filleule_id: int, request: Request, db: Session = Depen
             seen_parrains.add(parrain.id_parrain)
             parrains.append(parrain)
 
+    correspondants = (
+        db.query(Correspondant)
+        .order_by(Correspondant.prenom, Correspondant.nom)
+        .all()
+    )
+    correspondants_map = {
+        str(c.id_correspondant): f"{c.prenom} {c.nom}".strip()
+        for c in correspondants
+    }
+
+    documents = sorted(
+        f.documents,
+        key=lambda doc: doc.date_upload or datetime.min,
+        reverse=True,
+    )
+
     return templates.TemplateResponse(
         "filleules/detail.html",
-        {"request": request, "filleule": f, "scolarites": scolarites, "parrains": parrains}
+        {
+            "request": request,
+            "filleule": f,
+            "scolarites": scolarites,
+            "parrains": parrains,
+            "correspondant": f.correspondant,
+            "correspondants_map": correspondants_map,
+            "documents": documents,
+        }
     )
 
 

@@ -1,0 +1,37 @@
+{% extends "admin/admin_base.html" %}
+
+{% block title %}Localités{% endblock %}
+
+{% block content %}
+
+<h2 class="text-2xl font-bold mb-4">Localités</h2>
+
+<a href="/admin/localites/new"
+   class="bg-blue-600 text-white px-4 py-2 rounded">Nouvelle localité</a>
+
+<table class="w-full mt-6 bg-white shadow">
+    <thead class="bg-gray-200 text-left">
+        <tr>
+            <th class="p-3">Nom</th>
+            <th class="p-3">Latitude</th>
+            <th class="p-3">Longitude</th>
+            <th class="p-3">Alias</th>
+            <th class="p-3"></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for l in localites %}
+        <tr class="border-b">
+            <td class="p-3">{{ l.nom }}</td>
+            <td class="p-3">{{ l.latitude }}</td>
+            <td class="p-3">{{ l.longitude }}</td>
+            <td class="p-3">{{ l.aliases if l.aliases else "-" }}</td>
+            <td class="p-3 text-right">
+                <a href="/admin/localites/{{ l.id_localite }}" class="text-blue-600">Voir</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

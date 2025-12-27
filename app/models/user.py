@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, DateTime, Integer, String
 from sqlalchemy.orm import relationship
 from app.database import Base
 
@@ -9,5 +9,7 @@ class User(Base):
     email = Column(String(255), unique=True, nullable=False)
     hashed_password = Column(String(255), nullable=False)
     fullname = Column(String(255), nullable=True)
+    reset_token_hash = Column(String(255), nullable=True)
+    reset_token_expires = Column(DateTime, nullable=True)
 
     roles = relationship("Role", secondary="user_roles", back_populates="users")

@@ -37,6 +37,21 @@
     </label>
 
     <label class="block mb-4">
+        Année scolaire :
+        <select name="id_annee_scolaire" required class="border p-2 w-full">
+            <option value="" disabled {% if not document or not document.id_annee_scolaire %}selected{% endif %}>
+                Choisir une année scolaire
+            </option>
+            {% for a in annees %}
+            <option value="{{ a.id_annee_scolaire }}"
+                {% if document and document.id_annee_scolaire == a.id_annee_scolaire %}selected{% endif %}>
+                {{ a.periode }}
+            </option>
+            {% endfor %}
+        </select>
+    </label>
+
+    <label class="block mb-4">
         Titre :
         <input name="titre" required class="border p-2 w-full"
                value="{{ document.titre if document }}">

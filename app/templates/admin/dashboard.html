@@ -21,7 +21,7 @@
 
     <div class="grid gap-4 md:grid-cols-4">
         <div class="rounded-2xl bg-white/95 border border-[#F2932B1f] shadow-soft p-5">
-            <p class="text-sm text-slate-500">Filleuls</p>
+            <p class="text-sm text-slate-500">Filleules</p>
             <p class="text-3xl font-display text-[#F2932B]">{{ stats.filleules }}</p>
         </div>
         <div class="rounded-2xl bg-white/95 border border-[#F2932B1f] shadow-soft p-5">
@@ -35,6 +35,14 @@
         <div class="rounded-2xl bg-white/95 border border-[#F2932B1f] shadow-soft p-5">
             <p class="text-sm text-slate-500">Documents</p>
             <p class="text-3xl font-display text-[#4969A4]">{{ stats.documents }}</p>
+        </div>
+        <div class="rounded-2xl bg-white/95 border border-[#F2932B1f] shadow-soft p-5">
+            <p class="text-sm text-slate-500">Référents</p>
+            <p class="text-3xl font-display text-[#4969A4]">{{ stats.referents }}</p>
+        </div>
+        <div class="rounded-2xl bg-white/95 border border-[#F2932B1f] shadow-soft p-5">
+            <p class="text-sm text-slate-500">Écoles</p>
+            <p class="text-3xl font-display text-[#F2932B]">{{ stats.ecoles }}</p>
         </div>
     </div>
 
@@ -64,7 +72,7 @@
 
     <div class="grid gap-6 md:grid-cols-2">
         <div class="bg-white/95 rounded-2xl border border-[#F2932B1f] shadow-soft p-6 space-y-3">
-            <h4 class="font-semibold text-lg flex items-center gap-2">👩‍🎓 Filleuls par établissement</h4>
+            <h4 class="font-semibold text-lg flex items-center gap-2">👩‍🎓 Filleules par établissement</h4>
             <canvas id="filleulsChart"></canvas>
         </div>
 
@@ -91,11 +99,11 @@
     // ================================
     //  RENDER FUNCTIONS
     // ================================
-    function renderFilleulsChart(labels, data) {
+    function renderFilleulesChart(labels, data) {
         if (filleulsChart) filleulsChart.destroy();
         filleulsChart = new Chart(document.getElementById('filleulsChart'), {
             type: 'bar',
-            data: { labels, datasets: [{ label: "Nombre de filleuls", data, backgroundColor: "#F2932B" }] }
+            data: { labels, datasets: [{ label: "Nombre de filleules", data, backgroundColor: "#F2932B" }] }
         });
     }
 
@@ -118,7 +126,7 @@
     // ================================
     //  INITIAL DATA
     // ================================
-    renderFilleulsChart(
+    renderFilleulesChart(
         {{ charts.filleuls_par_etab | map(attribute=0) | list }},
         {{ charts.filleuls_par_etab | map(attribute=1) | list }}
     );
@@ -144,7 +152,7 @@
         const res = await fetch(`/admin/api/filleuls-par-etab?${query}`);
         const json = await res.json();
 
-        renderFilleulsChart(json.labels, json.data);
+        renderFilleulesChart(json.labels, json.data);
     });
 
     // ================================

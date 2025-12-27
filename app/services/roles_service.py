@@ -9,7 +9,7 @@ DEFAULT_ROLES = [
     {"name": "responsable_fae", "label": "Responsable du FAE"},
     {"name": "back_office_fae", "label": "Back office du FAE"},
     {"name": "parrain", "label": "Parrain"},
-    {"name": "correspondant", "label": "Correspondant"},
+    {"name": "correspondant", "label": "Référent"},
     {"name": "filleule", "label": "Filleule"},
 ]
 

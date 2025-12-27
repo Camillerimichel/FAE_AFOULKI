@@ -9,63 +9,146 @@
 
 <h2 class="text-2xl font-bold mb-6">{{ action }} un enregistrement de scolarité</h2>
 
-<form method="post" class="bg-white shadow p-6 rounded max-w-xl">
+<form method="post" class="bg-white shadow p-6 rounded max-w-4xl">
+    <div class="grid gap-6 lg:grid-cols-2">
+        <section class="border border-slate-100 rounded-2xl p-4 shadow-sm bg-white">
+            <h3 class="text-lg font-semibold mb-4">Année en cours</h3>
 
-    <label class="block mb-4">
-        Filleule :
-        <select name="id_filleule" required class="border p-2 w-full">
-            {% for f in filleules %}
-            <option value="{{ f.id_filleule }}"
-                {% if scolarite and scolarite.id_filleule == f.id_filleule %}selected{% endif %}>
-                {{ f.prenom }} {{ f.nom }}
-            </option>
-            {% endfor %}
-        </select>
-    </label>
+            <label class="block mb-4">
+                Année scolaire :
+                <select name="id_annee_scolaire" required class="border p-2 w-full">
+                    <option value="" disabled
+                        {% if not selected_annee_id %}selected{% endif %}>
+                        Choisir une année scolaire
+                    </option>
+                    {% for a in annees %}
+                    <option value="{{ a.id_annee_scolaire }}"
+                        {% if selected_annee_id == a.id_annee_scolaire %}selected{% endif %}>
+                        {{ a.periode }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </label>
+        </section>
 
-    <label class="block mb-4">
-        Établissement :
-        <select name="id_etablissement" required class="border p-2 w-full">
-            {% for e in etablissements %}
-            <option value="{{ e.id_etablissement }}"
-                {% if scolarite and scolarite.id_etablissement == e.id_etablissement %}selected{% endif %}>
-                {{ e.nom }}
-            </option>
-            {% endfor %}
-        </select>
-    </label>
+        <section class="border border-slate-100 rounded-2xl p-4 shadow-sm bg-white">
+            <h3 class="text-lg font-semibold mb-4">Filleule</h3>
 
-    <label class="block mb-4">
-        Année scolaire :
-        <select name="id_annee_scolaire" required class="border p-2 w-full">
-            {% for a in annees %}
-            <option value="{{ a.id_annee_scolaire }}"
-                {% if selected_annee_id == a.id_annee_scolaire %}selected{% endif %}>
-                {{ a.periode }}
-            </option>
-            {% endfor %}
-        </select>
-    </label>
+            <label class="block mb-4">
+                Filleule :
+                <select name="id_filleule" required class="border p-2 w-full">
+                    <option value="" disabled
+                        {% if not scolarite or not scolarite.id_filleule %}selected{% endif %}>
+                        Choisir une filleule
+                    </option>
+                    {% for f in filleules %}
+                    <option value="{{ f.id_filleule }}"
+                        {% if scolarite and scolarite.id_filleule == f.id_filleule %}selected{% endif %}>
+                        {{ f.prenom }} {{ f.nom }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </label>
 
-    <label class="block mb-4">
-        Niveau :
-        <input name="niveau" required class="border p-2 w-full"
-               value="{{ scolarite.niveau if scolarite }}">
-    </label>
+            <label class="block mb-4">
+                Référent A :
+                <select name="referent_a" required class="border p-2 w-full">
+                    <option value="" disabled
+                        {% if not selected_referent_a_id %}selected{% endif %}>
+                        Choisir un référent
+                    </option>
+                    {% for c in correspondants %}
+                        {% set full_name = c.prenom ~ ' ' ~ c.nom %}
+                        <option value="{{ c.id_correspondant }}"
+                            {% if selected_referent_a_id == c.id_correspondant %}selected{% endif %}>
+                            {{ full_name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </label>
 
-    <label class="block mb-4">
-        Résultats :
-        <textarea name="resultats" required class="border p-2 w-full">{{ scolarite.resultats if scolarite }}</textarea>
-    </label>
+            <label class="block mb-4">
+                Référent B (optionnel) :
+                <select name="referent_b" class="border p-2 w-full">
+                    <option value=""
+                        {% if not selected_referent_b_id %}selected{% endif %}>
+                        Aucun
+                    </option>
+                    {% for c in correspondants %}
+                        {% set full_name = c.prenom ~ ' ' ~ c.nom %}
+                        <option value="{{ c.id_correspondant }}"
+                            {% if selected_referent_b_id == c.id_correspondant %}selected{% endif %}>
+                            {{ full_name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </label>
 
-    <label class="block mb-4">
-        Diplôme obtenu :
-        <input name="diplome_obtenu" required class="border p-2 w-full"
-               value="{{ scolarite.diplome_obtenu if scolarite }}">
-    </label>
+        </section>
 
-    <button id="submit-btn" class="bg-blue-600 text-white px-4 py-2 rounded">{{ action }}</button>
+        <section class="border border-slate-100 rounded-2xl p-4 shadow-sm bg-white">
+            <h3 class="text-lg font-semibold mb-4">Établissement et niveau</h3>
 
+            <label class="block mb-4">
+                Établissement :
+                <select name="id_etablissement" required class="border p-2 w-full">
+                    <option value="" disabled
+                        {% if not scolarite or not scolarite.id_etablissement %}selected{% endif %}>
+                        Choisir un établissement
+                    </option>
+                    {% for e in etablissements %}
+                    <option value="{{ e.id_etablissement }}" data-ville="{{ e.ville if e.ville else '' }}"
+                        {% if scolarite and scolarite.id_etablissement == e.id_etablissement %}selected{% endif %}>
+                        {{ e.nom }}
+                    </option>
+                    {% endfor %}
+                </select>
+                <div id="etablissement-ville-wrap" class="mt-2">
+                    <label class="block text-sm text-slate-600">
+                        Ville :
+                        <input id="etablissement-ville" class="mt-1 border p-2 w-full bg-slate-50" readonly value="-">
+                    </label>
+                </div>
+            </label>
+
+            <label class="block mb-4">
+                Niveau :
+                <input name="niveau" required class="border p-2 w-full"
+                       value="{{ scolarite.niveau if scolarite }}">
+            </label>
+
+            <label class="block mb-4">
+                Filière :
+                <input name="filiere" class="border p-2 w-full"
+                       value="{{ scolarite.filiere if scolarite and scolarite.filiere else '' }}">
+            </label>
+
+            <label class="block mb-4">
+                Section :
+                <input name="section" class="border p-2 w-full"
+                       value="{{ scolarite.section if scolarite and scolarite.section else '' }}">
+            </label>
+        </section>
+
+        <section class="border border-slate-100 rounded-2xl p-4 shadow-sm bg-white">
+            <h3 class="text-lg font-semibold mb-4">Résultats</h3>
+
+            <label class="block mb-4">
+                Résultats :
+                <textarea name="resultats" required class="border p-2 w-full">{{ scolarite.resultats if scolarite }}</textarea>
+            </label>
+
+            <label class="block mb-4">
+                Diplôme obtenu :
+                <input name="diplome_obtenu" required class="border p-2 w-full"
+                       value="{{ scolarite.diplome_obtenu if scolarite }}">
+            </label>
+        </section>
+    </div>
+
+    <div class="mt-6">
+        <button id="submit-btn" class="bg-blue-600 text-white px-4 py-2 rounded">{{ action }}</button>
+    </div>
 </form>
 
 {% if action == "Créer" %}
@@ -90,5 +173,29 @@
     });
 </script>
 {% endif %}
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const select = document.querySelector('select[name="id_etablissement"]');
+        const wrapper = document.getElementById("etablissement-ville-wrap");
+        const valueEl = document.getElementById("etablissement-ville");
+        if (!select || !wrapper || !valueEl) {
+            return;
+        }
+
+        const updateVille = () => {
+            const selected = select.options[select.selectedIndex];
+            const ville = selected ? (selected.dataset.ville || "").trim() : "";
+            if (ville) {
+                valueEl.value = ville;
+            } else {
+                valueEl.value = "-";
+            }
+        };
+
+        updateVille();
+        select.addEventListener("change", updateVille);
+    });
+</script>
 
 {% endblock %}

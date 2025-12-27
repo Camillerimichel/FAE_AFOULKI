@@ -6,20 +6,25 @@
 
 <h2 class="text-2xl font-bold mb-4">Parrain : {{ parrain.prenom }} {{ parrain.nom }}</h2>
 
-<div class="bg-white p-6 shadow rounded">
-    <p><strong>ID :</strong> {{ parrain.id_parrain }}</p>
-    <p><strong>Nom :</strong> {{ parrain.nom }}</p>
-    <p><strong>Prénom :</strong> {{ parrain.prenom }}</p>
-    <p><strong>Téléphone :</strong> {{ parrain.telephone }}</p>
-    <p><strong>Email :</strong> {{ parrain.email }}</p>
-    <p><strong>Adresse :</strong> {{ parrain.adresse }}</p>
-    <p><strong>Photo :</strong>
+<div class="grid gap-6 lg:grid-cols-[240px_1fr]">
+    <div class="bg-white p-5 shadow rounded-2xl border border-slate-100">
+        <p class="text-sm text-slate-600 mb-3">Photo</p>
         {% if parrain.photo %}
-            <img src="/{{ parrain.photo }}" alt="Photo parrain" class="mt-2 h-32 w-32 object-cover rounded-xl border">
+            <img src="/{{ parrain.photo }}" alt="Photo parrain" class="h-48 w-48 object-cover rounded-2xl border mx-auto">
         {% else %}
-            -
+            <div class="h-48 w-48 rounded-2xl border border-dashed border-slate-300 flex items-center justify-center text-slate-500 text-sm mx-auto">
+                Pas de photo
+            </div>
         {% endif %}
-    </p>
+    </div>
+
+    <div class="bg-white p-6 shadow rounded-2xl border border-slate-100">
+        <p><strong>Nom :</strong> {{ parrain.nom }}</p>
+        <p><strong>Prénom :</strong> {{ parrain.prenom }}</p>
+        <p><strong>Téléphone :</strong> {{ parrain.telephone if parrain.telephone else "-" }}</p>
+        <p><strong>Email :</strong> {{ parrain.email if parrain.email else "-" }}</p>
+        <p><strong>Adresse :</strong> {{ parrain.adresse if parrain.adresse else "-" }}</p>
+    </div>
 </div>
 
 {% set back_url = request.headers.get('referer', '/admin/parrains') %}

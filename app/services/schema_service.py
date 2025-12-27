@@ -60,6 +60,26 @@ def ensure_filleule_etablissement_column():
         """
     )
 
+    old_fk_query = text(
+        """
+        SELECT COUNT(*)
+        FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_SCHEMA = :db
+          AND TABLE_NAME = 'Correspondants'
+          AND COLUMN_NAME = 'id_filleule'
+        """
+    )
+    old_fk_names_query = text(
+        """
+        SELECT CONSTRAINT_NAME
+        FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+        WHERE TABLE_SCHEMA = :db
+          AND TABLE_NAME = 'Correspondants'
+          AND COLUMN_NAME = 'id_filleule'
+          AND REFERENCED_TABLE_NAME IS NOT NULL
+        """
+    )
+
     with engine.begin() as conn:
         count = conn.execute(column_query, {"db": DB_NAME}).scalar()
         if count == 0:
@@ -182,3 +202,161 @@ def ensure_scolarite_annee_scolaire_column():
                 """
             )
         )
+
+
+def ensure_filleule_correspondant_column():
+    column_query = text(
+        """
+        SELECT COUNT(*)
+        FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_SCHEMA = :db
+          AND TABLE_NAME = 'Filleules'
+          AND COLUMN_NAME = 'id_correspondant'
+        """
+    )
+
+    fk_query = text(
+        """
+        SELECT CONSTRAINT_NAME
+        FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+        WHERE TABLE_SCHEMA = :db
+          AND TABLE_NAME = 'Filleules'
+          AND COLUMN_NAME = 'id_correspondant'
+          AND REFERENCED_TABLE_NAME IS NOT NULL
+        """
+    )
+
+    old_fk_query = text(
+        """
+        SELECT COUNT(*)
+        FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_SCHEMA = :db
+          AND TABLE_NAME = 'Correspondants'
+          AND COLUMN_NAME = 'id_filleule'
+        """
+    )
+    old_fk_names_query = text(
+        """
+        SELECT CONSTRAINT_NAME
+        FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+        WHERE TABLE_SCHEMA = :db
+          AND TABLE_NAME = 'Correspondants'
+          AND COLUMN_NAME = 'id_filleule'
+          AND REFERENCED_TABLE_NAME IS NOT NULL
+        """
+    )
+
+    with engine.begin() as conn:
+        count = conn.execute(column_query, {"db": DB_NAME}).scalar()
+        if count == 0:
+            conn.execute(text("ALTER TABLE Filleules ADD COLUMN id_correspondant INT NULL"))
+
+        has_old_fk = conn.execute(old_fk_query, {"db": DB_NAME}).scalar()
+        if has_old_fk:
+            conn.execute(
+                text(
+                    """
+                    UPDATE Filleules f
+                    INNER JOIN Correspondants c
+                      ON c.id_filleule = f.id_filleule
+                    SET f.id_correspondant = c.id_correspondant
+                    WHERE f.id_correspondant IS NULL
+                    """
+                )
+            )
+            constraints = conn.execute(old_fk_names_query, {"db": DB_NAME}).fetchall()
+            for row in constraints:
+                if row and row[0]:
+                    conn.execute(text(f"ALTER TABLE Correspondants DROP FOREIGN KEY `{row[0]}`"))
+            conn.execute(text("ALTER TABLE Correspondants DROP COLUMN id_filleule"))
+
+        fk_exists = conn.execute(fk_query, {"db": DB_NAME}).fetchone()
+        if fk_exists:
+            return
+
+        conn.execute(
+            text(
+                """
+                ALTER TABLE Filleules
+                ADD CONSTRAINT fk_filleules_correspondant
+                FOREIGN KEY (id_correspondant)
+                REFERENCES Correspondants(id_correspondant)
+                ON DELETE SET NULL
+                """
+            )
+        )
+
+
+def ensure_document_annee_scolaire_column():
+    column_query = text(
+        """
+        SELECT COUNT(*)
+        FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_SCHEMA = :db
+          AND TABLE_NAME = 'Documents'
+          AND COLUMN_NAME = 'id_annee_scolaire'
+        """
+    )
+
+    fk_query = text(
+        """
+        SELECT CONSTRAINT_NAME
+        FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+        WHERE TABLE_SCHEMA = :db
+          AND TABLE_NAME = 'Documents'
+          AND COLUMN_NAME = 'id_annee_scolaire'
+          AND REFERENCED_TABLE_NAME IS NOT NULL
+        """
+    )
+
+    with engine.begin() as conn:
+        count = conn.execute(column_query, {"db": DB_NAME}).scalar()
+        if count == 0:
+            conn.execute(text("ALTER TABLE Documents ADD COLUMN id_annee_scolaire INT NULL"))
+
+        fk_exists = conn.execute(fk_query, {"db": DB_NAME}).fetchone()
+        if fk_exists:
+            return
+
+        conn.execute(
+            text(
+                """
+                ALTER TABLE Documents
+                ADD CONSTRAINT fk_documents_annee_scolaire
+                FOREIGN KEY (id_annee_scolaire)
+                REFERENCES Annee_scolaire(id_annee_scolaire)
+                ON DELETE SET NULL
+                """
+            )
+        )
+
+
+def ensure_user_password_reset_columns():
+    hash_query = text(
+        """
+        SELECT COUNT(*)
+        FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_SCHEMA = :db
+          AND TABLE_NAME = 'users'
+          AND COLUMN_NAME = 'reset_token_hash'
+        """
+    )
+
+    expires_query = text(
+        """
+        SELECT COUNT(*)
+        FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_SCHEMA = :db
+          AND TABLE_NAME = 'users'
+          AND COLUMN_NAME = 'reset_token_expires'
+        """
+    )
+
+    with engine.begin() as conn:
+        hash_count = conn.execute(hash_query, {"db": DB_NAME}).scalar()
+        if hash_count == 0:
+            conn.execute(text("ALTER TABLE users ADD COLUMN reset_token_hash VARCHAR(255) NULL"))
+
+        expires_count = conn.execute(expires_query, {"db": DB_NAME}).scalar()
+        if expires_count == 0:
+            conn.execute(text("ALTER TABLE users ADD COLUMN reset_token_expires DATETIME NULL"))

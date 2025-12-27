@@ -6,9 +6,17 @@
 <h2 class="text-2xl font-bold mb-4">Document : {{ d.titre }}</h2>
 
 <div class="bg-white p-6 shadow rounded">
-    <p><strong>ID :</strong> {{ d.id_document }}</p>
     <p><strong>Filleule :</strong> {{ d.filleule.prenom }} {{ d.filleule.nom }}</p>
     <p><strong>Type :</strong> {{ d.type_document.libelle }}</p>
+    <p><strong>Année scolaire :</strong>
+        {% if d.annee_scolaire_ref %}
+            <a href="/admin/annees-scolaires/{{ d.annee_scolaire_ref.id_annee_scolaire }}" class="text-blue-600">
+                {{ d.annee_scolaire_ref.periode }}
+            </a>
+        {% else %}
+            -
+        {% endif %}
+    </p>
     <p><strong>Fichier :</strong>
         <a href="/{{ d.chemin_fichier }}" class="text-blue-600" target="_blank">
             Télécharger / Voir

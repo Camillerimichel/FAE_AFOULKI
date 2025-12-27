@@ -11,3 +11,4 @@ class AnneeScolaire(Base):
     periode = Column(String(9), nullable=False)
 
     scolarites = relationship("Scolarite", back_populates="annee_scolaire_ref")
+    documents = relationship("Document", back_populates="annee_scolaire_ref")

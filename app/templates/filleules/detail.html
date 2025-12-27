@@ -27,9 +27,19 @@
 
     <div class="bg-white/95 border border-[#F2932B1f] rounded-2xl shadow-soft p-6">
         <dl class="grid gap-4 sm:grid-cols-2">
-            <div>
-                <dt class="text-xs uppercase tracking-wide text-slate-500">ID</dt>
-                <dd class="font-semibold text-slate-800">{{ filleule.id_filleule }}</dd>
+            <div class="sm:col-span-1">
+                <dt class="text-xs uppercase tracking-wide text-slate-500">Parrain/Marraine</dt>
+                <dd class="font-semibold text-slate-800">
+                    {% if parrains %}
+                        {% for p in parrains %}
+                            <a href="/parrains/html/{{ p.id_parrain }}" class="text-[#F2932B] hover:underline">
+                                {{ p.prenom }} {{ p.nom }}
+                            </a>{% if not loop.last %}, {% endif %}
+                        {% endfor %}
+                    {% else %}
+                        -
+                    {% endif %}
+                </dd>
             </div>
             <div>
                 <dt class="text-xs uppercase tracking-wide text-slate-500">Village</dt>
@@ -40,34 +50,23 @@
                 <dd class="font-semibold text-slate-800">{{ filleule.date_naissance if filleule.date_naissance else "-" }}</dd>
             </div>
             <div>
-                <dt class="text-xs uppercase tracking-wide text-slate-500">Email</dt>
-                <dd class="font-semibold text-slate-800">{{ filleule.email if filleule.email else "-" }}</dd>
-            </div>
-            <div>
-                <dt class="text-xs uppercase tracking-wide text-slate-500">Téléphone</dt>
-                <dd class="font-semibold text-slate-800">{{ filleule.telephone if filleule.telephone else "-" }}</dd>
-            </div>
-            <div>
                 <dt class="text-xs uppercase tracking-wide text-slate-500">WhatsApp</dt>
                 <dd class="font-semibold text-slate-800">{{ filleule.whatsapp if filleule.whatsapp else "-" }}</dd>
-            </div>
-            <div>
-                <dt class="text-xs uppercase tracking-wide text-slate-500">Etat civil</dt>
-                <dd class="font-semibold text-slate-800">{{ filleule.etat_civil if filleule.etat_civil else "-" }}</dd>
             </div>
             <div>
                 <dt class="text-xs uppercase tracking-wide text-slate-500">Année d'entrée au FAE</dt>
                 <dd class="font-semibold text-slate-800">{{ filleule.annee_rentree if filleule.annee_rentree else "-" }}</dd>
             </div>
-            <div class="sm:col-span-2">
-                <dt class="text-xs uppercase tracking-wide text-slate-500">Parrain</dt>
+            <div class="sm:col-span-1">
+                <dt class="text-xs uppercase tracking-wide text-slate-500">Référent</dt>
                 <dd class="font-semibold text-slate-800">
-                    {% if parrains %}
-                        {% for p in parrains %}
-                            <a href="/parrains/html/{{ p.id_parrain }}" class="text-[#F2932B] hover:underline">
-                                {{ p.prenom }} {{ p.nom }}
-                            </a>{% if not loop.last %}, {% endif %}
-                        {% endfor %}
+                    {% if correspondant %}
+                        <div>{{ correspondant.prenom }} {{ correspondant.nom }}</div>
+                        <div class="text-sm text-slate-600">
+                            {% if correspondant.telephone %}{{ correspondant.telephone }}{% else %}-{% endif %}
+                            {% if correspondant.email %} • <a href="mailto:{{ correspondant.email }}" class="text-[#F2932B] hover:underline">{{ correspondant.email }}</a>{% endif %}
+                            {% if correspondant.lien %} • {{ correspondant.lien }}{% endif %}
+                        </div>
                     {% else %}
                         -
                     {% endif %}
@@ -86,9 +85,9 @@
                 <tr>
                     <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide">Année scolaire</th>
                     <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide">Établissement</th>
+                    <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide">Filière</th>
                     <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide">Niveau</th>
-                    <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide">Résultats</th>
-                    <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide">Diplôme</th>
+                    <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-right">Voir</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-[#F2932B14]">
@@ -98,16 +97,156 @@
                         {{ s.annee_scolaire_ref.periode if s.annee_scolaire_ref else s.annee_scolaire if s.annee_scolaire else "-" }}
                     </td>
                     <td class="px-4 py-3">{{ s.etablissement.nom if s.etablissement else "-" }}</td>
+                    <td class="px-4 py-3">{{ s.filiere if s.filiere else "-" }}</td>
                     <td class="px-4 py-3">{{ s.niveau if s.niveau else "-" }}</td>
-                    <td class="px-4 py-3">{{ s.resultats if s.resultats else "-" }}</td>
-                    <td class="px-4 py-3">{{ s.diplome_obtenu if s.diplome_obtenu else "-" }}</td>
+                    <td class="px-4 py-3 text-right">
+                        <button type="button"
+                                class="open-scolarite-modal text-[#F2932B] font-semibold hover:underline"
+                                data-modal-id="scolarite-modal-{{ s.id_scolarite }}">
+                            Voir
+                        </button>
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
+    {% for s in scolarites %}
+    {% set referent_a_label = correspondants_map.get(s.referent_a) if s.referent_a else None %}
+    {% set referent_b_label = correspondants_map.get(s.referent_b) if s.referent_b else None %}
+    <div id="scolarite-modal-{{ s.id_scolarite }}"
+         class="scolarite-modal fixed inset-0 z-50 hidden items-center justify-center p-4">
+        <button type="button" class="absolute inset-0 bg-slate-900/50" data-modal-close></button>
+        <div class="relative w-full max-w-5xl bg-white rounded-3xl shadow-2xl p-6 sm:p-8 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-start justify-between gap-4 mb-6">
+                <div>
+                    <p class="text-sm uppercase tracking-[0.2em] text-[#F2932B] font-semibold">Scolarité</p>
+                    <h3 class="font-display text-2xl">{{ filleule.prenom }} {{ filleule.nom }}</h3>
+                    <p class="text-slate-600 text-sm">Détails de l'enregistrement.</p>
+                </div>
+                <button type="button"
+                        class="close-scolarite-modal h-10 w-10 rounded-full border border-slate-200 text-slate-500 hover:text-slate-800 hover:border-slate-300 transition"
+                        aria-label="Fermer">
+                    ✕
+                </button>
+            </div>
+
+            <div class="grid gap-6 lg:grid-cols-3">
+                <section class="bg-slate-50/80 p-5 rounded-2xl border border-slate-100">
+                    <h4 class="text-lg font-semibold mb-4">Année en cours</h4>
+                    <div class="space-y-2 text-sm">
+                        <p><strong>Période :</strong> {{ s.annee_scolaire_ref.periode if s.annee_scolaire_ref else (s.annee_scolaire if s.annee_scolaire else "-") }}</p>
+                    </div>
+                </section>
+
+                <section class="bg-slate-50/80 p-5 rounded-2xl border border-slate-100">
+                    <h4 class="text-lg font-semibold mb-4">Filleule</h4>
+                    <div class="space-y-2 text-sm">
+                        <p><strong>Filleule :</strong> {{ filleule.prenom }} {{ filleule.nom }}</p>
+                        <p><strong>Référent A :</strong> {{ referent_a_label if referent_a_label else (s.referent_a if s.referent_a else "-") }}</p>
+                        <p><strong>Référent B :</strong> {{ referent_b_label if referent_b_label else (s.referent_b if s.referent_b else "-") }}</p>
+                    </div>
+                </section>
+
+                <section class="bg-slate-50/80 p-5 rounded-2xl border border-slate-100">
+                    <h4 class="text-lg font-semibold mb-4">Établissement et niveau</h4>
+                    <div class="space-y-2 text-sm">
+                        <p><strong>Année scolaire :</strong> {{ s.annee_scolaire_ref.periode if s.annee_scolaire_ref else (s.annee_scolaire if s.annee_scolaire else "-") }}</p>
+                        <p><strong>Établissement :</strong> {{ s.etablissement.nom if s.etablissement else "-" }}</p>
+                        <p><strong>Ville :</strong> {{ s.etablissement.ville if s.etablissement and s.etablissement.ville else "-" }}</p>
+                        <p><strong>Niveau :</strong> {{ s.niveau if s.niveau else "-" }}</p>
+                        <p><strong>Filière :</strong> {{ s.filiere if s.filiere else "-" }}</p>
+                        <p><strong>Section :</strong> {{ s.section if s.section else "-" }}</p>
+                        <p><strong>Résultats :</strong> <span class="whitespace-pre-line">{{ s.resultats if s.resultats else "-" }}</span></p>
+                        <p><strong>Diplôme obtenu :</strong> {{ s.diplome_obtenu if s.diplome_obtenu else "-" }}</p>
+                    </div>
+                </section>
+            </div>
+
+            <div class="mt-8">
+                <h4 class="text-lg font-semibold mb-4">Documents</h4>
+                {% if documents %}
+                <div class="grid gap-3 sm:grid-cols-2">
+                    {% for doc in documents %}
+                    <div class="flex items-start justify-between gap-3 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
+                        <div>
+                            <p class="font-semibold text-slate-800">
+                                {{ doc.titre if doc.titre else (doc.type_document.libelle if doc.type_document else "Document") }}
+                            </p>
+                            <p class="text-xs text-slate-500">
+                                {% if doc.type_document %}{{ doc.type_document.libelle }}{% endif %}
+                                {% if doc.annee_scolaire_ref and doc.annee_scolaire_ref.periode %} • {{ doc.annee_scolaire_ref.periode }}{% endif %}
+                                {% if doc.date_upload %} • {{ doc.date_upload.strftime("%d/%m/%Y") }}{% endif %}
+                            </p>
+                        </div>
+                        {% if doc.chemin_fichier %}
+                        <a href="/{{ doc.chemin_fichier }}" target="_blank"
+                           class="text-[#F2932B] font-semibold whitespace-nowrap hover:underline">Voir</a>
+                        {% else %}
+                        <span class="text-slate-400 text-sm whitespace-nowrap">Fichier indisponible</span>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-slate-500 text-sm">Aucun document disponible.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
     {% else %}
     <p class="text-slate-500 text-sm">Aucune scolarité enregistrée.</p>
     {% endif %}
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const openButtons = Array.from(document.querySelectorAll(".open-scolarite-modal"));
+        const modals = Array.from(document.querySelectorAll(".scolarite-modal"));
+
+        const openModal = (modal) => {
+            if (!modal) {
+                return;
+            }
+            modal.classList.remove("hidden");
+            modal.classList.add("flex");
+            document.body.classList.add("overflow-hidden");
+        };
+
+        const closeModal = (modal) => {
+            if (!modal) {
+                return;
+            }
+            modal.classList.add("hidden");
+            modal.classList.remove("flex");
+            document.body.classList.remove("overflow-hidden");
+        };
+
+        openButtons.forEach((button) => {
+            button.addEventListener("click", () => {
+                const modalId = button.dataset.modalId;
+                openModal(document.getElementById(modalId));
+            });
+        });
+
+        modals.forEach((modal) => {
+            const closeButton = modal.querySelector(".close-scolarite-modal");
+            const overlay = modal.querySelector("[data-modal-close]");
+            if (closeButton) {
+                closeButton.addEventListener("click", () => closeModal(modal));
+            }
+            if (overlay) {
+                overlay.addEventListener("click", () => closeModal(modal));
+            }
+        });
+
+        document.addEventListener("keydown", (event) => {
+            if (event.key !== "Escape") {
+                return;
+            }
+            modals.forEach((modal) => closeModal(modal));
+        });
+    });
+</script>
 {% endblock %}

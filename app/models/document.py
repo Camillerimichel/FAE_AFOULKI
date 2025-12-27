@@ -9,6 +9,7 @@ class Document(Base):
     id_document = Column(Integer, primary_key=True, index=True)
     id_filleule = Column(Integer, ForeignKey("Filleules.id_filleule"))
     id_type = Column(Integer, ForeignKey("TypesDocuments.id_type"))
+    id_annee_scolaire = Column(Integer, ForeignKey("Annee_scolaire.id_annee_scolaire"))
 
     titre = Column(String(255))
     chemin_fichier = Column(Text)
@@ -16,3 +17,4 @@ class Document(Base):
 
     filleule = relationship("Filleule", back_populates="documents")
     type_document = relationship("TypeDocument", back_populates="documents")
+    annee_scolaire_ref = relationship("AnneeScolaire", back_populates="documents")

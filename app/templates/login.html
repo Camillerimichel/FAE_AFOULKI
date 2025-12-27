@@ -7,7 +7,7 @@
     <div class="text-center mb-6">
         <p class="text-sm uppercase tracking-[0.2em] text-[#F2932B] font-semibold">Connexion</p>
         <h2 class="font-display text-3xl">Ravi de vous revoir 🌞</h2>
-        <p class="text-slate-600 text-sm mt-1">Accédez à la gestion Afoulki en toute sécurité.</p>
+        <p class="text-slate-600 text-sm mt-1">Accédez à la gestion du FAE Afoulki en toute sécurité.</p>
     </div>
 
     <form method="post" action="/auth/login" class="bg-white/95 border border-[#F2932B1f] shadow-soft rounded-2xl p-6 space-y-4">
@@ -24,10 +24,17 @@
         {% if error %}
             <p class="text-red-600 text-sm">{{ error }}</p>
         {% endif %}
+        {% if info %}
+            <p class="text-emerald-600 text-sm">{{ info }}</p>
+        {% endif %}
 
         <button type="submit" class="w-full inline-flex justify-center items-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-[#F2932B] to-[#4969A4] text-white font-semibold shadow-2xl shadow-[rgba(73,105,164,0.35)] hover:-translate-y-0.5 transition">
             Se connecter
         </button>
+
+        <div class="text-center">
+            <a href="/auth/forgot-password" class="text-sm text-[#F2932B] font-semibold hover:underline">Mot de passe perdu ?</a>
+        </div>
     </form>
 </div>
 {% endblock %}

@@ -1,9 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.etablissement import ETABLISSEMENT_TYPES, Etablissement
+from app.models.filleule import Filleule
 from app.schemas.etablissement import EtablissementCreate, EtablissementResponse
 
 router = APIRouter(prefix="/etablissements", tags=["Etablissements"])
@@ -23,9 +25,16 @@ def liste_etablissements_html(request: Request, db: Session = Depends(get_db)):
         return RedirectResponse("/auth/login")
 
     data = db.query(Etablissement).all()
+    rows = (
+        db.query(Filleule.etablissement_id, func.count(Filleule.id_filleule))
+        .filter(Filleule.etablissement_id.isnot(None))
+        .group_by(Filleule.etablissement_id)
+        .all()
+    )
+    counts = {row[0]: row[1] for row in rows}
     return templates.TemplateResponse(
         "etablissements/list.html",
-        {"request": request, "etablissements": data},
+        {"request": request, "etablissements": data, "etablissement_counts": counts},
     )
 
 

@@ -12,7 +12,6 @@
 
 <table class="w-full mt-6 bg-white shadow">
     <tr class="bg-gray-200">
-        <th class="p-3">ID</th>
         <th class="p-3">Titre</th>
         <th class="p-3">Filleule</th>
         <th class="p-3">Type</th>
@@ -22,7 +21,6 @@
 
     {% for d in documents %}
     <tr class="border-b">
-        <td class="p-3">{{ d.id_document }}</td>
         <td class="p-3">{{ d.titre }}</td>
         <td class="p-3">{{ d.filleule.prenom }} {{ d.filleule.nom }}</td>
         <td class="p-3">{{ d.type_document.libelle }}</td>
@@ -37,4 +35,3 @@
 </table>
 
 {% endblock %}
-

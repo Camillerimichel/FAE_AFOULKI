@@ -10,27 +10,147 @@
    class="bg-blue-600 text-white px-4 py-2 rounded">Nouvel enregistrement</a>
 
 <table class="w-full mt-6 bg-white shadow">
-    <tr class="bg-gray-200">
-        <th class="p-3">ID</th>
-        <th class="p-3">Filleule</th>
-        <th class="p-3">Établissement</th>
-        <th class="p-3">Année scolaire</th>
-        <th class="p-3">Niveau</th>
-        <th class="p-3"></th>
-    </tr>
-
-    {% for s in scolarites %}
-    <tr class="border-b">
-        <td class="p-3">{{ s.id_scolarite }}</td>
-        <td class="p-3">{{ s.filleule.prenom }} {{ s.filleule.nom }}</td>
-        <td class="p-3">{{ s.etablissement.nom }}</td>
-        <td class="p-3">{{ s.annee_scolaire_ref.periode if s.annee_scolaire_ref else s.annee_scolaire }}</td>
-        <td class="p-3">{{ s.niveau }}</td>
-        <td class="p-3 text-right">
-            <a href="/admin/scolarite/{{ s.id_scolarite }}" class="text-blue-600">Voir</a>
-        </td>
-    </tr>
-    {% endfor %}
+    <thead class="bg-gray-200 text-left">
+        <tr>
+            <th class="p-3">
+                <button type="button" class="admin-sort font-semibold" data-col="0" data-type="text">
+                    Filleule <span class="sort-indicator text-xs text-slate-500 ml-1"></span>
+                </button>
+                <input data-col="0" class="scolarite-filter mt-2 w-full rounded border border-slate-200 px-2 py-1 text-xs"
+                       placeholder="Filtrer">
+            </th>
+            <th class="p-3">
+                <button type="button" class="admin-sort font-semibold" data-col="1" data-type="text">
+                    Référent A <span class="sort-indicator text-xs text-slate-500 ml-1"></span>
+                </button>
+                <input data-col="1" class="scolarite-filter mt-2 w-full rounded border border-slate-200 px-2 py-1 text-xs"
+                       placeholder="Filtrer">
+            </th>
+            <th class="p-3">
+                <button type="button" class="admin-sort font-semibold" data-col="2" data-type="text">
+                    Établissement <span class="sort-indicator text-xs text-slate-500 ml-1"></span>
+                </button>
+                <input data-col="2" class="scolarite-filter mt-2 w-full rounded border border-slate-200 px-2 py-1 text-xs"
+                       placeholder="Filtrer">
+            </th>
+            <th class="p-3">
+                <button type="button" class="admin-sort font-semibold" data-col="3" data-type="text">
+                    Année scolaire <span class="sort-indicator text-xs text-slate-500 ml-1"></span>
+                </button>
+                <input data-col="3" class="scolarite-filter mt-2 w-full rounded border border-slate-200 px-2 py-1 text-xs"
+                       placeholder="Filtrer">
+            </th>
+            <th class="p-3">
+                <button type="button" class="admin-sort font-semibold" data-col="4" data-type="text">
+                    Niveau <span class="sort-indicator text-xs text-slate-500 ml-1"></span>
+                </button>
+                <input data-col="4" class="scolarite-filter mt-2 w-full rounded border border-slate-200 px-2 py-1 text-xs"
+                       placeholder="Filtrer">
+            </th>
+            <th class="p-3"></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for s in scolarites %}
+        <tr class="border-b">
+            <td class="p-3">{{ s.filleule.prenom }} {{ s.filleule.nom }}</td>
+            <td class="p-3">{{ referent_labels.get(s.id_scolarite) if referent_labels.get(s.id_scolarite) else "-" }}</td>
+            <td class="p-3">{{ s.etablissement.nom }}</td>
+            <td class="p-3">{{ s.annee_scolaire_ref.periode if s.annee_scolaire_ref else s.annee_scolaire }}</td>
+            <td class="p-3">{{ s.niveau }}</td>
+            <td class="p-3 text-right">
+                <a href="/admin/scolarite/{{ s.id_scolarite }}" class="text-blue-600">Voir</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
 </table>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const table = document.querySelector("table");
+        if (!table) {
+            return;
+        }
+        const tbody = table.querySelector("tbody");
+        const rows = Array.from(tbody.querySelectorAll("tr"));
+        const filters = Array.from(table.querySelectorAll(".scolarite-filter"));
+        const sortButtons = Array.from(table.querySelectorAll(".admin-sort"));
+        let sortState = { col: null, dir: "asc" };
+
+        const normalize = (value) => value.toLowerCase().trim();
+        const applyFilters = () => {
+            rows.forEach((row) => {
+                const cells = row.querySelectorAll("td");
+                const matches = filters.every((input) => {
+                    const query = normalize(input.value);
+                    if (!query) {
+                        return true;
+                    }
+                    const col = Number(input.dataset.col);
+                    const cell = cells[col];
+                    if (!cell) {
+                        return true;
+                    }
+                    return normalize(cell.textContent).includes(query);
+                });
+                row.classList.toggle("hidden", !matches);
+            });
+        };
+
+        const parseValue = (value, type) => {
+            if (type === "number") {
+                const parsed = Number(value.replace(/[^\d.-]/g, ""));
+                return Number.isNaN(parsed) ? 0 : parsed;
+            }
+            return normalize(value);
+        };
+
+        const updateIndicators = () => {
+            sortButtons.forEach((button) => {
+                const indicator = button.querySelector(".sort-indicator");
+                if (!indicator) {
+                    return;
+                }
+                const col = Number(button.dataset.col);
+                if (sortState.col === col) {
+                    indicator.textContent = sortState.dir === "asc" ? "^" : "v";
+                } else {
+                    indicator.textContent = "";
+                }
+            });
+        };
+
+        const applySort = (col, type) => {
+            sortState = {
+                col,
+                dir: sortState.col === col && sortState.dir === "asc" ? "desc" : "asc",
+            };
+            rows.sort((a, b) => {
+                const aText = a.querySelectorAll("td")[col]?.textContent ?? "";
+                const bText = b.querySelectorAll("td")[col]?.textContent ?? "";
+                const aVal = parseValue(aText, type);
+                const bVal = parseValue(bText, type);
+                if (aVal === bVal) {
+                    return 0;
+                }
+                const result = aVal > bVal ? 1 : -1;
+                return sortState.dir === "asc" ? result : -result;
+            });
+            rows.forEach((row) => tbody.appendChild(row));
+            updateIndicators();
+        };
+
+        filters.forEach((input) => {
+            input.addEventListener("input", applyFilters);
+        });
+        sortButtons.forEach((button) => {
+            button.addEventListener("click", () => {
+                applySort(Number(button.dataset.col), button.dataset.type);
+            });
+        });
+        updateIndicators();
+    });
+</script>
 
 {% endblock %}

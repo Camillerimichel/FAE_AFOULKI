@@ -3,7 +3,6 @@ from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
-from app.authz import ADMIN_ROLES, has_any_role
 from app.database import get_db
 from app.models.etablissement import ETABLISSEMENT_TYPES, Etablissement
 
@@ -15,8 +14,6 @@ templates = Jinja2Templates(directory="app/templates")
 def check_session(request: Request):
     if not request.state.user:
         return False
-    if not has_any_role(request, ADMIN_ROLES):
-        raise HTTPException(403, "Accès refusé")
     return True
 
 
@@ -26,7 +23,7 @@ def admin_etablissements_list(request: Request, db: Session = Depends(get_db)):
     if not check_session(request):
         return RedirectResponse("/auth/login")
 
-    etablissements = db.query(Etablissement).all()
+    etablissements = db.query(Etablissement).order_by(Etablissement.ville).all()
 
     return templates.TemplateResponse(
         "admin/etablissements/list.html",

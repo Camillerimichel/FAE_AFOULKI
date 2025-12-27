@@ -9,54 +9,64 @@
 
 <h2 class="text-2xl font-bold mb-6">{{ action }} un Parrain</h2>
 
-<form method="post" enctype="multipart/form-data" class="bg-white shadow p-6 rounded max-w-lg">
+<form method="post" enctype="multipart/form-data" class="bg-white shadow p-6 rounded max-w-5xl">
+    <div class="grid gap-6 lg:grid-cols-[240px_1fr]">
+        <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4 space-y-4">
+            <div class="text-center">
+                <p class="text-sm text-slate-600 mb-3">Photo actuelle :</p>
+                {% if parrain and parrain.photo %}
+                <img src="/{{ parrain.photo }}" alt="Photo parrain" class="h-40 w-40 object-cover rounded-2xl border mx-auto">
+                <label class="flex items-center justify-center gap-2 text-sm mt-3">
+                    <input type="checkbox" name="remove_photo" value="1">
+                    Supprimer la photo actuelle
+                </label>
+                {% else %}
+                <div class="h-40 w-40 rounded-2xl border border-dashed border-slate-300 flex items-center justify-center text-slate-500 text-sm mx-auto">
+                    Pas de photo
+                </div>
+                {% endif %}
+            </div>
 
-    <label class="block mb-4">
-        Nom :
-        <input name="nom" required class="border p-2 w-full" value="{{ parrain.nom if parrain }}">
-    </label>
+            <label class="block">
+                Photo :
+                <input name="photo" type="file" accept="image/*" class="border p-2 w-full">
+                {% if parrain and parrain.photo %}
+                <p class="text-xs text-slate-500 mt-1">Choisir une nouvelle photo pour remplacer l'actuelle.</p>
+                {% endif %}
+            </label>
+        </div>
 
-    <label class="block mb-4">
-        Prénom :
-        <input name="prenom" required class="border p-2 w-full" value="{{ parrain.prenom if parrain }}">
-    </label>
+        <div class="rounded-2xl border border-slate-200 bg-white p-4">
+            <div class="grid gap-4 md:grid-cols-2">
+                <label class="block">
+                    Nom :
+                    <input name="nom" required class="border p-2 w-full" value="{{ parrain.nom if parrain }}">
+                </label>
 
-    <label class="block mb-4">
-        Téléphone :
-        <input name="telephone" required class="border p-2 w-full" value="{{ parrain.telephone if parrain }}">
-    </label>
+                <label class="block">
+                    Prénom :
+                    <input name="prenom" required class="border p-2 w-full" value="{{ parrain.prenom if parrain }}">
+                </label>
 
-    <label class="block mb-4">
-        Email :
-        <input name="email" type="email" required class="border p-2 w-full" value="{{ parrain.email if parrain }}">
-    </label>
+                <label class="block">
+                    Téléphone :
+                    <input name="telephone" class="border p-2 w-full" value="{{ parrain.telephone if parrain }}">
+                </label>
 
-    <label class="block mb-4">
-        Adresse :
-        <input name="adresse" required class="border p-2 w-full" value="{{ parrain.adresse if parrain }}">
-    </label>
+                <label class="block">
+                    Email :
+                    <input name="email" type="email" class="border p-2 w-full" value="{{ parrain.email if parrain }}">
+                </label>
 
-    {% if parrain and parrain.photo %}
-    <div class="mb-4">
-        <p class="text-sm text-slate-600 mb-2">Photo actuelle :</p>
-        <img src="/{{ parrain.photo }}" alt="Photo parrain" class="h-32 w-32 object-cover rounded-xl border">
-        <label class="flex items-center gap-2 text-sm mt-2">
-            <input type="checkbox" name="remove_photo" value="1">
-            Supprimer la photo actuelle
-        </label>
+                <label class="block md:col-span-2">
+                    Adresse :
+                    <input name="adresse" required class="border p-2 w-full" value="{{ parrain.adresse if parrain }}">
+                </label>
+            </div>
+        </div>
     </div>
-    {% endif %}
 
-    <label class="block mb-4">
-        Photo :
-        <input name="photo" type="file" accept="image/*" class="border p-2 w-full">
-        {% if parrain and parrain.photo %}
-        <p class="text-xs text-slate-500 mt-1">Choisir une nouvelle photo pour remplacer l'actuelle.</p>
-        {% endif %}
-    </label>
-
-    <button id="submit-btn" class="bg-blue-600 text-white px-4 py-2 rounded">{{ action }}</button>
-
+    <button id="submit-btn" class="mt-6 bg-blue-600 text-white px-4 py-2 rounded">{{ action }}</button>
 </form>
 
 {% if action == "Créer" %}

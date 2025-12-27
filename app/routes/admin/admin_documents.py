@@ -7,9 +7,9 @@ from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
-from app.authz import ADMIN_ROLES, has_any_role
 from app.database import BASE_DIR, get_db
 from app.models.document import Document
+from app.models.annee_scolaire import AnneeScolaire
 from app.models.filleule import Filleule
 from app.models.typedocument import TypeDocument
 
@@ -32,8 +32,6 @@ def resolve_document_path(path_value: str | None) -> Path | None:
 def check_session(request: Request):
     if not request.state.user:
         return False
-    if not has_any_role(request, ADMIN_ROLES):
-        raise HTTPException(403, "Accès refusé")
     return True
 
 
@@ -59,11 +57,12 @@ def admin_documents_new(request: Request, db: Session = Depends(get_db)):
 
     filleules = db.query(Filleule).all()
     types = db.query(TypeDocument).all()
+    annees = db.query(AnneeScolaire).order_by(AnneeScolaire.periode).all()
 
     return templates.TemplateResponse(
         "admin/documents/form.html",
         {"request": request, "action": "Créer", "document": None,
-         "filleules": filleules, "types": types},
+         "filleules": filleules, "types": types, "annees": annees},
     )
 
 
@@ -72,6 +71,7 @@ def admin_documents_create(
     request: Request,
     id_filleule: int = Form(...),
     id_type: int = Form(...),
+    id_annee_scolaire: int = Form(...),
     titre: str = Form(...),
     fichier: UploadFile = File(...),
     db: Session = Depends(get_db),
@@ -91,6 +91,7 @@ def admin_documents_create(
     doc = Document(
         id_filleule=id_filleule,
         id_type=id_type,
+        id_annee_scolaire=id_annee_scolaire,
         titre=titre,
         chemin_fichier=relative_path,
     )
@@ -129,11 +130,12 @@ def admin_documents_edit(id_document: int, request: Request, db: Session = Depen
 
     filleules = db.query(Filleule).all()
     types = db.query(TypeDocument).all()
+    annees = db.query(AnneeScolaire).order_by(AnneeScolaire.periode).all()
 
     return templates.TemplateResponse(
         "admin/documents/form.html",
         {"request": request, "action": "Modifier", "document": d,
-         "filleules": filleules, "types": types},
+         "filleules": filleules, "types": types, "annees": annees},
     )
 
 
@@ -143,6 +145,7 @@ def admin_documents_update(
     request: Request,
     id_filleule: int = Form(...),
     id_type: int = Form(...),
+    id_annee_scolaire: int = Form(...),
     titre: str = Form(...),
     db: Session = Depends(get_db),
 ):
@@ -152,6 +155,7 @@ def admin_documents_update(
 
     d.id_filleule = id_filleule
     d.id_type = id_type
+    d.id_annee_scolaire = id_annee_scolaire
     d.titre = titre
 
     db.commit()

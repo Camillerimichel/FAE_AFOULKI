@@ -6,6 +6,7 @@ from fastapi.staticfiles import StaticFiles
 
 # Base SQLAlchemy + création des tables
 from app.database import Base, engine
+from app.models.localite import Localite  # noqa: F401
 
 # Middleware session
 from app.middleware.session import SessionMiddleware
@@ -29,12 +30,19 @@ from app.routes.admin.export_excel_router import router as export_excel_router
 from app.routes.admin.admin_router import router as admin_router
 from app.services.roles_service import ensure_default_roles
 from app.services.annees_scolaires_service import ensure_annees_scolaires_seed
+from app.services.localites_service import (
+    ensure_filleule_ville_mapping,
+    ensure_localites_seed,
+)
 from app.services.schema_service import (
     ensure_filleule_photo_column,
     ensure_filleule_etablissement_column,
     ensure_parrain_photo_column,
     ensure_etablissement_type_enum,
     ensure_scolarite_annee_scolaire_column,
+    ensure_document_annee_scolaire_column,
+    ensure_filleule_correspondant_column,
+    ensure_user_password_reset_columns,
 )
 
 
@@ -55,7 +63,12 @@ ensure_filleule_etablissement_column()
 ensure_parrain_photo_column()
 ensure_etablissement_type_enum()
 ensure_annees_scolaires_seed()
+ensure_localites_seed()
+ensure_filleule_ville_mapping()
 ensure_scolarite_annee_scolaire_column()
+ensure_document_annee_scolaire_column()
+ensure_filleule_correspondant_column()
+ensure_user_password_reset_columns()
 
 
 # --------------------------------------------------
