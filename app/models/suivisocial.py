@@ -1,6 +1,8 @@
-from sqlalchemy import Column, Integer, Text, ForeignKey, Date
+from sqlalchemy import Column, Integer, Text, ForeignKey, Date, Enum
 from sqlalchemy.orm import relationship
 from app.database import Base
+
+SUIVI_ETATS = ("En cours", "Problème", "Fini")
 
 class SuiviSocial(Base):
     __tablename__ = "SuiviSocial"
@@ -9,6 +11,7 @@ class SuiviSocial(Base):
     id_filleule = Column(Integer, ForeignKey("Filleules.id_filleule"))
 
     date_suivi = Column(Date)
+    etat = Column(Enum(*SUIVI_ETATS, name="suivisocial_etat"), nullable=False)
     commentaire = Column(Text)
     besoins = Column(Text)
 

@@ -1,12 +1,14 @@
+import io
 import os
 import shutil
 from pathlib import Path
 from uuid import uuid4
 
 from fastapi import APIRouter, Request, Depends, Form, HTTPException, UploadFile, File
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, StreamingResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
+from openpyxl import Workbook
 
 from app.database import BASE_DIR, get_db
 from app.models.parrain import Parrain
@@ -67,11 +69,43 @@ def admin_parrains_list(request: Request, db: Session = Depends(get_db)):
     if not check_session(request):
         return RedirectResponse("/auth/login")
 
-    parrains = db.query(Parrain).all()
+    parrains = db.query(Parrain).order_by(Parrain.nom.asc(), Parrain.prenom.asc()).all()
 
     return templates.TemplateResponse(
         "admin/parrains/list.html",
         {"request": request, "parrains": parrains},
+    )
+
+
+@router.get("/export/excel")
+def admin_parrains_export_excel(request: Request, db: Session = Depends(get_db)):
+    if not check_session(request):
+        return RedirectResponse("/auth/login")
+
+    parrains = db.query(Parrain).order_by(Parrain.nom.asc(), Parrain.prenom.asc()).all()
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Parrains"
+    ws.append(["Nom", "Prénom", "Téléphone", "Email", "Adresse"])
+    for p in parrains:
+        ws.append([
+            p.nom,
+            p.prenom,
+            p.telephone or "",
+            p.email or "",
+            p.adresse or "",
+        ])
+
+    output = io.BytesIO()
+    wb.save(output)
+    output.seek(0)
+
+    headers = {"Content-Disposition": "attachment; filename=parrains.xlsx"}
+    return StreamingResponse(
+        output,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers=headers,
     )
 
 

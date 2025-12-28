@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+
+{% block title %}Suivi social{% endblock %}
+
+{% block content %}
+<div class="flex flex-col gap-4 mb-6 sm:flex-row sm:items-center sm:justify-between">
+    <div>
+        <p class="text-sm uppercase tracking-[0.2em] text-[#F2932B] font-semibold">Suivi social</p>
+        <h2 class="font-display text-2xl">Suivis sociaux</h2>
+        <p class="text-slate-600 text-sm">Historique des suivis et besoins déclarés.</p>
+    </div>
+    <a href="/" class="inline-flex items-center px-4 py-2 rounded-2xl border border-[#F2932B33] text-[#F2932B] font-semibold hover:bg-[#F2932B10] transition">
+        Retour à l'accueil
+    </a>
+</div>
+
+<div class="overflow-hidden rounded-2xl bg-white/95 border border-[#F2932B1f] shadow-soft">
+    <table class="min-w-full text-left">
+        <thead class="bg-gradient-to-r from-[#F2932B14] via-[#F2A75A20] to-[#4969A420] text-slate-700">
+            <tr>
+                <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide">
+                    <div class="flex flex-col gap-2">
+                        <span>Filleule</span>
+                        <input data-col="0" class="suivi-filter w-full rounded-lg border border-slate-200 bg-white/80 px-2 py-1 text-xs normal-case font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#F2932B40]" placeholder="Filtrer">
+                    </div>
+                </th>
+                <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide">Date</th>
+                <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide">
+                    <div class="flex flex-col gap-2">
+                        <span>État</span>
+                        <input data-col="2" class="suivi-filter w-full rounded-lg border border-slate-200 bg-white/80 px-2 py-1 text-xs normal-case font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#F2932B40]" placeholder="Filtrer">
+                    </div>
+                </th>
+                <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-right">Voir</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-[#F2932B14]">
+            {% for suivi in suivis %}
+            <tr class="hover:bg-[#F2932B0f] transition">
+                <td class="px-4 py-3">
+                    {% if suivi.filleule %}
+                        {{ suivi.filleule.prenom }} {{ suivi.filleule.nom }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                <td class="px-4 py-3">{{ suivi.date_suivi if suivi.date_suivi else "-" }}</td>
+                <td class="px-4 py-3">{{ suivi.etat if suivi.etat else "-" }}</td>
+                <td class="px-4 py-3 text-right">
+                    <button type="button"
+                            class="open-suivi-modal text-[#F2932B] font-semibold hover:underline"
+                            data-modal-id="suivi-modal-{{ suivi.id_suivi }}">
+                        Voir
+                    </button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% for suivi in suivis %}
+<div id="suivi-modal-{{ suivi.id_suivi }}"
+     class="suivi-modal fixed inset-0 z-50 hidden items-center justify-center p-4">
+    <button type="button" class="absolute inset-0 bg-slate-900/50" data-modal-close></button>
+    <div class="relative w-full max-w-3xl bg-white rounded-3xl shadow-2xl p-6 sm:p-8 max-h-[90vh] overflow-y-auto">
+        <div class="flex items-start justify-between gap-4 mb-6">
+            <div>
+                <p class="text-sm uppercase tracking-[0.2em] text-[#F2932B] font-semibold">Suivi social</p>
+                <h3 class="font-display text-2xl">
+                    {% if suivi.filleule %}
+                        {{ suivi.filleule.prenom }} {{ suivi.filleule.nom }}
+                    {% else %}
+                        Filleule
+                    {% endif %}
+                </h3>
+                <p class="text-slate-600 text-sm">Détails du suivi.</p>
+            </div>
+            <button type="button"
+                    class="close-suivi-modal h-10 w-10 rounded-full border border-slate-200 text-slate-500 hover:text-slate-800 hover:border-slate-300 transition"
+                    aria-label="Fermer">
+                ✕
+            </button>
+        </div>
+
+        <div class="grid gap-6 lg:grid-cols-2">
+            <section class="bg-slate-50/80 p-5 rounded-2xl border border-slate-100">
+                <h4 class="text-lg font-semibold mb-4">Informations</h4>
+                <div class="space-y-2 text-sm">
+                    <p><strong>Date :</strong> {{ suivi.date_suivi if suivi.date_suivi else "-" }}</p>
+                    <p><strong>État :</strong> {{ suivi.etat if suivi.etat else "-" }}</p>
+                </div>
+            </section>
+
+            <section class="bg-slate-50/80 p-5 rounded-2xl border border-slate-100">
+                <h4 class="text-lg font-semibold mb-4">Besoins</h4>
+                <div class="text-sm whitespace-pre-line">{{ suivi.besoins if suivi.besoins else "-" }}</div>
+            </section>
+        </div>
+
+        <div class="mt-6 bg-slate-50/80 p-5 rounded-2xl border border-slate-100">
+            <h4 class="text-lg font-semibold mb-4">Commentaire</h4>
+            <div class="text-sm whitespace-pre-line">{{ suivi.commentaire if suivi.commentaire else "-" }}</div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const table = document.querySelector("table");
+        if (!table) {
+            return;
+        }
+        const rows = Array.from(table.querySelectorAll("tbody tr"));
+        const filters = Array.from(table.querySelectorAll(".suivi-filter"));
+        const normalize = (value) => value.toLowerCase().trim();
+
+        const applyFilters = () => {
+            rows.forEach((row) => {
+                const cells = row.querySelectorAll("td");
+                const matches = filters.every((input) => {
+                    const query = normalize(input.value);
+                    if (!query) {
+                        return true;
+                    }
+                    const col = Number(input.dataset.col);
+                    const cell = cells[col];
+                    if (!cell) {
+                        return true;
+                    }
+                    return normalize(cell.textContent).includes(query);
+                });
+                row.classList.toggle("hidden", !matches);
+            });
+        };
+
+        filters.forEach((input) => {
+            input.addEventListener("input", applyFilters);
+        });
+
+        const openButtons = Array.from(document.querySelectorAll(".open-suivi-modal"));
+        const modals = Array.from(document.querySelectorAll(".suivi-modal"));
+
+        const openModal = (modal) => {
+            if (!modal) {
+                return;
+            }
+            modal.classList.remove("hidden");
+            modal.classList.add("flex");
+            document.body.classList.add("overflow-hidden");
+        };
+
+        const closeModal = (modal) => {
+            if (!modal) {
+                return;
+            }
+            modal.classList.add("hidden");
+            modal.classList.remove("flex");
+            document.body.classList.remove("overflow-hidden");
+        };
+
+        openButtons.forEach((button) => {
+            button.addEventListener("click", () => {
+                const modalId = button.dataset.modalId;
+                openModal(document.getElementById(modalId));
+            });
+        });
+
+        modals.forEach((modal) => {
+            const closeButton = modal.querySelector(".close-suivi-modal");
+            const overlay = modal.querySelector("[data-modal-close]");
+            if (closeButton) {
+                closeButton.addEventListener("click", () => closeModal(modal));
+            }
+            if (overlay) {
+                overlay.addEventListener("click", () => closeModal(modal));
+            }
+        });
+
+        document.addEventListener("keydown", (event) => {
+            if (event.key !== "Escape") {
+                return;
+            }
+            modals.forEach((modal) => closeModal(modal));
+        });
+    });
+</script>
+{% endblock %}

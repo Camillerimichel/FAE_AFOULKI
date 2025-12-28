@@ -1,7 +1,10 @@
+import io
+
 from fastapi import APIRouter, Request, Depends, Form, HTTPException
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, StreamingResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
+from openpyxl import Workbook
 
 from app.database import get_db
 from app.models.etablissement import ETABLISSEMENT_TYPES, Etablissement
@@ -28,6 +31,42 @@ def admin_etablissements_list(request: Request, db: Session = Depends(get_db)):
     return templates.TemplateResponse(
         "admin/etablissements/list.html",
         {"request": request, "etablissements": etablissements},
+    )
+
+
+@router.get("/export/excel")
+def admin_etablissements_export_excel(request: Request, db: Session = Depends(get_db)):
+    if not check_session(request):
+        return RedirectResponse("/auth/login")
+
+    etablissements = (
+        db.query(Etablissement)
+        .order_by(Etablissement.ville, Etablissement.nom)
+        .all()
+    )
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Etablissements"
+    ws.append(["ID", "Nom", "Ville", "Type", "Adresse"])
+    for etab in etablissements:
+        ws.append([
+            etab.id_etablissement,
+            etab.nom,
+            etab.ville or "",
+            etab.type or "",
+            etab.adresse or "",
+        ])
+
+    output = io.BytesIO()
+    wb.save(output)
+    output.seek(0)
+
+    headers = {"Content-Disposition": "attachment; filename=etablissements.xlsx"}
+    return StreamingResponse(
+        output,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers=headers,
     )
 
 

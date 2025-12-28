@@ -1,9 +1,11 @@
 from typing import Optional
+import io
 
 from fastapi import APIRouter, Request, Depends, Form, HTTPException
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, StreamingResponse
 from fastapi.templating import Jinja2Templates
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
+from openpyxl import Workbook
 
 from app.database import get_db
 from app.models.scolarite import Scolarite
@@ -76,20 +78,78 @@ def admin_scolarite_list(request: Request, db: Session = Depends(get_db)):
     )
 
 
-# --- CREER ---
-@router.get("/new")
-def admin_scolarite_new(request: Request, db: Session = Depends(get_db)):
+@router.get("/export/excel")
+def admin_scolarite_export_excel(request: Request, db: Session = Depends(get_db)):
     if not check_session(request):
         return RedirectResponse("/auth/login")
 
-    filleules = db.query(Filleule).all()
-    etablissements = db.query(Etablissement).all()
+    scolarites = (
+        db.query(Scolarite)
+        .options(
+            joinedload(Scolarite.filleule),
+            joinedload(Scolarite.etablissement),
+            joinedload(Scolarite.annee_scolaire_ref),
+        )
+        .order_by(Scolarite.id_scolarite.asc())
+        .all()
+    )
+    correspondants = (
+        db.query(Correspondant)
+        .order_by(Correspondant.prenom, Correspondant.nom)
+        .all()
+    )
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Scolarite"
+    ws.append(["Filleule", "Référent A", "Établissement", "Année scolaire", "Niveau"])
+    for s in scolarites:
+        filleule = ""
+        if s.filleule:
+            filleule = f"{s.filleule.prenom} {s.filleule.nom}".strip()
+        referent = resolve_correspondant_label(s.referent_a, correspondants) or ""
+        etablissement = s.etablissement.nom if s.etablissement else ""
+        annee = s.annee_scolaire_ref.periode if s.annee_scolaire_ref else s.annee_scolaire
+        ws.append([
+            filleule,
+            referent,
+            etablissement,
+            annee or "",
+            s.niveau or "",
+        ])
+
+    output = io.BytesIO()
+    wb.save(output)
+    output.seek(0)
+
+    headers = {"Content-Disposition": "attachment; filename=scolarite.xlsx"}
+    return StreamingResponse(
+        output,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers=headers,
+    )
+
+
+# --- CREER ---
+@router.get("/new")
+def admin_scolarite_new(
+    request: Request,
+    db: Session = Depends(get_db),
+    id_filleule: Optional[int] = None,
+    referent_a: Optional[str] = None,
+):
+    if not check_session(request):
+        return RedirectResponse("/auth/login")
+
+    filleules = db.query(Filleule).order_by(Filleule.nom, Filleule.prenom).all()
+    etablissements = db.query(Etablissement).order_by(Etablissement.nom).all()
     annees = db.query(AnneeScolaire).order_by(AnneeScolaire.periode).all()
     correspondants = (
         db.query(Correspondant)
         .order_by(Correspondant.prenom, Correspondant.nom)
         .all()
     )
+    selected_referent_a_id = resolve_correspondant_id(referent_a, correspondants)
 
     return templates.TemplateResponse(
         "admin/scolarite/form.html",
@@ -102,8 +162,9 @@ def admin_scolarite_new(request: Request, db: Session = Depends(get_db)):
             "annees": annees,
             "correspondants": correspondants,
             "selected_annee_id": None,
-            "selected_referent_a_id": None,
+            "selected_referent_a_id": selected_referent_a_id,
             "selected_referent_b_id": None,
+            "selected_filleule_id": id_filleule,
         },
     )
 
@@ -188,8 +249,8 @@ def admin_scolarite_edit(id_scolarite: int, request: Request, db: Session = Depe
     if not s:
         raise HTTPException(404, "Enregistrement scolarité non trouvé")
 
-    filleules = db.query(Filleule).all()
-    etablissements = db.query(Etablissement).all()
+    filleules = db.query(Filleule).order_by(Filleule.nom, Filleule.prenom).all()
+    etablissements = db.query(Etablissement).order_by(Etablissement.nom).all()
     annees = db.query(AnneeScolaire).order_by(AnneeScolaire.periode).all()
     correspondants = (
         db.query(Correspondant)
@@ -229,6 +290,7 @@ def admin_scolarite_edit(id_scolarite: int, request: Request, db: Session = Depe
             "selected_annee_id": selected_annee_id,
             "selected_referent_a_id": selected_referent_a_id,
             "selected_referent_b_id": selected_referent_b_id,
+            "selected_filleule_id": s.id_filleule,
         },
     )
 

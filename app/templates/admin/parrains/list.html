@@ -6,28 +6,216 @@
 
 <h2 class="text-2xl font-bold mb-4">Liste des Parrains</h2>
 
-<a href="/admin/parrains/new" class="bg-blue-600 text-white px-4 py-2 rounded">Ajouter un parrain</a>
+<div class="flex flex-wrap items-center justify-between gap-3">
+    <div class="flex flex-wrap items-center gap-3">
+        <a href="/admin/parrains/new" class="bg-blue-600 text-white px-4 py-2 rounded">Ajouter un parrain</a>
+        <button type="button" data-parrains-incomplete class="rounded border border-amber-200 bg-amber-50 px-4 py-2 text-amber-700 hover:bg-amber-100">
+            Données incomplètes
+        </button>
+    </div>
+    <a href="/admin/parrains/export/excel" class="rounded border border-emerald-200 bg-emerald-50 px-4 py-2 text-emerald-700 hover:bg-emerald-100">
+        Export Excel
+    </a>
+</div>
 
-<table class="w-full mt-6 bg-white shadow">
-    <tr class="bg-gray-200 text-left">
-        <th class="p-3">Nom</th>
-        <th class="p-3">Prénom</th>
-        <th class="p-3">Téléphone</th>
-        <th class="p-3">Email</th>
-        <th></th>
-    </tr>
-
-    {% for p in parrains %}
-    <tr class="border-b">
-        <td class="p-3">{{ p.nom }}</td>
-        <td class="p-3">{{ p.prenom }}</td>
-        <td class="p-3">{{ p.telephone }}</td>
-        <td class="p-3">{{ p.email }}</td>
-        <td class="p-3 text-right">
-            <a href="/admin/parrains/{{ p.id_parrain }}" class="text-blue-600">Voir</a>
-        </td>
-    </tr>
-    {% endfor %}
+<table class="w-full mt-6 bg-white shadow text-xs">
+    <thead>
+        <tr class="bg-gray-200 text-left">
+            <th class="px-3 py-2">
+                <div class="flex flex-col gap-1.5">
+                    <button type="button" class="parrains-sort flex items-center gap-2 font-semibold" data-col="0" data-label="Nom">
+                        Nom <span class="sort-indicator text-xs text-gray-500"></span>
+                    </button>
+                    <input data-col="0" class="parrains-filter w-full rounded border border-slate-200 bg-white px-2 py-1 text-xs" placeholder="Filtrer">
+                </div>
+            </th>
+            <th class="px-3 py-2">
+                <div class="flex flex-col gap-1.5">
+                    <button type="button" class="parrains-sort flex items-center gap-2 font-semibold" data-col="1" data-label="Prénom">
+                        Prénom <span class="sort-indicator text-xs text-gray-500"></span>
+                    </button>
+                    <input data-col="1" class="parrains-filter w-full rounded border border-slate-200 bg-white px-2 py-1 text-xs" placeholder="Filtrer">
+                </div>
+            </th>
+            <th class="px-3 py-2 font-semibold">Téléphone</th>
+            <th class="px-3 py-2 font-semibold">Email</th>
+            <th class="px-3 py-2"></th>
+        </tr>
+    </thead>
+    <tbody class="divide-y">
+        {% for p in parrains %}
+        <tr class="border-b">
+            <td class="px-3 py-1 leading-tight uppercase">{{ p.nom }}</td>
+            <td class="px-3 py-1 leading-tight">{{ p.prenom }}</td>
+            <td class="px-3 py-1 leading-tight">{{ p.telephone if p.telephone else "-" }}</td>
+            <td class="px-3 py-1 leading-tight">{{ p.email if p.email else "-" }}</td>
+            <td class="px-3 py-1 text-right leading-tight">
+                <a href="/admin/parrains/{{ p.id_parrain }}" class="text-blue-600">Voir</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
 </table>
+<div class="mt-4 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-600">
+    <div data-parrains-count></div>
+    <div class="flex items-center gap-2">
+        <button type="button" data-parrains-prev class="rounded border border-slate-200 px-2 py-1 text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed">
+            Précédent
+        </button>
+        <span data-parrains-page class="min-w-[80px] text-center"></span>
+        <button type="button" data-parrains-next class="rounded border border-slate-200 px-2 py-1 text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed">
+            Suivant
+        </button>
+    </div>
+</div>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const table = document.querySelector("table");
+        if (!table) {
+            return;
+        }
+        const tbody = table.querySelector("tbody");
+        const rows = Array.from(tbody.querySelectorAll("tr"));
+        const filters = Array.from(table.querySelectorAll(".parrains-filter"));
+        const sortButtons = Array.from(table.querySelectorAll(".parrains-sort"));
+        const countLabel = document.querySelector("[data-parrains-count]");
+        const pageLabel = document.querySelector("[data-parrains-page]");
+        const prevButton = document.querySelector("[data-parrains-prev]");
+        const nextButton = document.querySelector("[data-parrains-next]");
+        const incompleteButton = document.querySelector("[data-parrains-incomplete]");
+        const pageSize = 20;
+        let currentPage = 1;
+        let showIncompleteOnly = false;
+        const normalize = (value) => value.toLowerCase().trim();
+        const getCellValue = (row, col) => {
+            const cell = row.querySelectorAll("td")[col];
+            return cell ? normalize(cell.textContent) : "";
+        };
+        const isIncomplete = (row) => {
+            const phone = getCellValue(row, 2);
+            const email = getCellValue(row, 3);
+            const missingPhone = phone === "" || phone === "-";
+            const missingEmail = email === "" || email === "-";
+            return missingPhone || missingEmail;
+        };
+        const updatePagination = () => {
+            const matchingRows = rows.filter((row) => row.dataset.match !== "false");
+            const total = matchingRows.length;
+            const totalPages = total === 0 ? 0 : Math.ceil(total / pageSize);
+            if (currentPage > totalPages) {
+                currentPage = totalPages;
+            }
+            const startIndex = total === 0 ? 0 : (currentPage - 1) * pageSize;
+            const endIndex = total === 0 ? 0 : startIndex + pageSize;
+
+            rows.forEach((row) => row.classList.add("hidden"));
+            matchingRows.forEach((row, index) => {
+                const onPage = index >= startIndex && index < endIndex;
+                row.classList.toggle("hidden", !onPage);
+            });
+
+            if (countLabel) {
+                const startLabel = total === 0 ? 0 : startIndex + 1;
+                const endLabel = total === 0 ? 0 : Math.min(endIndex, total);
+                countLabel.textContent = `Affichage ${startLabel}-${endLabel} sur ${total}`;
+            }
+            if (pageLabel) {
+                pageLabel.textContent = `Page ${total === 0 ? 0 : currentPage} / ${totalPages}`;
+            }
+            if (prevButton) {
+                prevButton.disabled = currentPage <= 1;
+            }
+            if (nextButton) {
+                nextButton.disabled = totalPages === 0 || currentPage >= totalPages;
+            }
+        };
+        const applyFilters = () => {
+            rows.forEach((row) => {
+                let matches = filters.every((input) => {
+                    const query = normalize(input.value);
+                    if (!query) {
+                        return true;
+                    }
+                    const col = Number(input.dataset.col);
+                    return getCellValue(row, col).includes(query);
+                });
+                if (showIncompleteOnly) {
+                    matches = matches && isIncomplete(row);
+                }
+                row.dataset.match = matches ? "true" : "false";
+            });
+            currentPage = 1;
+            updatePagination();
+        };
+        const sortRows = (col, direction) => {
+            rows.sort((a, b) => getCellValue(a, col).localeCompare(getCellValue(b, col), "fr", { sensitivity: "base" }));
+            if (direction === "desc") {
+                rows.reverse();
+            }
+            rows.forEach((row) => tbody.appendChild(row));
+            updatePagination();
+        };
+        const clearIndicators = () => {
+            sortButtons.forEach((button) => {
+                const indicator = button.querySelector(".sort-indicator");
+                if (indicator) {
+                    indicator.textContent = "";
+                }
+                button.dataset.direction = "";
+            });
+        };
+        filters.forEach((input) => {
+            input.addEventListener("input", applyFilters);
+        });
+        sortButtons.forEach((button) => {
+            button.addEventListener("click", () => {
+                const col = Number(button.dataset.col);
+                const current = button.dataset.direction || "asc";
+                const next = current === "asc" ? "desc" : "asc";
+                clearIndicators();
+                button.dataset.direction = next;
+                const indicator = button.querySelector(".sort-indicator");
+                if (indicator) {
+                    indicator.textContent = next === "asc" ? "▲" : "▼";
+                }
+                sortRows(col, next);
+            });
+        });
+        if (prevButton) {
+            prevButton.addEventListener("click", () => {
+                if (currentPage > 1) {
+                    currentPage -= 1;
+                    updatePagination();
+                }
+            });
+        }
+        if (nextButton) {
+            nextButton.addEventListener("click", () => {
+                const matchingRows = rows.filter((row) => row.dataset.match !== "false");
+                const totalPages = matchingRows.length === 0 ? 0 : Math.ceil(matchingRows.length / pageSize);
+                if (currentPage < totalPages) {
+                    currentPage += 1;
+                    updatePagination();
+                }
+            });
+        }
+        if (incompleteButton) {
+            incompleteButton.addEventListener("click", () => {
+                showIncompleteOnly = !showIncompleteOnly;
+                incompleteButton.classList.toggle("bg-amber-600", showIncompleteOnly);
+                incompleteButton.classList.toggle("text-white", showIncompleteOnly);
+                incompleteButton.classList.toggle("border-amber-600", showIncompleteOnly);
+                incompleteButton.classList.toggle("bg-amber-50", !showIncompleteOnly);
+                incompleteButton.classList.toggle("text-amber-700", !showIncompleteOnly);
+                incompleteButton.classList.toggle("border-amber-200", !showIncompleteOnly);
+                applyFilters();
+            });
+        }
+        rows.forEach((row) => {
+            row.dataset.match = "true";
+        });
+        updatePagination();
+    });
+</script>
 
 {% endblock %}

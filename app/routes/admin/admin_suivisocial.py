@@ -4,7 +4,7 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.models.suivisocial import SuiviSocial
+from app.models.suivisocial import SuiviSocial, SUIVI_ETATS
 from app.models.filleule import Filleule
 
 router = APIRouter(prefix="/suivisocial", tags=["Admin - Suivi social"])
@@ -42,7 +42,13 @@ def admin_suivi_new(request: Request, db: Session = Depends(get_db)):
 
     return templates.TemplateResponse(
         "admin/suivisocial/form.html",
-        {"request": request, "action": "Créer", "suivi": None, "filleules": filleules},
+        {
+            "request": request,
+            "action": "Créer",
+            "suivi": None,
+            "filleules": filleules,
+            "etat_options": SUIVI_ETATS,
+        },
     )
 
 
@@ -51,13 +57,18 @@ def admin_suivi_create(
     request: Request,
     id_filleule: int = Form(...),
     date_suivi: str = Form(...),
+    etat: str = Form(...),
     commentaire: str = Form(...),
     besoins: str = Form(...),
     db: Session = Depends(get_db),
 ):
+    if etat not in SUIVI_ETATS:
+        raise HTTPException(400, "État de suivi invalide")
+
     s = SuiviSocial(
         id_filleule=id_filleule,
         date_suivi=date_suivi,
+        etat=etat,
         commentaire=commentaire,
         besoins=besoins,
     )
@@ -98,7 +109,13 @@ def admin_suivi_edit(id_suivi: int, request: Request, db: Session = Depends(get_
 
     return templates.TemplateResponse(
         "admin/suivisocial/form.html",
-        {"request": request, "action": "Modifier", "suivi": s, "filleules": filleules},
+        {
+            "request": request,
+            "action": "Modifier",
+            "suivi": s,
+            "filleules": filleules,
+            "etat_options": SUIVI_ETATS,
+        },
     )
 
 
@@ -108,6 +125,7 @@ def admin_suivi_update(
     request: Request,
     id_filleule: int = Form(...),
     date_suivi: str = Form(...),
+    etat: str = Form(...),
     commentaire: str = Form(...),
     besoins: str = Form(...),
     db: Session = Depends(get_db),
@@ -116,8 +134,12 @@ def admin_suivi_update(
     if not s:
         raise HTTPException(404, "Suivi non trouvé")
 
+    if etat not in SUIVI_ETATS:
+        raise HTTPException(400, "État de suivi invalide")
+
     s.id_filleule = id_filleule
     s.date_suivi = date_suivi
+    s.etat = etat
     s.commentaire = commentaire
     s.besoins = besoins
 

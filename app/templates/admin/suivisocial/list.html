@@ -9,24 +9,150 @@
 <a href="/admin/suivisocial/new"
    class="bg-blue-600 text-white px-4 py-2 rounded">Nouvel enregistrement</a>
 
-<table class="w-full mt-6 bg-white shadow">
-    <tr class="bg-gray-200">
-        <th class="p-3">ID</th>
-        <th class="p-3">Filleule</th>
-        <th class="p-3">Date</th>
-        <th class="p-3"></th>
-    </tr>
-
-    {% for s in suivis %}
-    <tr class="border-b">
-        <td class="p-3">{{ s.id_suivi }}</td>
-        <td class="p-3">{{ s.filleule.prenom }} {{ s.filleule.nom }}</td>
-        <td class="p-3">{{ s.date_suivi }}</td>
-        <td class="p-3 text-right">
-            <a href="/admin/suivisocial/{{ s.id_suivi }}" class="text-blue-600">Voir</a>
-        </td>
-    </tr>
-    {% endfor %}
+<table class="w-full mt-6 bg-white shadow text-xs">
+    <thead>
+        <tr class="bg-gray-200 text-left">
+            <th class="px-3 py-2">
+                <span class="font-semibold">Filleule</span>
+                <input data-col="0" class="suivis-filter mt-2 w-full rounded border border-slate-200 px-2 py-1 text-xs"
+                       placeholder="Filtrer">
+            </th>
+            <th class="px-3 py-2">
+                <span class="font-semibold">Date</span>
+            </th>
+            <th class="px-3 py-2">
+                <span class="font-semibold">Etat</span>
+                <input data-col="2" class="suivis-filter mt-2 w-full rounded border border-slate-200 px-2 py-1 text-xs"
+                       placeholder="Filtrer">
+            </th>
+            <th class="px-3 py-2"></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for s in suivis %}
+        <tr class="border-b">
+            <td class="px-3 py-1 leading-tight">{{ s.filleule.prenom }} {{ s.filleule.nom }}</td>
+            <td class="px-3 py-1 leading-tight">{{ s.date_suivi }}</td>
+            <td class="px-3 py-1 leading-tight">{{ s.etat if s.etat else "-" }}</td>
+            <td class="px-3 py-1 text-right leading-tight">
+                <a href="/admin/suivisocial/{{ s.id_suivi }}" class="text-blue-600">Voir</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
 </table>
+<div class="mt-4 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-600">
+    <div data-suivis-count></div>
+    <div class="flex items-center gap-2">
+        <button type="button" data-suivis-prev class="rounded border border-slate-200 px-2 py-1 text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed">
+            Précédent
+        </button>
+        <span data-suivis-page class="min-w-[80px] text-center"></span>
+        <button type="button" data-suivis-next class="rounded border border-slate-200 px-2 py-1 text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed">
+            Suivant
+        </button>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const table = document.querySelector("table");
+        if (!table) {
+            return;
+        }
+        const tbody = table.querySelector("tbody");
+        if (!tbody) {
+            return;
+        }
+        const rows = Array.from(tbody.querySelectorAll("tr"));
+        const filters = Array.from(table.querySelectorAll(".suivis-filter"));
+        const countLabel = document.querySelector("[data-suivis-count]");
+        const pageLabel = document.querySelector("[data-suivis-page]");
+        const prevButton = document.querySelector("[data-suivis-prev]");
+        const nextButton = document.querySelector("[data-suivis-next]");
+        const pageSize = 20;
+        let currentPage = 1;
+
+        const normalize = (value) => value.toLowerCase().trim();
+        const updatePagination = () => {
+            const matchingRows = rows.filter((row) => row.dataset.match !== "false");
+            const total = matchingRows.length;
+            const totalPages = total === 0 ? 0 : Math.ceil(total / pageSize);
+            if (currentPage > totalPages) {
+                currentPage = totalPages;
+            }
+            const startIndex = total === 0 ? 0 : (currentPage - 1) * pageSize;
+            const endIndex = total === 0 ? 0 : startIndex + pageSize;
+
+            rows.forEach((row) => row.classList.add("hidden"));
+            matchingRows.forEach((row, index) => {
+                const onPage = index >= startIndex && index < endIndex;
+                row.classList.toggle("hidden", !onPage);
+            });
+
+            if (countLabel) {
+                const startLabel = total === 0 ? 0 : startIndex + 1;
+                const endLabel = total === 0 ? 0 : Math.min(endIndex, total);
+                countLabel.textContent = `Affichage ${startLabel}-${endLabel} sur ${total}`;
+            }
+            if (pageLabel) {
+                pageLabel.textContent = `Page ${total === 0 ? 0 : currentPage} / ${totalPages}`;
+            }
+            if (prevButton) {
+                prevButton.disabled = currentPage <= 1;
+            }
+            if (nextButton) {
+                nextButton.disabled = totalPages === 0 || currentPage >= totalPages;
+            }
+        };
+
+        const applyFilters = () => {
+            rows.forEach((row) => {
+                const cells = row.querySelectorAll("td");
+                const matches = filters.every((input) => {
+                    const query = normalize(input.value);
+                    if (!query) {
+                        return true;
+                    }
+                    const col = Number(input.dataset.col);
+                    const cell = cells[col];
+                    if (!cell) {
+                        return true;
+                    }
+                    return normalize(cell.textContent).includes(query);
+                });
+                row.dataset.match = matches ? "true" : "false";
+            });
+            currentPage = 1;
+            updatePagination();
+        };
+
+        filters.forEach((input) => {
+            input.addEventListener("input", applyFilters);
+        });
+        if (prevButton) {
+            prevButton.addEventListener("click", () => {
+                if (currentPage > 1) {
+                    currentPage -= 1;
+                    updatePagination();
+                }
+            });
+        }
+        if (nextButton) {
+            nextButton.addEventListener("click", () => {
+                const matchingRows = rows.filter((row) => row.dataset.match !== "false");
+                const totalPages = matchingRows.length === 0 ? 0 : Math.ceil(matchingRows.length / pageSize);
+                if (currentPage < totalPages) {
+                    currentPage += 1;
+                    updatePagination();
+                }
+            });
+        }
+        rows.forEach((row) => {
+            row.dataset.match = "true";
+        });
+        updatePagination();
+    });
+</script>
 
 {% endblock %}

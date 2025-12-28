@@ -4,34 +4,173 @@
 
 {% block content %}
 
-<h2 class="text-2xl font-bold mb-4">Localités</h2>
+<div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+    <h2 class="text-2xl font-bold">Localités</h2>
+    <a href="/admin/localites/export/excel" class="rounded border border-emerald-200 bg-emerald-50 px-4 py-2 text-emerald-700 hover:bg-emerald-100">
+        Export Excel
+    </a>
+</div>
 
-<a href="/admin/localites/new"
-   class="bg-blue-600 text-white px-4 py-2 rounded">Nouvelle localité</a>
+<div class="flex flex-wrap items-center gap-3">
+    <a href="/admin/localites/new"
+       class="bg-blue-600 text-white px-4 py-2 rounded">Nouvelle localité</a>
+    <button type="button" data-localites-missing-coords class="rounded border border-amber-200 bg-amber-50 px-4 py-2 text-amber-700 hover:bg-amber-100">
+        Données manquantes
+    </button>
+</div>
 
-<table class="w-full mt-6 bg-white shadow">
+<table class="w-full mt-6 bg-white shadow text-xs">
     <thead class="bg-gray-200 text-left">
         <tr>
-            <th class="p-3">Nom</th>
-            <th class="p-3">Latitude</th>
-            <th class="p-3">Longitude</th>
-            <th class="p-3">Alias</th>
-            <th class="p-3"></th>
+            <th class="px-3 py-2 capitalize">Nom</th>
+            <th class="px-3 py-2 capitalize">Latitude</th>
+            <th class="px-3 py-2 capitalize">Longitude</th>
+            <th class="px-3 py-2 capitalize">Alias</th>
+            <th class="px-3 py-2"></th>
         </tr>
     </thead>
     <tbody>
         {% for l in localites %}
         <tr class="border-b">
-            <td class="p-3">{{ l.nom }}</td>
-            <td class="p-3">{{ l.latitude }}</td>
-            <td class="p-3">{{ l.longitude }}</td>
-            <td class="p-3">{{ l.aliases if l.aliases else "-" }}</td>
-            <td class="p-3 text-right">
+            <td class="px-3 py-1 leading-tight">{{ l.nom }}</td>
+            <td class="px-3 py-1 leading-tight">{{ l.latitude if l.latitude is not none else "-" }}</td>
+            <td class="px-3 py-1 leading-tight">{{ l.longitude if l.longitude is not none else "-" }}</td>
+            <td class="px-3 py-1 leading-tight">{{ l.aliases if l.aliases else "-" }}</td>
+            <td class="px-3 py-1 text-right leading-tight">
                 <a href="/admin/localites/{{ l.id_localite }}" class="text-blue-600">Voir</a>
             </td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
+<div class="mt-4 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-600">
+    <div data-localites-count></div>
+    <div class="flex items-center gap-2">
+        <button type="button" data-localites-prev class="rounded border border-slate-200 px-2 py-1 text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed">
+            Précédent
+        </button>
+        <span data-localites-page class="min-w-[80px] text-center"></span>
+        <button type="button" data-localites-next class="rounded border border-slate-200 px-2 py-1 text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed">
+            Suivant
+        </button>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const table = document.querySelector("table");
+        if (!table) {
+            return;
+        }
+        const tbody = table.querySelector("tbody");
+        if (!tbody) {
+            return;
+        }
+        const rows = Array.from(tbody.querySelectorAll("tr"));
+        const countLabel = document.querySelector("[data-localites-count]");
+        const pageLabel = document.querySelector("[data-localites-page]");
+        const prevButton = document.querySelector("[data-localites-prev]");
+        const nextButton = document.querySelector("[data-localites-next]");
+        const missingCoordsButton = document.querySelector("[data-localites-missing-coords]");
+        const pageSize = 20;
+        let currentPage = 1;
+        let showMissingCoordsOnly = false;
+
+        const normalize = (value) => value.toLowerCase().trim();
+        const isMissingCoords = (row) => {
+            const latValue = normalize(row.querySelectorAll("td")[1]?.textContent ?? "");
+            const lonValue = normalize(row.querySelectorAll("td")[2]?.textContent ?? "");
+            const missingLat = latValue === "" || latValue === "-" || latValue === "none" || latValue === "null";
+            const missingLon = lonValue === "" || lonValue === "-" || lonValue === "none" || lonValue === "null";
+            return missingLat || missingLon;
+        };
+
+        const updatePagination = () => {
+            const matchingRows = rows.filter((row) => row.dataset.match !== "false");
+            const total = matchingRows.length;
+            const totalPages = total === 0 ? 0 : Math.ceil(total / pageSize);
+            if (currentPage > totalPages) {
+                currentPage = totalPages;
+            }
+            const startIndex = total === 0 ? 0 : (currentPage - 1) * pageSize;
+            const endIndex = total === 0 ? 0 : startIndex + pageSize;
+
+            rows.forEach((row) => row.classList.add("hidden"));
+            matchingRows.forEach((row, index) => {
+                const onPage = index >= startIndex && index < endIndex;
+                row.classList.toggle("hidden", !onPage);
+            });
+
+            if (countLabel) {
+                const startLabel = total === 0 ? 0 : startIndex + 1;
+                const endLabel = total === 0 ? 0 : Math.min(endIndex, total);
+                countLabel.textContent = `Affichage ${startLabel}-${endLabel} sur ${total}`;
+            }
+            if (pageLabel) {
+                pageLabel.textContent = `Page ${total === 0 ? 0 : currentPage} / ${totalPages}`;
+            }
+            if (prevButton) {
+                prevButton.disabled = currentPage <= 1;
+            }
+            if (nextButton) {
+                nextButton.disabled = totalPages === 0 || currentPage >= totalPages;
+            }
+        };
+
+        const applyFilters = () => {
+            rows.forEach((row) => {
+                let matches = true;
+                if (showMissingCoordsOnly) {
+                    matches = isMissingCoords(row);
+                }
+                row.dataset.match = matches ? "true" : "false";
+            });
+            currentPage = 1;
+            updatePagination();
+        };
+
+        const setMissingCoordsActive = (active) => {
+            showMissingCoordsOnly = active;
+            if (!missingCoordsButton) {
+                return;
+            }
+            missingCoordsButton.classList.toggle("bg-amber-600", active);
+            missingCoordsButton.classList.toggle("text-white", active);
+            missingCoordsButton.classList.toggle("border-amber-600", active);
+            missingCoordsButton.classList.toggle("bg-amber-50", !active);
+            missingCoordsButton.classList.toggle("text-amber-700", !active);
+            missingCoordsButton.classList.toggle("border-amber-200", !active);
+        };
+
+        if (missingCoordsButton) {
+            missingCoordsButton.addEventListener("click", () => {
+                setMissingCoordsActive(!showMissingCoordsOnly);
+                applyFilters();
+            });
+        }
+        if (prevButton) {
+            prevButton.addEventListener("click", () => {
+                if (currentPage > 1) {
+                    currentPage -= 1;
+                    updatePagination();
+                }
+            });
+        }
+        if (nextButton) {
+            nextButton.addEventListener("click", () => {
+                const matchingRows = rows.filter((row) => row.dataset.match !== "false");
+                const totalPages = matchingRows.length === 0 ? 0 : Math.ceil(matchingRows.length / pageSize);
+                if (currentPage < totalPages) {
+                    currentPage += 1;
+                    updatePagination();
+                }
+            });
+        }
+        rows.forEach((row) => {
+            row.dataset.match = "true";
+        });
+        updatePagination();
+    });
+</script>
 
 {% endblock %}

@@ -4,7 +4,7 @@
 
 {% block content %}
 <div class="mb-4">
-    <a href="/admin/users" class="inline-flex items-center px-3 py-2 rounded border border-slate-200 text-slate-700 hover:bg-slate-100 transition">Retour Administration</a>
+    <a href="/admin/scolarite" class="inline-flex items-center px-3 py-2 rounded border border-slate-200 text-slate-700 hover:bg-slate-100 transition">Retour</a>
 </div>
 
 <h2 class="text-2xl font-bold mb-6">{{ action }} un enregistrement de scolarité</h2>
@@ -36,15 +36,16 @@
 
             <label class="block mb-4">
                 Filleule :
+                {% set current_filleule_id = scolarite.id_filleule if scolarite else selected_filleule_id %}
                 <select name="id_filleule" required class="border p-2 w-full">
                     <option value="" disabled
-                        {% if not scolarite or not scolarite.id_filleule %}selected{% endif %}>
+                        {% if not current_filleule_id %}selected{% endif %}>
                         Choisir une filleule
                     </option>
                     {% for f in filleules %}
                     <option value="{{ f.id_filleule }}"
-                        {% if scolarite and scolarite.id_filleule == f.id_filleule %}selected{% endif %}>
-                        {{ f.prenom }} {{ f.nom }}
+                        {% if current_filleule_id == f.id_filleule %}selected{% endif %}>
+                        {{ f.nom }} {{ f.prenom }}
                     </option>
                     {% endfor %}
                 </select>

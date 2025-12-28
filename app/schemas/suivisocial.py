@@ -5,6 +5,7 @@ from datetime import date
 class SuiviSocialBase(BaseModel):
     id_filleule: int
     date_suivi: Optional[date] = None
+    etat: str
     commentaire: Optional[str] = None
     besoins: Optional[str] = None
 

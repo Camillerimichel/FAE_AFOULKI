@@ -30,6 +30,18 @@
     </label>
 
     <label class="block mb-4">
+        État de suivi :
+        <select name="etat" required class="border p-2 w-full">
+            {% for option in etat_options %}
+            <option value="{{ option }}"
+                {% if suivi and suivi.etat == option %}selected{% endif %}>
+                {{ option }}
+            </option>
+            {% endfor %}
+        </select>
+    </label>
+
+    <label class="block mb-4">
         Commentaire :
         <textarea name="commentaire" required class="border p-2 w-full">{{ suivi.commentaire if suivi }}</textarea>
     </label>

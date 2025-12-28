@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Request, Depends, Form, HTTPException
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
+from sqlalchemy import func
 from sqlalchemy.orm import Session, selectinload
 
 from app.database import get_db
@@ -23,7 +24,12 @@ def admin_users_list(request: Request, db: Session = Depends(get_db)):
     if not check_session(request):
         return RedirectResponse("/auth/login")
 
-    users = db.query(User).options(selectinload(User.roles)).order_by(User.id).all()
+    users = (
+        db.query(User)
+        .options(selectinload(User.roles))
+        .order_by(User.fullname.is_(None), func.lower(User.fullname))
+        .all()
+    )
 
     return templates.TemplateResponse(
         "admin/users/list.html",

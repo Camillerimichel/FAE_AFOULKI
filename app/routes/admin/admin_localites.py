@@ -1,7 +1,11 @@
+import io
+
 from fastapi import APIRouter, Request, Depends, Form, HTTPException
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, StreamingResponse
 from fastapi.templating import Jinja2Templates
+from sqlalchemy import func
 from sqlalchemy.orm import Session
+from openpyxl import Workbook
 
 from app.database import get_db
 from app.models.localite import Localite
@@ -21,11 +25,42 @@ def admin_localites_list(request: Request, db: Session = Depends(get_db)):
     if not check_session(request):
         return RedirectResponse("/auth/login")
 
-    localites = db.query(Localite).order_by(Localite.nom).all()
+    localites = db.query(Localite).order_by(func.lower(Localite.nom)).all()
 
     return templates.TemplateResponse(
         "admin/localites/list.html",
         {"request": request, "localites": localites},
+    )
+
+
+@router.get("/export/excel")
+def admin_localites_export_excel(request: Request, db: Session = Depends(get_db)):
+    if not check_session(request):
+        return RedirectResponse("/auth/login")
+
+    localites = db.query(Localite).order_by(Localite.nom).all()
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Localites"
+    ws.append(["Nom", "Latitude", "Longitude", "Alias"])
+    for loc in localites:
+        ws.append([
+            loc.nom,
+            loc.latitude if loc.latitude is not None else "",
+            loc.longitude if loc.longitude is not None else "",
+            loc.aliases or "",
+        ])
+
+    output = io.BytesIO()
+    wb.save(output)
+    output.seek(0)
+
+    headers = {"Content-Disposition": "attachment; filename=localites.xlsx"}
+    return StreamingResponse(
+        output,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers=headers,
     )
 
 

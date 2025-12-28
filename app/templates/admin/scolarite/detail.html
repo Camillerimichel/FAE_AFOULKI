@@ -53,9 +53,13 @@
 </div>
 
 {% set back_url = request.headers.get('referer', '/admin/scolarite') %}
+{% set duplicate_url = "/admin/scolarite/new?id_filleule=" ~ (scolarite.id_filleule if scolarite.id_filleule else "") ~ "&referent_a=" ~ ((scolarite.referent_a if scolarite.referent_a else "") | urlencode) %}
 <div class="mt-6 flex space-x-4">
     <a href="/admin/scolarite/{{ scolarite.id_scolarite }}/edit"
        class="bg-yellow-500 text-white px-4 py-2 rounded">Modifier</a>
+
+    <a href="{{ duplicate_url }}"
+       class="bg-blue-600 text-white px-4 py-2 rounded">Duppliquer</a>
 
     <a href="/admin/scolarite/{{ scolarite.id_scolarite }}/delete"
        onclick="return confirm('Supprimer cet enregistrement ?');"

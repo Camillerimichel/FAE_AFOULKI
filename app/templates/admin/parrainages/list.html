@@ -4,38 +4,289 @@
 
 {% block content %}
 
-<h2 class="text-2xl font-bold mb-4">Liste des Parrainages</h2>
+<div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+    <h2 class="text-2xl font-bold">Liste des Parrainages</h2>
+    <a href="/admin/parrainages/export/excel" class="rounded border border-emerald-200 bg-emerald-50 px-4 py-2 text-emerald-700 hover:bg-emerald-100">
+        Export Excel
+    </a>
+</div>
 
-<a href="/admin/parrainages/new" class="bg-blue-600 text-white px-4 py-2 rounded">Créer un parrainage</a>
+<div class="flex flex-wrap items-center gap-3">
+    <a href="/admin/parrainages/new" class="bg-blue-600 text-white px-4 py-2 rounded">Créer un parrainage</a>
+    <button type="button" data-parrainages-missing-start class="rounded border border-amber-200 bg-amber-50 px-4 py-2 text-amber-700 hover:bg-amber-100">
+        Données manquantes
+    </button>
+    <button type="button" data-parrainages-reset class="rounded border border-slate-200 bg-white px-4 py-2 text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+        Réinitialiser filtres
+    </button>
+    <span data-parrainages-filter-status class="hidden text-xs font-semibold text-amber-700">
+        Filtre: début manquant
+    </span>
+</div>
 
-<table class="w-full mt-6 bg-white shadow">
-    <tr class="bg-gray-200">
-        <th class="p-3">ID</th>
-        <th class="p-3">Parrain</th>
-        <th class="p-3">Filleule</th>
-        <th class="p-3">Début</th>
-        <th class="p-3">Fin</th>
-        <th class="p-3">Statut</th>
-        <th class="p-3">Bourse centre</th>
-        <th class="p-3">Bourse RW</th>
-        <th></th>
-    </tr>
-
-    {% for p in parrainages %}
-    <tr class="border-b">
-        <td class="p-3">{{ p.id_parrainage }}</td>
-        <td class="p-3">{{ p.parrain.prenom }} {{ p.parrain.nom }}</td>
-        <td class="p-3">{{ p.filleule.prenom }} {{ p.filleule.nom }}</td>
-        <td class="p-3">{{ p.date_debut }}</td>
-        <td class="p-3">{{ p.date_fin }}</td>
-        <td class="p-3">{{ p.statut }}</td>
-        <td class="p-3">{{ p.bourse_centre or "—" }}</td>
-        <td class="p-3">{{ p.bourse_rw or "—" }}</td>
-        <td class="p-3 text-right">
-            <a href="/admin/parrainages/{{ p.id_parrainage }}" class="text-blue-600">Voir</a>
-        </td>
-    </tr>
-    {% endfor %}
+<table class="w-full mt-6 bg-white shadow text-xs">
+    <thead class="bg-gray-200 text-left">
+        <tr>
+            <th class="px-3 py-2 w-1/3">
+                <button type="button" class="admin-sort text-left font-semibold" data-col="0" data-type="text">
+                    Parrain <span class="sort-indicator text-xs text-slate-500 ml-1"></span>
+                </button>
+                <input data-col="0" class="parrainages-filter mt-2 w-full rounded border border-slate-200 px-2 py-1 text-xs"
+                       placeholder="Filtrer">
+            </th>
+            <th class="px-3 py-2 w-1/3">
+                <button type="button" class="admin-sort text-left font-semibold" data-col="1" data-type="text">
+                    Filleule <span class="sort-indicator text-xs text-slate-500 ml-1"></span>
+                </button>
+                <input data-col="1" class="parrainages-filter mt-2 w-full rounded border border-slate-200 px-2 py-1 text-xs"
+                       placeholder="Filtrer">
+            </th>
+            <th class="px-3 py-2 w-28">
+                <span class="font-semibold">Début</span>
+                <input data-col="2" class="parrainages-filter mt-2 w-full rounded border border-slate-200 px-2 py-1 text-xs"
+                       placeholder="Filtrer">
+            </th>
+            <th class="px-3 py-2 w-28">
+                <span class="font-semibold">Fin</span>
+                <input data-col="3" class="parrainages-filter mt-2 w-full rounded border border-slate-200 px-2 py-1 text-xs"
+                       placeholder="Filtrer">
+            </th>
+            <th class="px-3 py-2 w-24">
+                <span class="font-semibold">Statut</span>
+                <input data-col="4" class="parrainages-filter mt-2 w-full rounded border border-slate-200 px-2 py-1 text-xs"
+                       placeholder="Filtrer">
+            </th>
+            <th class="px-3 py-2"></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for p in parrainages %}
+        <tr class="border-b">
+            <td class="px-3 py-1 leading-tight">{{ p.parrain.nom | upper }} {{ p.parrain.prenom | capitalize }}</td>
+            <td class="px-3 py-1 leading-tight">{{ p.filleule.nom | upper }} {{ p.filleule.prenom | capitalize }}</td>
+            <td class="px-3 py-1 leading-tight">{{ p.date_debut if p.date_debut else "-" }}</td>
+            <td class="px-3 py-1 leading-tight">{{ p.date_fin if p.date_fin else "-" }}</td>
+            <td class="px-3 py-1 leading-tight">{{ p.statut if p.statut else "-" }}</td>
+            <td class="px-3 py-1 text-right leading-tight">
+                <a href="/admin/parrainages/{{ p.id_parrainage }}" class="text-blue-600">Voir</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
 </table>
+<div class="mt-4 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-600">
+    <div data-parrainages-count></div>
+    <div class="flex items-center gap-2">
+        <button type="button" data-parrainages-prev class="rounded border border-slate-200 px-2 py-1 text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed">
+            Précédent
+        </button>
+        <span data-parrainages-page class="min-w-[80px] text-center"></span>
+        <button type="button" data-parrainages-next class="rounded border border-slate-200 px-2 py-1 text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed">
+            Suivant
+        </button>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const table = document.querySelector("table");
+        if (!table) {
+            return;
+        }
+        const tbody = table.querySelector("tbody");
+        const rows = Array.from(tbody.querySelectorAll("tr"));
+        const filters = Array.from(document.querySelectorAll(".parrainages-filter"));
+        const sortButtons = Array.from(table.querySelectorAll(".admin-sort"));
+        const countLabel = document.querySelector("[data-parrainages-count]");
+        const pageLabel = document.querySelector("[data-parrainages-page]");
+        const prevButton = document.querySelector("[data-parrainages-prev]");
+        const nextButton = document.querySelector("[data-parrainages-next]");
+        const missingStartButton = document.querySelector("[data-parrainages-missing-start]");
+        const resetButton = document.querySelector("[data-parrainages-reset]");
+        const filterStatus = document.querySelector("[data-parrainages-filter-status]");
+        const pageSize = 20;
+        let currentPage = 1;
+        let showMissingStartOnly = false;
+        let sortState = { col: null, dir: "asc" };
+
+        const normalize = (value) => value.toLowerCase().trim();
+        const isMissingStart = (row) => {
+            const startValue = normalize(row.querySelectorAll("td")[2]?.textContent ?? "");
+            return startValue === "" || startValue === "-" || startValue === "none" || startValue === "null";
+        };
+        const updatePagination = () => {
+            const matchingRows = rows.filter((row) => row.dataset.match !== "false");
+            const total = matchingRows.length;
+            const totalPages = total === 0 ? 0 : Math.ceil(total / pageSize);
+            if (currentPage > totalPages) {
+                currentPage = totalPages;
+            }
+            const startIndex = total === 0 ? 0 : (currentPage - 1) * pageSize;
+            const endIndex = total === 0 ? 0 : startIndex + pageSize;
+
+            rows.forEach((row) => row.classList.add("hidden"));
+            matchingRows.forEach((row, index) => {
+                const onPage = index >= startIndex && index < endIndex;
+                row.classList.toggle("hidden", !onPage);
+            });
+
+            if (countLabel) {
+                const startLabel = total === 0 ? 0 : startIndex + 1;
+                const endLabel = total === 0 ? 0 : Math.min(endIndex, total);
+                countLabel.textContent = `Affichage ${startLabel}-${endLabel} sur ${total}`;
+            }
+            if (pageLabel) {
+                pageLabel.textContent = `Page ${total === 0 ? 0 : currentPage} / ${totalPages}`;
+            }
+            if (prevButton) {
+                prevButton.disabled = currentPage <= 1;
+            }
+            if (nextButton) {
+                nextButton.disabled = totalPages === 0 || currentPage >= totalPages;
+            }
+        };
+
+        const updateFilterControls = () => {
+            const hasTextFilters = filters.some((input) => normalize(input.value));
+            const hasFilters = hasTextFilters || showMissingStartOnly;
+            if (resetButton) {
+                resetButton.disabled = !hasFilters;
+            }
+            if (filterStatus) {
+                filterStatus.classList.toggle("hidden", !showMissingStartOnly);
+            }
+        };
+
+        const applyFilters = () => {
+            rows.forEach((row) => {
+                const cells = row.querySelectorAll("td");
+                let matches = filters.every((input) => {
+                    const query = normalize(input.value);
+                    if (!query) {
+                        return true;
+                    }
+                    const col = Number(input.dataset.col);
+                    const cell = cells[col];
+                    if (!cell) {
+                        return true;
+                    }
+                    return normalize(cell.textContent).includes(query);
+                });
+                if (showMissingStartOnly) {
+                    matches = matches && isMissingStart(row);
+                }
+                row.dataset.match = matches ? "true" : "false";
+            });
+            currentPage = 1;
+            updatePagination();
+            updateFilterControls();
+        };
+
+        const parseValue = (value, type) => {
+            if (type === "number") {
+                const parsed = Number(value.replace(/[^\d.-]/g, ""));
+                return Number.isNaN(parsed) ? 0 : parsed;
+            }
+            return normalize(value);
+        };
+
+        const updateIndicators = () => {
+            sortButtons.forEach((button) => {
+                const indicator = button.querySelector(".sort-indicator");
+                if (!indicator) {
+                    return;
+                }
+                const col = Number(button.dataset.col);
+                if (sortState.col === col) {
+                    indicator.textContent = sortState.dir === "asc" ? "^" : "v";
+                } else {
+                    indicator.textContent = "";
+                }
+            });
+        };
+
+        const applySort = (col, type) => {
+            sortState = {
+                col,
+                dir: sortState.col === col && sortState.dir === "asc" ? "desc" : "asc",
+            };
+            rows.sort((a, b) => {
+                const aText = a.querySelectorAll("td")[col]?.textContent ?? "";
+                const bText = b.querySelectorAll("td")[col]?.textContent ?? "";
+                const aVal = parseValue(aText, type);
+                const bVal = parseValue(bText, type);
+                if (aVal === bVal) {
+                    return 0;
+                }
+                const result = aVal > bVal ? 1 : -1;
+                return sortState.dir === "asc" ? result : -result;
+            });
+            rows.forEach((row) => tbody.appendChild(row));
+            updateIndicators();
+            updatePagination();
+        };
+
+        filters.forEach((input) => {
+            input.addEventListener("input", applyFilters);
+        });
+        sortButtons.forEach((button) => {
+            button.addEventListener("click", () => {
+                applySort(Number(button.dataset.col), button.dataset.type);
+            });
+        });
+        updateIndicators();
+        if (prevButton) {
+            prevButton.addEventListener("click", () => {
+                if (currentPage > 1) {
+                    currentPage -= 1;
+                    updatePagination();
+                }
+            });
+        }
+        if (nextButton) {
+            nextButton.addEventListener("click", () => {
+                const matchingRows = rows.filter((row) => row.dataset.match !== "false");
+                const totalPages = matchingRows.length === 0 ? 0 : Math.ceil(matchingRows.length / pageSize);
+                if (currentPage < totalPages) {
+                    currentPage += 1;
+                    updatePagination();
+                }
+            });
+        }
+        const setMissingStartActive = (active) => {
+            showMissingStartOnly = active;
+            if (!missingStartButton) {
+                return;
+            }
+            missingStartButton.classList.toggle("bg-amber-600", active);
+            missingStartButton.classList.toggle("text-white", active);
+            missingStartButton.classList.toggle("border-amber-600", active);
+            missingStartButton.classList.toggle("bg-amber-50", !active);
+            missingStartButton.classList.toggle("text-amber-700", !active);
+            missingStartButton.classList.toggle("border-amber-200", !active);
+        };
+
+        if (missingStartButton) {
+            missingStartButton.addEventListener("click", () => {
+                setMissingStartActive(!showMissingStartOnly);
+                applyFilters();
+            });
+        }
+        if (resetButton) {
+            resetButton.addEventListener("click", () => {
+                filters.forEach((input) => {
+                    input.value = "";
+                });
+                setMissingStartActive(false);
+                applyFilters();
+            });
+        }
+        rows.forEach((row) => {
+            row.dataset.match = "true";
+        });
+        updatePagination();
+        updateFilterControls();
+    });
+</script>
 
 {% endblock %}

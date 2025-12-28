@@ -21,7 +21,7 @@
         <p><strong>Nom :</strong> {{ filleule.nom }}</p>
         <p><strong>Prénom :</strong> {{ filleule.prenom }}</p>
         <p><strong>Date de naissance :</strong> {{ filleule.date_naissance if filleule.date_naissance else "-" }}</p>
-        <p><strong>Village :</strong> {{ filleule.village }}</p>
+        <p><strong>Ville :</strong> {{ filleule.ville if filleule.ville else "-" }}</p>
         <p><strong>Email :</strong> {{ filleule.email if filleule.email else "-" }}</p>
         <p><strong>Téléphone :</strong> {{ filleule.telephone if filleule.telephone else "-" }}</p>
         <p><strong>WhatsApp :</strong> {{ filleule.whatsapp if filleule.whatsapp else "-" }}</p>

@@ -9,6 +9,7 @@
 <div class="bg-white p-6 shadow rounded">
     <p><strong>Date :</strong> {{ s.date_suivi }}</p>
     <p><strong>Filleule :</strong> {{ s.filleule.prenom }} {{ s.filleule.nom }}</p>
+    <p><strong>État :</strong> {{ s.etat if s.etat else "-" }}</p>
     <p><strong>Commentaire :</strong> {{ s.commentaire }}</p>
     <p><strong>Besoins :</strong> {{ s.besoins }}</p>
 </div>

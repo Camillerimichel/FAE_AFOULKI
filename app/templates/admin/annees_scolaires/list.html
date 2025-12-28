@@ -9,20 +9,105 @@
 <a href="/admin/annees-scolaires/new"
    class="bg-blue-600 text-white px-4 py-2 rounded">Créer une période</a>
 
-<table class="w-full mt-6 bg-white shadow">
-    <tr class="bg-gray-200 text-left">
-        <th class="p-3">Période</th>
-        <th class="p-3"></th>
-    </tr>
-
-    {% for a in annees %}
-    <tr class="border-b">
-        <td class="p-3">{{ a.periode }}</td>
-        <td class="p-3 text-right">
-            <a href="/admin/annees-scolaires/{{ a.id_annee_scolaire }}" class="text-blue-600">Voir</a>
-        </td>
-    </tr>
-    {% endfor %}
+<table class="w-full mt-6 bg-white shadow text-xs">
+    <thead>
+        <tr class="bg-gray-200 text-left">
+            <th class="px-3 py-2">Période</th>
+            <th class="px-3 py-2"></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for a in annees %}
+        <tr class="border-b">
+            <td class="px-3 py-1 leading-tight">{{ a.periode }}</td>
+            <td class="px-3 py-1 text-right leading-tight">
+                <a href="/admin/annees-scolaires/{{ a.id_annee_scolaire }}" class="text-blue-600">Voir</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
 </table>
+<div class="mt-4 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-600">
+    <div data-annees-count></div>
+    <div class="flex items-center gap-2">
+        <button type="button" data-annees-prev class="rounded border border-slate-200 px-2 py-1 text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed">
+            Précédent
+        </button>
+        <span data-annees-page class="min-w-[80px] text-center"></span>
+        <button type="button" data-annees-next class="rounded border border-slate-200 px-2 py-1 text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed">
+            Suivant
+        </button>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const table = document.querySelector("table");
+        if (!table) {
+            return;
+        }
+        const tbody = table.querySelector("tbody");
+        if (!tbody) {
+            return;
+        }
+        const rows = Array.from(tbody.querySelectorAll("tr"));
+        const countLabel = document.querySelector("[data-annees-count]");
+        const pageLabel = document.querySelector("[data-annees-page]");
+        const prevButton = document.querySelector("[data-annees-prev]");
+        const nextButton = document.querySelector("[data-annees-next]");
+        const pageSize = 20;
+        let currentPage = 1;
+
+        const updatePagination = () => {
+            const total = rows.length;
+            const totalPages = total === 0 ? 0 : Math.ceil(total / pageSize);
+            if (currentPage > totalPages) {
+                currentPage = totalPages;
+            }
+            const startIndex = total === 0 ? 0 : (currentPage - 1) * pageSize;
+            const endIndex = total === 0 ? 0 : startIndex + pageSize;
+
+            rows.forEach((row) => row.classList.add("hidden"));
+            rows.forEach((row, index) => {
+                const onPage = index >= startIndex && index < endIndex;
+                row.classList.toggle("hidden", !onPage);
+            });
+
+            if (countLabel) {
+                const startLabel = total === 0 ? 0 : startIndex + 1;
+                const endLabel = total === 0 ? 0 : Math.min(endIndex, total);
+                countLabel.textContent = `Affichage ${startLabel}-${endLabel} sur ${total}`;
+            }
+            if (pageLabel) {
+                pageLabel.textContent = `Page ${total === 0 ? 0 : currentPage} / ${totalPages}`;
+            }
+            if (prevButton) {
+                prevButton.disabled = currentPage <= 1;
+            }
+            if (nextButton) {
+                nextButton.disabled = totalPages === 0 || currentPage >= totalPages;
+            }
+        };
+
+        if (prevButton) {
+            prevButton.addEventListener("click", () => {
+                if (currentPage > 1) {
+                    currentPage -= 1;
+                    updatePagination();
+                }
+            });
+        }
+        if (nextButton) {
+            nextButton.addEventListener("click", () => {
+                const totalPages = rows.length === 0 ? 0 : Math.ceil(rows.length / pageSize);
+                if (currentPage < totalPages) {
+                    currentPage += 1;
+                    updatePagination();
+                }
+            });
+        }
+        updatePagination();
+    });
+</script>
 
 {% endblock %}

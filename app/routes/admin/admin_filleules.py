@@ -1,14 +1,16 @@
 from datetime import date
+import io
 import os
 import shutil
 from pathlib import Path
 from uuid import uuid4
 
 from fastapi import APIRouter, Request, Depends, Form, HTTPException, UploadFile, File
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, StreamingResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy import func
 from sqlalchemy.orm import Session, joinedload
+from openpyxl import Workbook
 
 from app.database import BASE_DIR, get_db
 from app.models.correspondant import Correspondant
@@ -115,6 +117,48 @@ def admin_filleules_list(request: Request, db: Session = Depends(get_db)):
             "request": request,
             "filleules": filleules,
         },
+    )
+
+
+@router.get("/export/excel")
+def admin_filleules_export_excel(request: Request, db: Session = Depends(get_db)):
+    if not check_session(request):
+        return RedirectResponse("/auth/login")
+
+    filleules = (
+        db.query(Filleule)
+        .options(joinedload(Filleule.correspondant))
+        .order_by(Filleule.nom.asc(), Filleule.prenom.asc())
+        .all()
+    )
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Filleules"
+    ws.append(["ID", "Nom", "Prénom", "WhatsApp", "Entrée au FAE", "ID Référent", "Référent"])
+    for f in filleules:
+        referent = ""
+        if f.correspondant:
+            referent = f"{f.correspondant.prenom} {f.correspondant.nom}"
+        ws.append([
+            f.id_filleule,
+            f.nom,
+            f.prenom,
+            f.whatsapp or "",
+            f.annee_rentree or "",
+            f.id_correspondant or "",
+            referent,
+        ])
+
+    output = io.BytesIO()
+    wb.save(output)
+    output.seek(0)
+
+    headers = {"Content-Disposition": "attachment; filename=filleules.xlsx"}
+    return StreamingResponse(
+        output,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers=headers,
     )
 
 

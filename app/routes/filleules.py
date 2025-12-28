@@ -129,6 +129,7 @@ def detail_filleule_html(filleule_id: int, request: Request, db: Session = Depen
             joinedload(Filleule.correspondant),
             joinedload(Filleule.documents).joinedload(Document.type_document),
             joinedload(Filleule.documents).joinedload(Document.annee_scolaire_ref),
+            joinedload(Filleule.suivis),
         )
         .filter(Filleule.id_filleule == filleule_id)
         .first()
@@ -183,6 +184,11 @@ def detail_filleule_html(filleule_id: int, request: Request, db: Session = Depen
         key=lambda doc: doc.date_upload or datetime.min,
         reverse=True,
     )
+    suivis = sorted(
+        f.suivis,
+        key=lambda item: item.date_suivi or datetime.min,
+        reverse=True,
+    )
 
     return templates.TemplateResponse(
         "filleules/detail.html",
@@ -194,6 +200,7 @@ def detail_filleule_html(filleule_id: int, request: Request, db: Session = Depen
             "correspondant": f.correspondant,
             "correspondants_map": correspondants_map,
             "documents": documents,
+            "suivis": suivis,
         }
     )
 
