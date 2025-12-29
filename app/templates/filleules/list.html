@@ -28,58 +28,58 @@
 </div>
 
 <div class="overflow-hidden rounded-2xl bg-white/95 border border-[#F2932B1f] shadow-soft">
-    <table class="min-w-full text-left">
+    <table class="min-w-full table-fixed text-left text-sm">
         <thead class="bg-gradient-to-r from-[#F2932B14] via-[#F2A75A20] to-[#4969A420] text-slate-700">
             <tr>
-                <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide">
+                <th class="px-4 py-0.5 text-xs font-semibold uppercase tracking-wide">
                     <div class="flex flex-col gap-2">
                         <span>Nom</span>
-                        <input data-col="0" class="filleules-filter w-full rounded-lg border border-slate-200 bg-white/80 px-2 py-1 text-xs normal-case font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#F2932B40]" placeholder="Filtrer">
+                        <input data-col="0" class="filleules-filter w-full rounded-lg border border-slate-200 bg-white/80 px-2 py-0.5 text-xs normal-case font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#F2932B40]" placeholder="Filtrer">
                     </div>
                 </th>
-                <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide">
+                <th class="px-4 py-0.5 text-xs font-semibold uppercase tracking-wide">
                     <div class="flex flex-col gap-2">
                         <span>Prénom</span>
-                        <input data-col="1" class="filleules-filter w-full rounded-lg border border-slate-200 bg-white/80 px-2 py-1 text-xs normal-case font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#F2932B40]" placeholder="Filtrer">
+                        <input data-col="1" class="filleules-filter w-full rounded-lg border border-slate-200 bg-white/80 px-2 py-0.5 text-xs normal-case font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#F2932B40]" placeholder="Filtrer">
                     </div>
                 </th>
-                <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-center">
+                <th class="w-24 px-4 py-0.5 text-xs font-semibold uppercase tracking-wide text-center">
                     <div class="flex flex-col gap-2">
                         <span>Entrée au FAE</span>
-                        <input data-col="2" class="filleules-filter w-full rounded-lg border border-slate-200 bg-white/80 px-2 py-1 text-xs normal-case font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#F2932B40]" placeholder="Filtrer">
+                        <input data-col="2" class="filleules-filter w-full rounded-lg border border-slate-200 bg-white/80 px-2 py-0.5 text-xs normal-case font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#F2932B40]" placeholder="Filtrer">
                     </div>
                 </th>
-                <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide">
+                <th class="w-[30%] px-4 py-0.5 text-xs font-semibold uppercase tracking-wide">
                     <div class="flex flex-col gap-2">
                         <span>Référent</span>
-                        <input data-col="3" class="filleules-filter w-full rounded-lg border border-slate-200 bg-white/80 px-2 py-1 text-xs normal-case font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#F2932B40]" placeholder="Filtrer">
+                        <input data-col="3" class="filleules-filter w-full rounded-lg border border-slate-200 bg-white/80 px-2 py-0.5 text-xs normal-case font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#F2932B40]" placeholder="Filtrer">
                     </div>
                 </th>
-                <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide">
+                <th class="px-4 py-0.5 text-xs font-semibold uppercase tracking-wide">
                     <div class="flex flex-col gap-2">
                         <span>Établissement</span>
-                        <input data-col="4" class="filleules-filter w-full rounded-lg border border-slate-200 bg-white/80 px-2 py-1 text-xs normal-case font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#F2932B40]" placeholder="Filtrer">
+                        <input data-col="4" class="filleules-filter w-full rounded-lg border border-slate-200 bg-white/80 px-2 py-0.5 text-xs normal-case font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#F2932B40]" placeholder="Filtrer">
                     </div>
                 </th>
-                <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-right">Actions</th>
+                <th class="px-4 py-0.5 text-xs font-semibold uppercase tracking-wide text-right">Actions</th>
             </tr>
         </thead>
         <tbody class="divide-y divide-[#F2932B14]">
             {% for f in filleules %}
             {% set latest = recent_scolarite.get(f.id_filleule) %}
             <tr class="hover:bg-[#F2932B0f] transition">
-                <td class="px-4 py-3">{{ f.nom }}</td>
-                <td class="px-4 py-3">{{ f.prenom }}</td>
-                <td class="px-4 py-3 text-center">{{ f.annee_rentree if f.annee_rentree else "-" }}</td>
-                <td class="px-4 py-3">
+                <td class="px-4 py-0.5">{{ f.nom }}</td>
+                <td class="px-4 py-0.5">{{ f.prenom }}</td>
+                <td class="w-24 px-4 py-0.5 text-center">{{ f.annee_rentree if f.annee_rentree else "-" }}</td>
+                <td class="px-4 py-0.5">
                     {% if f.correspondant %}
                         {{ f.correspondant.prenom }} {{ f.correspondant.nom }}
                     {% else %}
                         -
                     {% endif %}
                 </td>
-                <td class="px-4 py-3">{{ latest.etablissement if latest else "-" }}</td>
-                <td class="px-4 py-3 text-right">
+                <td class="w-[30%] px-4 py-0.5">{{ latest.etablissement if latest else "-" }}</td>
+                <td class="px-4 py-0.5 text-right">
                     <a href="/filleules/html/{{ f.id_filleule }}" class="inline-flex items-center gap-2 text-[#F2932B] font-semibold hover:translate-x-1 transition">
                         Voir <span>→</span>
                     </a>
@@ -88,6 +88,18 @@
             {% endfor %}
         </tbody>
     </table>
+    <div class="flex flex-wrap items-center justify-between gap-3 px-4 py-3 border-t border-[#F2932B14] bg-white/80 text-sm">
+        <div id="filleules-range" class="text-slate-600">Affichage 0-0 sur 0</div>
+        <div class="flex items-center gap-2">
+            <button type="button" id="filleules-prev" class="rounded-full border border-slate-200 px-3 py-1 text-slate-600 hover:-translate-y-0.5 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                ← Préc.
+            </button>
+            <span id="filleules-page" class="text-slate-600"></span>
+            <button type="button" id="filleules-next" class="rounded-full border border-slate-200 px-3 py-1 text-slate-600 hover:-translate-y-0.5 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                Suiv. →
+            </button>
+        </div>
+    </div>
 </div>
 <script>
     document.addEventListener("DOMContentLoaded", () => {
@@ -97,11 +109,17 @@
         }
         const rows = Array.from(table.querySelectorAll("tbody tr"));
         const filters = Array.from(table.querySelectorAll(".filleules-filter"));
+        const perPage = 20;
+        let currentPage = 1;
+        const pageLabel = document.getElementById("filleules-page");
+        const rangeLabel = document.getElementById("filleules-range");
+        const prevButton = document.getElementById("filleules-prev");
+        const nextButton = document.getElementById("filleules-next");
         const normalize = (value) => value.toLowerCase().trim();
-        const applyFilters = () => {
-            rows.forEach((row) => {
+        const getFilteredRows = () => {
+            return rows.filter((row) => {
                 const cells = row.querySelectorAll("td");
-                const matches = filters.every((input) => {
+                return filters.every((input) => {
                     const query = normalize(input.value);
                     if (!query) {
                         return true;
@@ -113,13 +131,56 @@
                     }
                     return normalize(cell.textContent).includes(query);
                 });
-                row.classList.toggle("hidden", !matches);
             });
         };
+        const renderPage = () => {
+            const filteredRows = getFilteredRows();
+            const totalPages = Math.max(1, Math.ceil(filteredRows.length / perPage));
+            if (currentPage > totalPages) {
+                currentPage = totalPages;
+            }
+            const start = (currentPage - 1) * perPage;
+            const end = start + perPage;
+            rows.forEach((row) => row.classList.add("hidden"));
+            filteredRows.slice(start, end).forEach((row) => row.classList.remove("hidden"));
+            if (pageLabel) {
+                pageLabel.textContent = `Page ${currentPage} / ${totalPages}`;
+            }
+            if (rangeLabel) {
+                if (!filteredRows.length) {
+                    rangeLabel.textContent = "Aucun résultat";
+                } else {
+                    const startIndex = start + 1;
+                    const endIndex = Math.min(end, filteredRows.length);
+                    rangeLabel.textContent = `Affichage ${startIndex}-${endIndex} sur ${filteredRows.length}`;
+                }
+            }
+            if (prevButton) {
+                prevButton.disabled = currentPage === 1;
+            }
+            if (nextButton) {
+                nextButton.disabled = currentPage === totalPages;
+            }
+        };
+        if (prevButton) {
+            prevButton.addEventListener("click", () => {
+                currentPage = Math.max(1, currentPage - 1);
+                renderPage();
+            });
+        }
+        if (nextButton) {
+            nextButton.addEventListener("click", () => {
+                currentPage = currentPage + 1;
+                renderPage();
+            });
+        }
         filters.forEach((input) => {
-            input.addEventListener("input", applyFilters);
+            input.addEventListener("input", () => {
+                currentPage = 1;
+                renderPage();
+            });
         });
-        applyFilters();
+        renderPage();
     });
 </script>
 {% endblock %}

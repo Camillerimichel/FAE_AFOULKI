@@ -15,24 +15,24 @@
 </div>
 
 <div class="overflow-hidden rounded-2xl bg-white/95 border border-[#F2932B1f] shadow-soft">
-    <table class="min-w-full text-left">
+    <table class="min-w-full text-left text-sm">
         <thead class="bg-gradient-to-r from-[#F2932B14] via-[#F2A75A20] to-[#4969A420] text-slate-700">
             <tr>
-                <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide">Nom</th>
-                <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide">Ville</th>
-                <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide">Type</th>
-                <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide">Filleules</th>
-                <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-right">Actions</th>
+                <th class="px-4 py-0.5 text-xs font-semibold uppercase tracking-wide">Nom</th>
+                <th class="px-4 py-0.5 text-xs font-semibold uppercase tracking-wide">Ville</th>
+                <th class="px-4 py-0.5 text-xs font-semibold uppercase tracking-wide">Type</th>
+                <th class="px-4 py-0.5 text-xs font-semibold uppercase tracking-wide text-center">Filleules</th>
+                <th class="px-4 py-0.5 text-xs font-semibold uppercase tracking-wide text-right">Actions</th>
             </tr>
         </thead>
         <tbody class="divide-y divide-[#F2932B14]">
             {% for e in etablissements %}
             <tr class="hover:bg-[#F2932B0f] transition">
-                <td class="px-4 py-3">{{ e.nom }}</td>
-                <td class="px-4 py-3">{{ e.ville if e.ville else "-" }}</td>
-                <td class="px-4 py-3">{{ e.type if e.type else "-" }}</td>
-                <td class="px-4 py-3">{{ etablissement_counts.get(e.id_etablissement, 0) }}</td>
-                <td class="px-4 py-3 text-right">
+                <td class="px-4 py-0.5">{{ e.nom }}</td>
+                <td class="px-4 py-0.5">{{ e.ville if e.ville else "-" }}</td>
+                <td class="px-4 py-0.5">{{ e.type if e.type else "-" }}</td>
+                <td class="px-4 py-0.5 text-center">{{ etablissement_counts.get(e.id_etablissement, 0) }}</td>
+                <td class="px-4 py-0.5 text-right">
                     <a href="/etablissements/html/{{ e.id_etablissement }}" class="inline-flex items-center gap-2 text-[#F2932B] font-semibold hover:translate-x-1 transition">
                         Voir <span>→</span>
                     </a>
@@ -41,5 +41,74 @@
             {% endfor %}
         </tbody>
     </table>
+    <div class="flex flex-wrap items-center justify-between gap-3 px-4 py-3 border-t border-[#F2932B14] bg-white/80 text-sm">
+        <div id="etablissements-range" class="text-slate-600">Affichage 0-0 sur 0</div>
+        <div class="flex items-center gap-2">
+            <button type="button" id="etablissements-prev" class="rounded-full border border-slate-200 px-3 py-1 text-slate-600 hover:-translate-y-0.5 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                ← Préc.
+            </button>
+            <span id="etablissements-page" class="text-slate-600"></span>
+            <button type="button" id="etablissements-next" class="rounded-full border border-slate-200 px-3 py-1 text-slate-600 hover:-translate-y-0.5 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                Suiv. →
+            </button>
+        </div>
+    </div>
 </div>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const table = document.querySelector("table");
+        if (!table) {
+            return;
+        }
+        const rows = Array.from(table.querySelectorAll("tbody tr"));
+        const perPage = 20;
+        let currentPage = 1;
+        const pageLabel = document.getElementById("etablissements-page");
+        const rangeLabel = document.getElementById("etablissements-range");
+        const prevButton = document.getElementById("etablissements-prev");
+        const nextButton = document.getElementById("etablissements-next");
+        const renderPage = () => {
+            const totalPages = Math.max(1, Math.ceil(rows.length / perPage));
+            if (currentPage > totalPages) {
+                currentPage = totalPages;
+            }
+            const start = (currentPage - 1) * perPage;
+            const end = start + perPage;
+            rows.forEach((row, index) => {
+                row.classList.toggle("hidden", index < start || index >= end);
+            });
+            if (pageLabel) {
+                pageLabel.textContent = `Page ${currentPage} / ${totalPages}`;
+            }
+            if (rangeLabel) {
+                if (!rows.length) {
+                    rangeLabel.textContent = "Aucun résultat";
+                } else {
+                    const startIndex = start + 1;
+                    const endIndex = Math.min(end, rows.length);
+                    rangeLabel.textContent = `Affichage ${startIndex}-${endIndex} sur ${rows.length}`;
+                }
+            }
+            if (prevButton) {
+                prevButton.disabled = currentPage === 1;
+            }
+            if (nextButton) {
+                nextButton.disabled = currentPage === totalPages;
+            }
+        };
+        if (prevButton) {
+            prevButton.addEventListener("click", () => {
+                currentPage = Math.max(1, currentPage - 1);
+                renderPage();
+            });
+        }
+        if (nextButton) {
+            nextButton.addEventListener("click", () => {
+                currentPage = currentPage + 1;
+                renderPage();
+            });
+        }
+        renderPage();
+    });
+</script>
 {% endblock %}

@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from sqlalchemy import func
+from sqlalchemy import and_, func, or_
 from sqlalchemy.orm import Session, aliased
 
 from app.database import SessionLocal
@@ -13,6 +13,7 @@ from app.models.localite import Localite
 from app.models.parrain import Parrain
 from app.models.parrainage import Parrainage
 from app.models.scolarite import Scolarite
+from app.models.annee_scolaire import AnneeScolaire
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 CITY_COORDS_PATH = DATA_DIR / "city_coords.json"
@@ -54,6 +55,7 @@ async def get_dashboard_stats():
         "referents": db.query(Correspondant).count(),
         "ecoles": db.query(Etablissement).count(),
         "localites": db.query(Localite).count(),
+        "annees_scolaires": db.query(AnneeScolaire).count(),
         "parrains": db.query(Parrain).count(),
         "parrainages": db.query(Parrainage).count(),
         "documents": db.query(Document).count(),
@@ -61,6 +63,32 @@ async def get_dashboard_stats():
 
     db.close()
     return stats
+
+
+async def get_annees_scolaires():
+    db: Session = SessionLocal()
+    rows = (
+        db.query(
+            AnneeScolaire.id_annee_scolaire,
+            AnneeScolaire.periode,
+            func.count(Scolarite.id_scolarite),
+        )
+        .outerjoin(
+            Scolarite,
+            or_(
+                Scolarite.id_annee_scolaire == AnneeScolaire.id_annee_scolaire,
+                and_(
+                    Scolarite.id_annee_scolaire.is_(None),
+                    Scolarite.annee_scolaire == AnneeScolaire.periode,
+                ),
+            ),
+        )
+        .group_by(AnneeScolaire.id_annee_scolaire, AnneeScolaire.periode)
+        .order_by(AnneeScolaire.periode.desc())
+        .all()
+    )
+    db.close()
+    return [{"id": row[0], "periode": row[1], "count": row[2]} for row in rows]
 
 
 async def get_city_origin_stats():

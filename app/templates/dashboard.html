@@ -5,42 +5,17 @@
 {% block content %}
 <div class="space-y-8">
 
-    <div class="grid gap-6 md:grid-cols-2">
-        <div class="p-6 rounded-2xl bg-white/90 border border-[#F2932B1f] shadow-soft">
-            <div class="flex items-center gap-3 mb-2">
-                <span class="text-2xl">🌱</span>
-                <h3 class="font-semibold text-lg">Une plateforme qui fait du bien</h3>
-            </div>
-            <p class="text-slate-600 text-sm leading-relaxed">Chaque action ici soutient un parcours scolaire, rapproche un parrain d'une filleule et rend les échanges plus simples. On garde le sourire tout en travaillant sérieusement.</p>
-        </div>
-
-        <div class="p-6 rounded-2xl bg-white/90 border border-[#F2932B1f] shadow-soft">
-            <div class="flex items-center gap-3 mb-2">
-                <span class="text-2xl">🎯</span>
-                <h3 class="font-semibold text-lg">Prochaines étapes</h3>
-            </div>
-            <ul class="space-y-2 text-sm text-slate-700">
-                <li class="flex items-center gap-2"><span class="text-[#F2932B]">•</span>Vérifier les nouvelles filleules et leur village d'origine.</li>
-                <li class="flex items-center gap-2"><span class="text-[#F2932B]">•</span>Mettre à jour les documents et justificatifs importants.</li>
-                <li class="flex items-center gap-2"><span class="text-[#F2932B]">•</span>Envoyer un message chaleureux aux parrains actifs.</li>
-            </ul>
-        </div>
-    </div>
-
     {% if request.state.user %}
     <div class="pt-10 border-t border-[#F2932B1f] space-y-8">
         <div class="bg-gradient-to-r from-[#F2932B] via-[#F2A75A] to-[#4969A4] text-white rounded-3xl p-8 shadow-2xl shadow-[rgba(73,105,164,0.35)]">
             <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                 <div>
-                    <p class="text-sm uppercase tracking-[0.25em] text-white/80 font-semibold">Dashboard admin</p>
-                    <h1 class="font-display text-3xl">Suivi joyeux des indicateurs 🎉</h1>
-                    <p class="text-white/85 mt-2 max-w-2xl">Visualisez l'activité des filleules, parrains et documents en gardant une touche colorée.</p>
+                    <h1 class="font-display text-3xl">Suivi des indicateurs 🎉</h1>
                 </div>
                 <div class="flex items-center gap-3 bg-white/15 rounded-2xl px-4 py-3 shadow-soft">
                     <span class="text-3xl">📈</span>
                     <div class="text-sm">
                         <p class="font-semibold">Vue d'ensemble</p>
-                        <p class="text-white/80">Mettez à jour vos filtres selon vos besoins.</p>
                     </div>
                 </div>
             </div>
@@ -63,28 +38,61 @@
                 <p class="text-sm text-slate-500">Documents</p>
                 <p class="text-3xl font-display text-[#4969A4]">{{ stats.documents }}</p>
             </div>
-            <div class="rounded-2xl bg-white/95 border border-[#F2932B1f] shadow-soft p-5 text-center">
+            <a href="/correspondants/html" class="rounded-2xl bg-white/95 border border-[#F2932B1f] shadow-soft p-5 text-center transition hover:-translate-y-0.5 hover:shadow-soft">
                 <p class="text-sm text-slate-500">Référents</p>
                 <p class="text-3xl font-display text-[#4969A4]">{{ stats.referents }}</p>
-            </div>
+            </a>
+            <a href="#scolarites" class="rounded-2xl bg-white/95 border border-[#F2932B1f] shadow-soft p-5 text-center transition hover:-translate-y-0.5 hover:shadow-soft">
+                <p class="text-sm text-slate-500">Scolarités</p>
+                <p class="text-3xl font-display text-[#4969A4]">{{ stats.annees_scolaires }}</p>
+            </a>
             <a href="#villes-origine" class="rounded-2xl bg-white/95 border border-[#F2932B1f] shadow-soft p-5 text-center transition hover:-translate-y-0.5 hover:shadow-soft">
                 <p class="text-sm text-slate-500">Villes d'origine</p>
                 <p class="text-3xl font-display text-[#F2932B]">{{ stats.localites }}</p>
             </a>
         </div>
 
-        {% if map_json != "null" %}
-        <div id="villes-origine" class="rounded-3xl bg-white/95 border border-[#F2932B1f] shadow-soft p-6 sm:p-8 scroll-mt-24">
-            <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                <div>
-                    <p class="text-sm uppercase tracking-[0.2em] text-[#F2932B] font-semibold">Villes d'origine</p>
-                    <h3 class="font-display text-2xl">Province d'Essaouira</h3>
-                    <p class="text-slate-600 text-sm">Repérez les villes d'origine des enfants et le nombre par ville.</p>
+        <details id="scolarites" class="rounded-3xl bg-white/95 border border-[#F2932B1f] shadow-soft p-6 sm:p-8 scroll-mt-24" data-dashboard-accordion>
+            <summary class="cursor-pointer">
+                <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                    <div>
+                        <p class="text-sm uppercase tracking-[0.2em] text-[#F2932B] font-semibold">Scolarités</p>
+                        <h3 class="font-display text-2xl">Années scolaires</h3>
+                        <p class="text-slate-600 text-sm">Choisissez une année pour filtrer la liste des scolarités.</p>
+                    </div>
+                    <div class="text-xs text-slate-500 bg-[#F2932B10] border border-[#F2932B20] px-3 py-2 rounded-2xl">
+                        ● {{ stats.annees_scolaires }} années disponibles
+                    </div>
                 </div>
-                <div class="text-xs text-slate-500 bg-[#F2932B10] border border-[#F2932B20] px-3 py-2 rounded-2xl">
-                    ● Taille du point = nombre d'enfants
-                </div>
+            </summary>
+
+            <div class="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {% for annee in annees_scolaires %}
+                <a href="/scolarite/html?annee={{ annee.periode | urlencode }}"
+                   class="flex flex-col items-center gap-1 rounded-2xl border border-[#F2932B1f] bg-[#F2932B0f] px-4 py-3 text-center transition hover:-translate-y-0.5 hover:shadow-soft">
+                    <span class="text-sm font-semibold text-slate-700">{{ annee.periode }} ({{ annee.count }})</span>
+                </a>
+                {% endfor %}
+                {% if not annees_scolaires %}
+                <p class="text-slate-500 text-sm">Aucune année scolaire renseignée.</p>
+                {% endif %}
             </div>
+        </details>
+
+        {% if map_json != "null" %}
+        <details id="villes-origine" class="rounded-3xl bg-white/95 border border-[#F2932B1f] shadow-soft p-6 sm:p-8 scroll-mt-24" data-dashboard-accordion>
+            <summary class="cursor-pointer">
+                <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                    <div>
+                        <p class="text-sm uppercase tracking-[0.2em] text-[#F2932B] font-semibold">Villes d'origine</p>
+                        <h3 class="font-display text-2xl">Province d'Essaouira</h3>
+                        <p class="text-slate-600 text-sm">Repérez les villes d'origine des enfants et le nombre par ville.</p>
+                    </div>
+                    <div class="text-xs text-slate-500 bg-[#F2932B10] border border-[#F2932B20] px-3 py-2 rounded-2xl">
+                        ● Taille du point = nombre d'enfants
+                    </div>
+                </div>
+            </summary>
 
             <div class="mt-6 grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
                 <div class="rounded-2xl border border-[#F2932B1f] bg-[#F2932B08] p-4 overflow-hidden">
@@ -115,7 +123,7 @@
                     {% endif %}
                 </div>
             </div>
-        </div>
+        </details>
         {% endif %}
 
         <div id="city-filleules-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
@@ -138,17 +146,19 @@
         </div>
 
 
-        <div id="filieres" class="rounded-3xl bg-white/95 border border-[#F2932B1f] shadow-soft p-6 sm:p-8 scroll-mt-24">
-            <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                <div>
-                    <p class="text-sm uppercase tracking-[0.2em] text-[#F2932B] font-semibold">Filières</p>
-                    <h3 class="font-display text-2xl">Parcours des filleules</h3>
-                    <p class="text-slate-600 text-sm">Répartition des filières sur l'année en cours.</p>
+        <details id="filieres" class="rounded-3xl bg-white/95 border border-[#F2932B1f] shadow-soft p-6 sm:p-8 scroll-mt-24" data-dashboard-accordion>
+            <summary class="cursor-pointer">
+                <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                    <div>
+                        <p class="text-sm uppercase tracking-[0.2em] text-[#F2932B] font-semibold">Filières</p>
+                        <h3 class="font-display text-2xl">Parcours des filleules</h3>
+                        <p class="text-slate-600 text-sm">Répartition des filières sur l'année en cours.</p>
+                    </div>
+                    <div class="text-xs text-slate-500 bg-[#F2932B10] border border-[#F2932B20] px-3 py-2 rounded-2xl">
+                        ● Total basé sur la dernière scolarité connue
+                    </div>
                 </div>
-                <div class="text-xs text-slate-500 bg-[#F2932B10] border border-[#F2932B20] px-3 py-2 rounded-2xl">
-                    ● Total basé sur la dernière scolarité connue
-                </div>
-            </div>
+            </summary>
 
             <div class="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {% for filiere in filiere_stats %}
@@ -162,7 +172,7 @@
                 <p class="text-slate-500 text-sm">Aucune filière renseignée.</p>
                 {% endif %}
             </div>
-        </div>
+        </details>
 
     </div>
     {% endif %}
@@ -233,6 +243,7 @@
         }
 
         const listButtons = Array.from(document.querySelectorAll(".city-list-item"));
+        const accordionPanels = Array.from(document.querySelectorAll("details[data-dashboard-accordion]"));
         const modal = document.getElementById("city-filleules-modal");
         const modalTitle = document.getElementById("city-modal-title");
         const modalList = document.getElementById("city-modal-list");
@@ -278,6 +289,60 @@
         listButtons.forEach((button) => {
             button.addEventListener("click", () => {
                 openModal(button.dataset.cityName || "");
+            });
+        });
+
+        accordionPanels.forEach((panel) => {
+            panel.addEventListener("toggle", () => {
+                if (!panel.open) {
+                    return;
+                }
+                accordionPanels.forEach((otherPanel) => {
+                    if (otherPanel !== panel) {
+                        otherPanel.removeAttribute("open");
+                    }
+                });
+                panel.scrollIntoView({ behavior: "smooth", block: "start" });
+            });
+        });
+
+        const openAccordion = (panel) => {
+            if (!panel) {
+                return;
+            }
+            panel.setAttribute("open", "");
+            accordionPanels.forEach((otherPanel) => {
+                if (otherPanel !== panel) {
+                    otherPanel.removeAttribute("open");
+                }
+            });
+            panel.scrollIntoView({ behavior: "smooth", block: "start" });
+        };
+
+        const filieresPanel = document.getElementById("filieres");
+        const filieresLinks = Array.from(document.querySelectorAll('a[href="#filieres"]'));
+        filieresLinks.forEach((link) => {
+            link.addEventListener("click", (event) => {
+                event.preventDefault();
+                openAccordion(filieresPanel);
+            });
+        });
+
+        const villesPanel = document.getElementById("villes-origine");
+        const villesLinks = Array.from(document.querySelectorAll('a[href="#villes-origine"]'));
+        villesLinks.forEach((link) => {
+            link.addEventListener("click", (event) => {
+                event.preventDefault();
+                openAccordion(villesPanel);
+            });
+        });
+
+        const scolaritesPanel = document.getElementById("scolarites");
+        const scolaritesLinks = Array.from(document.querySelectorAll('a[href="#scolarites"]'));
+        scolaritesLinks.forEach((link) => {
+            link.addEventListener("click", (event) => {
+                event.preventDefault();
+                openAccordion(scolaritesPanel);
             });
         });
 

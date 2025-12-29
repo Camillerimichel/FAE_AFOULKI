@@ -48,21 +48,26 @@
                 <p class="text-xs uppercase tracking-[0.25em] text-white/80 font-semibold">Afoulki</p>
                 <h1 class="font-display text-2xl leading-tight">FAE</h1>
             </div>
+            {% if request.state.user %}
+            <div class="hidden sm:flex items-center gap-2">
+                <span class="inline-flex items-center rounded-full bg-white/15 border border-white/20 px-3 py-1 text-xs text-white/85">
+                    {{ request.state.user.fullname if request.state.user.fullname else request.state.user.email }}
+                </span>
+                <a href="/auth/logout" class="px-2 py-1 rounded-full text-white/90 hover:bg-white/15 transition" title="Déconnexion" aria-label="Déconnexion">⏻</a>
+            </div>
+            {% endif %}
         </div>
 
         <nav class="flex flex-wrap items-center gap-2 text-sm sm:text-base">
             <a href="/" class="px-4 py-2 rounded-full text-white/90 hover:bg-white/15 transition">Tableau de bord</a>
             <a href="/filleules/html" class="px-4 py-2 rounded-full text-white/90 hover:bg-white/15 transition">Filleules</a>
             <a href="/parrains/html" class="px-4 py-2 rounded-full text-white/90 hover:bg-white/15 transition">Parrains</a>
+            <a href="/scolarite/html" class="px-4 py-2 rounded-full text-white/90 hover:bg-white/15 transition">Scolarités</a>
             <a href="/suivisocial" class="px-4 py-2 rounded-full text-white/90 hover:bg-white/15 transition">Suivi social</a>
             <a href="/correspondants/html" class="px-4 py-2 rounded-full text-white/90 hover:bg-white/15 transition">Référents</a>
             <a href="/etablissements/html" class="px-4 py-2 rounded-full text-white/90 hover:bg-white/15 transition">Établissements</a>
             {% if request.state.user %}
             <a href="/admin" class="px-4 py-2 rounded-full text-white/90 hover:bg-white/15 transition">Administration</a>
-            {% endif %}
-            {% if request.state.user %}
-            <span class="px-4 py-2 rounded-full text-white/85 bg-white/10 border border-white/15">{{ request.state.user.fullname if request.state.user.fullname else request.state.user.email }}</span>
-            <a href="/auth/logout" class="px-4 py-2 rounded-full text-white/90 hover:bg-white/15 transition" title="Déconnexion" aria-label="Déconnexion">🚪</a>
             {% endif %}
         </nav>
     </div>
