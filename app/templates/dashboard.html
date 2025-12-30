@@ -50,6 +50,11 @@
                 <p class="text-sm text-slate-500">Villes d'origine</p>
                 <p class="text-3xl font-display text-[#F2932B]">{{ stats.localites }}</p>
             </a>
+            <a href="/filleules/html?couverture_sante=1"
+               class="rounded-2xl bg-white/95 border border-[#F2932B1f] shadow-soft p-5 text-center transition hover:-translate-y-0.5 hover:shadow-soft">
+                <p class="text-sm text-slate-500">Couverture santé</p>
+                <p class="text-3xl font-display text-[#4969A4]">{{ stats.couverture_sante }}</p>
+            </a>
         </div>
 
         <details id="scolarites" class="rounded-3xl bg-white/95 border border-[#F2932B1f] shadow-soft p-6 sm:p-8 scroll-mt-24" data-dashboard-accordion>
@@ -75,6 +80,34 @@
                 {% endfor %}
                 {% if not annees_scolaires %}
                 <p class="text-slate-500 text-sm">Aucune année scolaire renseignée.</p>
+                {% endif %}
+            </div>
+        </details>
+
+        <details id="filieres" class="rounded-3xl bg-white/95 border border-[#F2932B1f] shadow-soft p-6 sm:p-8 scroll-mt-24" data-dashboard-accordion>
+            <summary class="cursor-pointer">
+                <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                    <div>
+                        <p class="text-sm uppercase tracking-[0.2em] text-[#F2932B] font-semibold">Filières</p>
+                        <h3 class="font-display text-2xl">Parcours des filleules</h3>
+                        <p class="text-slate-600 text-sm">Répartition des filières sur l'année en cours.</p>
+                    </div>
+                    <div class="text-xs text-slate-500 bg-[#F2932B10] border border-[#F2932B20] px-3 py-2 rounded-2xl">
+                        ● Total basé sur la dernière scolarité connue
+                    </div>
+                </div>
+            </summary>
+
+            <div class="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {% for filiere in filiere_stats %}
+                <a href="/filleules/html?filiere={{ filiere.name | urlencode }}"
+                   class="flex items-center justify-between gap-3 rounded-2xl border border-[#F2932B1f] bg-[#F2932B0f] px-4 py-3 transition hover:-translate-y-0.5 hover:shadow-soft">
+                    <span class="text-sm font-semibold text-slate-700">{{ filiere.name }}</span>
+                    <span class="text-lg font-display text-[#4969A4]">{{ filiere.count }}</span>
+                </a>
+                {% endfor %}
+                {% if not filiere_stats %}
+                <p class="text-slate-500 text-sm">Aucune filière renseignée.</p>
                 {% endif %}
             </div>
         </details>
@@ -145,34 +178,6 @@
             </div>
         </div>
 
-
-        <details id="filieres" class="rounded-3xl bg-white/95 border border-[#F2932B1f] shadow-soft p-6 sm:p-8 scroll-mt-24" data-dashboard-accordion>
-            <summary class="cursor-pointer">
-                <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                    <div>
-                        <p class="text-sm uppercase tracking-[0.2em] text-[#F2932B] font-semibold">Filières</p>
-                        <h3 class="font-display text-2xl">Parcours des filleules</h3>
-                        <p class="text-slate-600 text-sm">Répartition des filières sur l'année en cours.</p>
-                    </div>
-                    <div class="text-xs text-slate-500 bg-[#F2932B10] border border-[#F2932B20] px-3 py-2 rounded-2xl">
-                        ● Total basé sur la dernière scolarité connue
-                    </div>
-                </div>
-            </summary>
-
-            <div class="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {% for filiere in filiere_stats %}
-                <a href="/filleules/html?filiere={{ filiere.name | urlencode }}"
-                   class="flex items-center justify-between gap-3 rounded-2xl border border-[#F2932B1f] bg-[#F2932B0f] px-4 py-3 transition hover:-translate-y-0.5 hover:shadow-soft">
-                    <span class="text-sm font-semibold text-slate-700">{{ filiere.name }}</span>
-                    <span class="text-lg font-display text-[#4969A4]">{{ filiere.count }}</span>
-                </a>
-                {% endfor %}
-                {% if not filiere_stats %}
-                <p class="text-slate-500 text-sm">Aucune filière renseignée.</p>
-                {% endif %}
-            </div>
-        </details>
 
     </div>
     {% endif %}

@@ -12,6 +12,9 @@ class FilleuleBase(BaseModel):
     whatsapp: Optional[str] = None
     email: Optional[str] = None
     etat_civil: Optional[str] = None
+    profession_pere: Optional[str] = None
+    profession_mere: Optional[str] = None
+    couverture_sante: Optional[str] = None
     annee_rentree: Optional[str] = None
     etablissement_id: Optional[int] = None
     id_correspondant: Optional[int] = None

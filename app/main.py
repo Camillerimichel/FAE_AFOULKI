@@ -36,6 +36,7 @@ from app.services.localites_service import (
 )
 from app.services.schema_service import (
     ensure_filleule_photo_column,
+    ensure_filleule_parent_sante_columns,
     ensure_filleule_etablissement_column,
     ensure_parrain_photo_column,
     ensure_etablissement_type_enum,
@@ -59,6 +60,7 @@ app.add_middleware(SessionMiddleware)
 Base.metadata.create_all(bind=engine)
 ensure_default_roles()
 ensure_filleule_photo_column()
+ensure_filleule_parent_sante_columns()
 ensure_filleule_etablissement_column()
 ensure_parrain_photo_column()
 ensure_etablissement_type_enum()

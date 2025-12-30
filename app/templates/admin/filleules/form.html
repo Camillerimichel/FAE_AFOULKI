@@ -122,6 +122,29 @@
                            value="{{ filleule.annee_rentree if filleule }}">
                 </label>
 
+                <div class="md:col-span-2 rounded-xl border border-slate-200 bg-slate-50 p-4">
+                    <p class="text-sm font-semibold text-slate-700 mb-3">Parents et santé</p>
+                    <div class="grid gap-4 md:grid-cols-3">
+                        <label class="block">
+                            Profession du père :
+                            <input name="profession_pere" type="text" class="border p-2 w-full"
+                                   value="{{ filleule.profession_pere if filleule }}">
+                        </label>
+
+                        <label class="block">
+                            Profession de la mère :
+                            <input name="profession_mere" type="text" class="border p-2 w-full"
+                                   value="{{ filleule.profession_mere if filleule }}">
+                        </label>
+
+                        <label class="block">
+                            Couverture santé :
+                            <input name="couverture_sante" type="text" class="border p-2 w-full"
+                                   value="{{ filleule.couverture_sante if filleule }}">
+                        </label>
+                    </div>
+                </div>
+
                 <label class="block md:col-span-2">
                     Référent :
                     <select name="id_correspondant" class="border p-2 w-full">
@@ -236,6 +259,29 @@
             <input name="annee_rentree" type="text" class="border p-2 w-full"
                    value="{{ filleule.annee_rentree if filleule }}">
         </label>
+
+        <div class="md:col-span-2 rounded-xl border border-slate-200 bg-slate-50 p-4">
+            <p class="text-sm font-semibold text-slate-700 mb-3">Parents et santé</p>
+            <div class="grid gap-4 md:grid-cols-3">
+                <label class="block">
+                    Profession du père :
+                    <input name="profession_pere" type="text" class="border p-2 w-full"
+                           value="{{ filleule.profession_pere if filleule }}">
+                </label>
+
+                <label class="block">
+                    Profession de la mère :
+                    <input name="profession_mere" type="text" class="border p-2 w-full"
+                           value="{{ filleule.profession_mere if filleule }}">
+                </label>
+
+                <label class="block">
+                    Couverture santé :
+                    <input name="couverture_sante" type="text" class="border p-2 w-full"
+                           value="{{ filleule.couverture_sante if filleule }}">
+                </label>
+            </div>
+        </div>
 
         <label class="block md:col-span-2">
             Référent :

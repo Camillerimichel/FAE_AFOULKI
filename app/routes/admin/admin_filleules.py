@@ -200,6 +200,9 @@ def admin_filleule_create(
     telephone: str | None = Form(None),
     whatsapp: str | None = Form(None),
     etat_civil: str | None = Form(None),
+    profession_pere: str | None = Form(None),
+    profession_mere: str | None = Form(None),
+    couverture_sante: str | None = Form(None),
     annee_rentree: str | None = Form(None),
     etablissement_id: int | None = Form(None),
     id_correspondant: str | None = Form(None),
@@ -220,6 +223,9 @@ def admin_filleule_create(
         telephone=normalize_optional(telephone),
         whatsapp=normalize_optional(whatsapp),
         etat_civil=normalize_optional(etat_civil),
+        profession_pere=normalize_optional(profession_pere),
+        profession_mere=normalize_optional(profession_mere),
+        couverture_sante=normalize_optional(couverture_sante),
         annee_rentree=normalize_optional(annee_rentree),
         etablissement_id=etablissement_id,
         id_correspondant=normalize_optional_int(id_correspondant),
@@ -332,6 +338,9 @@ def admin_filleule_update(
     telephone: str | None = Form(None),
     whatsapp: str | None = Form(None),
     etat_civil: str | None = Form(None),
+    profession_pere: str | None = Form(None),
+    profession_mere: str | None = Form(None),
+    couverture_sante: str | None = Form(None),
     annee_rentree: str | None = Form(None),
     etablissement_id: int | None = Form(None),
     id_correspondant: str | None = Form(None),
@@ -357,6 +366,9 @@ def admin_filleule_update(
     obj.telephone = normalize_optional(telephone)
     obj.whatsapp = normalize_optional(whatsapp)
     obj.etat_civil = normalize_optional(etat_civil)
+    obj.profession_pere = normalize_optional(profession_pere)
+    obj.profession_mere = normalize_optional(profession_mere)
+    obj.couverture_sante = normalize_optional(couverture_sante)
     obj.annee_rentree = normalize_optional(annee_rentree)
     if etablissement_id is not None:
         obj.etablissement_id = etablissement_id

@@ -21,6 +21,32 @@ def ensure_filleule_photo_column():
             conn.execute(text("ALTER TABLE Filleules ADD COLUMN photo VARCHAR(255)"))
 
 
+def ensure_filleule_parent_sante_columns():
+    column_query = text(
+        """
+        SELECT COUNT(*)
+        FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_SCHEMA = :db
+          AND TABLE_NAME = 'Filleules'
+          AND COLUMN_NAME = :column
+        """
+    )
+
+    columns = {
+        "profession_pere": "VARCHAR(255) NULL",
+        "profession_mere": "VARCHAR(255) NULL",
+        "couverture_sante": "VARCHAR(255) NULL",
+    }
+
+    with engine.begin() as conn:
+        for column_name, column_type in columns.items():
+            count = conn.execute(column_query, {"db": DB_NAME, "column": column_name}).scalar()
+            if count == 0:
+                conn.execute(
+                    text(f"ALTER TABLE Filleules ADD COLUMN {column_name} {column_type}")
+                )
+
+
 def ensure_parrain_photo_column():
     query = text(
         """

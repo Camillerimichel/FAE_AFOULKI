@@ -19,14 +19,17 @@
        class="inline-flex items-center gap-2 rounded-full border border-[#F2932B30] bg-[#F2932B14] px-4 py-2 text-sm font-semibold text-[#F2932B] hover:-translate-y-0.5 transition shadow-soft">
         Filleules / Parrains/Marraines ({{ count_without_parrains }})
     </a>
-    {% if showing_without_parrains %}
+    <a href="/filleules/html?couverture_sante=1"
+       class="inline-flex items-center gap-2 rounded-full border border-[#4969A430] bg-[#4969A41f] px-4 py-2 text-sm font-semibold text-[#4969A4] hover:-translate-y-0.5 transition shadow-soft">
+        Couverture santé ({{ count_couverture_sante }})
+    </a>
+    {% if showing_without_parrains or showing_couverture_sante %}
     <a href="/filleules/html"
        class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 hover:-translate-y-0.5 transition shadow-soft">
         Voir toutes les filleules
     </a>
     {% endif %}
 </div>
-
 <div class="overflow-hidden rounded-2xl bg-white/95 border border-[#F2932B1f] shadow-soft">
     <table class="min-w-full table-fixed text-left text-sm">
         <thead class="bg-gradient-to-r from-[#F2932B14] via-[#F2A75A20] to-[#4969A420] text-slate-700">

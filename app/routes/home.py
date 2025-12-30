@@ -24,6 +24,7 @@ async def dashboard(request: Request):
         "parrainages": 0,
         "documents": 0,
         "annees_scolaires": 0,
+        "couverture_sante": 0,
     }
     charts = {
         "filleuls_par_etab": [],

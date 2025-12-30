@@ -28,6 +28,7 @@ def liste_filleules_html(
     request: Request,
     filiere: str | None = Query(default=None),
     sans_parrains: int | None = None,
+    couverture_sante: int | None = None,
     db: Session = Depends(get_db),
 ):
     """
@@ -40,6 +41,13 @@ def liste_filleules_html(
     count_without_parrains = (
         db.query(Filleule)
         .filter(~Filleule.parrainages.any())
+        .count()
+    )
+    count_couverture_sante = (
+        db.query(Filleule)
+        .filter(Filleule.couverture_sante.isnot(None))
+        .filter(func.trim(Filleule.couverture_sante) != "")
+        .filter(func.lower(func.trim(Filleule.couverture_sante)) != "none")
         .count()
     )
 
@@ -62,6 +70,12 @@ def liste_filleules_html(
             query = query.filter(Filleule.id_filleule.in_(ids_subquery))
     if sans_parrains:
         query = query.filter(~Filleule.parrainages.any())
+    if couverture_sante:
+        query = (
+            query.filter(Filleule.couverture_sante.isnot(None))
+            .filter(func.trim(Filleule.couverture_sante) != "")
+            .filter(func.lower(func.trim(Filleule.couverture_sante)) != "none")
+        )
 
     data = query.all()
 
@@ -107,6 +121,10 @@ def liste_filleules_html(
             "recent_scolarite": recent_scolarite,
             "showing_without_parrains": bool(sans_parrains),
             "count_without_parrains": count_without_parrains,
+            "showing_couverture_sante": bool(couverture_sante),
+            "count_couverture_sante": count_couverture_sante,
+            "debug_couverture_sante_param": couverture_sante,
+            "debug_couverture_sante_filtered": len(data),
         }
     )
 

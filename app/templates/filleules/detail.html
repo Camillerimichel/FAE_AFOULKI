@@ -14,7 +14,7 @@
     </a>
 </div>
 
-<div class="grid gap-6 lg:grid-cols-[240px_1fr]">
+<div class="grid gap-6 lg:grid-cols-[240px_1fr_1fr]">
     <div class="bg-white/95 border border-[#F2932B1f] rounded-2xl shadow-soft p-4 flex items-center justify-center">
         {% if filleule.photo %}
             <img src="/{{ filleule.photo }}" alt="Photo filleule" class="h-52 w-52 object-cover rounded-2xl border">
@@ -71,6 +71,24 @@
                         -
                     {% endif %}
                 </dd>
+            </div>
+        </dl>
+    </div>
+
+    <div class="bg-white/95 border border-[#F2932B1f] rounded-2xl shadow-soft p-6">
+        <h3 class="font-display text-xl mb-4">Parents et santé</h3>
+        <dl class="grid gap-4">
+            <div>
+                <dt class="text-xs uppercase tracking-wide text-slate-500">Profession du père</dt>
+                <dd class="font-semibold text-slate-800">{{ filleule.profession_pere if filleule.profession_pere else "-" }}</dd>
+            </div>
+            <div>
+                <dt class="text-xs uppercase tracking-wide text-slate-500">Profession de la mère</dt>
+                <dd class="font-semibold text-slate-800">{{ filleule.profession_mere if filleule.profession_mere else "-" }}</dd>
+            </div>
+            <div>
+                <dt class="text-xs uppercase tracking-wide text-slate-500">Couverture santé</dt>
+                <dd class="font-semibold text-slate-800">{{ filleule.couverture_sante if filleule.couverture_sante else "-" }}</dd>
             </div>
         </dl>
     </div>

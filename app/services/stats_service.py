@@ -59,6 +59,13 @@ async def get_dashboard_stats():
         "parrains": db.query(Parrain).count(),
         "parrainages": db.query(Parrainage).count(),
         "documents": db.query(Document).count(),
+        "couverture_sante": (
+            db.query(Filleule)
+            .filter(Filleule.couverture_sante.isnot(None))
+            .filter(func.trim(Filleule.couverture_sante) != "")
+            .filter(func.lower(func.trim(Filleule.couverture_sante)) != "none")
+            .count()
+        ),
     }
 
     db.close()
