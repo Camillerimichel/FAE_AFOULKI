@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Tâches - PDF</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --brand-orange: #F2932B;
+            --brand-blue: #4969A4;
+            --slate-900: #0f172a;
+            --slate-700: #334155;
+            --slate-600: #475569;
+            --slate-200: #e2e8f0;
+            --slate-100: #f1f5f9;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 32px 18px;
+            font-family: "Nunito", system-ui, sans-serif;
+            color: var(--slate-900);
+            background: radial-gradient(circle at top right, rgba(242, 147, 43, 0.12), transparent 50%),
+                radial-gradient(circle at top left, rgba(73, 105, 164, 0.12), transparent 55%),
+                #f8fafc;
+        }
+
+        .page {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: #ffffff;
+            border: 1px solid var(--slate-200);
+            border-radius: 18px;
+            padding: 28px 26px 32px;
+            box-shadow: 0 18px 45px -30px rgba(15, 23, 42, 0.4);
+        }
+
+        .header-top {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .logo {
+            width: 54px;
+            height: 54px;
+            border-radius: 16px;
+            background: rgba(242, 147, 43, 0.14);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(242, 147, 43, 0.25);
+        }
+
+        .logo img {
+            width: 38px;
+            height: 38px;
+            object-fit: contain;
+        }
+
+        .brand-title {
+            font-family: "Baloo 2", "Nunito", system-ui, sans-serif;
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+        }
+
+        .brand-subtitle {
+            font-size: 14px;
+            color: var(--slate-600);
+            margin-top: 2px;
+        }
+
+        .header-meta {
+            margin-top: 12px;
+            text-align: right;
+            font-size: 12px;
+            color: var(--slate-600);
+        }
+
+        .status-section {
+            margin-top: 22px;
+            border: 1px solid var(--slate-200);
+            border-radius: 14px;
+            padding: 16px 18px;
+            background: var(--slate-100);
+        }
+
+        .status-title {
+            font-size: 15px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--slate-700);
+        }
+
+        .date-section {
+            margin-top: 16px;
+            padding: 12px 14px;
+            border-radius: 12px;
+            background: #ffffff;
+            border: 1px solid var(--slate-200);
+        }
+
+        .date-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--brand-blue);
+            margin-bottom: 10px;
+        }
+
+        .task-card {
+            border: 1px solid var(--slate-200);
+            border-radius: 12px;
+            padding: 12px 14px;
+            background: #ffffff;
+            margin-bottom: 10px;
+        }
+
+        .task-card:last-child {
+            margin-bottom: 0;
+        }
+
+        .task-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--slate-900);
+        }
+
+        .task-meta {
+            margin-top: 6px;
+            font-size: 12.5px;
+            color: var(--slate-700);
+        }
+
+        .task-meta strong {
+            color: var(--slate-900);
+        }
+
+        .task-comments {
+            margin-top: 8px;
+            padding: 8px 10px;
+            border-radius: 10px;
+            background: rgba(242, 147, 43, 0.08);
+            font-size: 12px;
+            white-space: pre-line;
+        }
+
+        .muted {
+            color: var(--slate-600);
+            font-size: 12.5px;
+        }
+
+        @media print {
+            body {
+                background: #ffffff;
+                padding: 0;
+            }
+
+            .page {
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                padding: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <header>
+            <div class="header-top">
+                <div class="logo">
+                    <img src="/static/favicon.png" alt="Logo FAE Afoulki">
+                </div>
+                <div>
+                    <div class="brand-title">FAE Afoulki</div>
+                    <div class="brand-subtitle">Actions en cours</div>
+                </div>
+            </div>
+            <div class="header-meta">Date : {{ today_label }}</div>
+        </header>
+
+        {% if groups %}
+            {% for group in groups %}
+            <section class="status-section">
+                <div class="status-title">{{ group.status_label }}</div>
+                {% for date_section in group.date_sections %}
+                <div class="date-section">
+                    <div class="date-title">Date de début : {{ date_section.date_label }}</div>
+                    {% for item in date_section.tasks %}
+                    <div class="task-card">
+                        <div class="task-title">{{ item.task.titre }} — {{ object_labels.get(item.task.objet, item.task.objet) }}</div>
+                        <div class="task-meta">
+                            <strong>Rappel :</strong>
+                            {{ item.task.description if item.task.description else "-" }}
+                            <br>
+                            <strong>Assignés :</strong> {{ item.assignees_label }}
+                        </div>
+                        <div class="task-comments">
+                            {{ item.comment_thread if item.comment_thread else "Aucun commentaire" }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endfor %}
+            </section>
+            {% endfor %}
+        {% else %}
+            <p class="muted" style="margin-top: 18px;">Aucune action en cours.</p>
+        {% endif %}
+    </div>
+    <script>
+        window.addEventListener("load", () => {
+            window.print();
+        });
+    </script>
+</body>
+</html>

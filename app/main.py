@@ -7,6 +7,7 @@ from fastapi.staticfiles import StaticFiles
 # Base SQLAlchemy + création des tables
 from app.database import Base, engine
 from app.models.localite import Localite  # noqa: F401
+from app.models.tache import Tache  # noqa: F401
 
 # Middleware session
 from app.middleware.session import SessionMiddleware
@@ -23,6 +24,7 @@ from app.routes.typesdocuments import router as typesdocuments_router
 from app.routes.documents import router as documents_router
 from app.routes.suivisocial import router as suivisocial_router
 from app.routes.auth_html import router as auth_html_router
+from app.routes.taches import router as taches_router
 
 from app.routes.admin.dashboard_router import router as dashboard_router
 from app.routes.admin.dashboard_api_router import router as dashboard_api_router
@@ -99,6 +101,7 @@ app.include_router(correspondants_router)
 app.include_router(typesdocuments_router)
 app.include_router(documents_router)
 app.include_router(suivisocial_router)
+app.include_router(taches_router)
 
 
 # --------------------------------------------------

@@ -1,0 +1,278 @@
+{% extends "base.html" %}
+
+{% block title %}Tâches{% endblock %}
+
+{% block content %}
+<div class="flex flex-col gap-4 mb-6 sm:flex-row sm:items-center sm:justify-between">
+    <div>
+        <p class="text-sm uppercase tracking-[0.2em] text-[#F2932B] font-semibold">Tâches</p>
+        <h2 class="font-display text-2xl">{{ action }} une tache</h2>
+        <p class="text-slate-600 text-sm">Organisation des actions et suivi des responsabilites.</p>
+    </div>
+    <a href="/taches" class="inline-flex items-center px-4 py-2 rounded-full border border-[#F2932B33] text-[#F2932B] font-semibold hover:bg-[#F2932B10] transition">
+        Retour liste
+    </a>
+</div>
+
+<form method="post" class="bg-white shadow-soft rounded-3xl border border-slate-100 p-6 space-y-6">
+    <div class="grid gap-4 md:grid-cols-[2fr_1fr_1fr]">
+        <label class="block">
+            Titre :
+            <input name="titre" required class="border p-2 w-full {% if task %}bg-slate-100 text-slate-500{% endif %}" value="{{ task.titre if task else '' }}" {% if task %}readonly{% endif %}>
+        </label>
+        <label class="block">
+            Objet :
+            {% if task %}
+            <input type="hidden" name="objet" value="{{ task.objet }}">
+            <select disabled class="border p-2 w-full h-10 bg-slate-100 text-slate-500">
+                {% for obj in objects %}
+                <option value="{{ obj }}" {% if task and task.objet == obj %}selected{% endif %}>{{ object_labels.get(obj, obj) }}</option>
+                {% endfor %}
+            </select>
+            {% else %}
+            <select name="objet" required class="border p-2 w-full h-10">
+                {% for obj in objects %}
+                <option value="{{ obj }}">{{ object_labels.get(obj, obj) }}</option>
+                {% endfor %}
+            </select>
+            {% endif %}
+        </label>
+        <label class="block">
+            Date de debut :
+            <input type="date" name="date_debut" required class="border p-2 w-full {% if task %}bg-slate-100 text-slate-500{% endif %}" value="{{ task.date_debut if task and task.date_debut else '' }}" {% if task %}readonly{% endif %}>
+        </label>
+        <label class="block md:col-span-2">
+            Statut :
+            {% set status_display = {"A faire": "À faire", "En cours": "En cours", "En attente": "En attente", "Realise": "Réalisé"} %}
+            {% set status_colors = {"A faire": "bg-rose-500 border-rose-500", "En cours": "bg-orange-500 border-orange-500", "En attente": "bg-amber-400 border-amber-400", "Realise": "bg-emerald-500 border-emerald-500"} %}
+            <input type="hidden" name="statut" id="statut-input" value="{{ task.statut if task else 'A faire' }}">
+            <div class="mt-2 flex flex-wrap gap-2">
+                {% for status in statuses %}
+                <button type="button"
+                        class="status-button inline-flex items-center rounded-full border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 transition"
+                        data-value="{{ status }}"
+                        data-order="{{ loop.index0 }}"
+                        data-color="{{ status_colors.get(status, 'bg-slate-500 border-slate-500') }}">
+                    {{ status_display.get(status, status) }}
+                </button>
+                {% endfor %}
+            </div>
+        </label>
+        <label class="block">
+            Date de fin :
+            <input type="date" id="date_fin" name="date_fin" class="border p-2 w-full" value="{{ task.date_fin if task and task.date_fin else '' }}">
+            <p class="text-xs text-slate-500 mt-1">Obligatoire si le statut est "Realise".</p>
+        </label>
+    </div>
+
+    <div class="grid gap-4 md:grid-cols-[1fr_3fr]">
+        <div class="space-y-3">
+            <label class="block">
+                Cible :
+            <select name="cible_type" id="cible_type" class="border p-2 w-full h-10 {% if task %}bg-slate-100 text-slate-500{% endif %}" {% if task %}disabled{% endif %}>
+                    <option value="" {% if not task or not task.cible_type %}selected{% endif %}>Aucune cible</option>
+                    {% for target in targets %}
+                    <option value="{{ target }}" {% if task and task.cible_type == target %}selected{% endif %}>{{ target_labels.get(target, target) }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <div id="cible_filleule" class="hidden">
+                <label class="block">
+                    Filleule :
+                    <select name="cible_id_filleule" class="border p-2 w-full h-10 {% if task %}bg-slate-100 text-slate-500{% endif %}" {% if task %}disabled{% endif %}>
+                        <option value="">Selectionner une filleule</option>
+                        {% for item in filleules %}
+                        <option value="{{ item.id_filleule }}" {% if task and task.cible_type == 'filleule' and task.cible_id == item.id_filleule %}selected{% endif %}>
+                            {{ item.prenom }} {{ item.nom }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </label>
+            </div>
+            <div id="cible_parrain" class="hidden">
+                <label class="block">
+                    Parrain :
+                    <select name="cible_id_parrain" class="border p-2 w-full h-10 {% if task %}bg-slate-100 text-slate-500{% endif %}" {% if task %}disabled{% endif %}>
+                        <option value="">Selectionner un parrain</option>
+                        {% for item in parrains %}
+                        <option value="{{ item.id_parrain }}" {% if task and task.cible_type == 'parrain' and task.cible_id == item.id_parrain %}selected{% endif %}>
+                            {{ item.prenom }} {{ item.nom }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </label>
+            </div>
+            <div id="cible_correspondant" class="hidden">
+                <label class="block">
+                    Referent :
+                    <select name="cible_id_correspondant" class="border p-2 w-full h-10 {% if task %}bg-slate-100 text-slate-500{% endif %}" {% if task %}disabled{% endif %}>
+                        <option value="">Selectionner un referent</option>
+                        {% for item in correspondants %}
+                        <option value="{{ item.id_correspondant }}" {% if task and task.cible_type == 'correspondant' and task.cible_id == item.id_correspondant %}selected{% endif %}>
+                            {{ item.prenom }} {{ item.nom }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </label>
+            </div>
+        </div>
+        <label class="block">
+            Description :
+            <textarea name="description" rows="4" class="border p-2 w-full {% if task %}bg-slate-100 text-slate-500{% endif %}" {% if task %}readonly{% endif %}>{{ task.description if task and task.description else '' }}</textarea>
+        </label>
+    </div>
+
+    <div class="block">
+        <p class="text-sm font-semibold text-slate-700 mb-2">Assignes :</p>
+        <div id="assignees-grid" class="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            {% for user in users %}
+            {% set selected = user.id in assigned_ids %}
+            <button type="button"
+                    class="assignee-button inline-flex items-center justify-center rounded-xl border px-3 py-2 text-sm font-semibold transition {% if selected %}bg-emerald-100 text-emerald-700 border-emerald-200{% else %}bg-slate-50 text-slate-700 border-slate-200 hover:border-slate-300{% endif %}"
+                    data-user-id="{{ user.id }}"
+                    aria-pressed="{{ 'true' if selected else 'false' }}">
+                {{ user.fullname if user.fullname else user.email }}
+            </button>
+            {% if selected %}
+            <input type="hidden" name="assignees" value="{{ user.id }}" data-assignee-input="{{ user.id }}">
+            {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+
+    <button class="bg-[#F2932B] text-white px-5 py-2 rounded-full font-semibold hover:shadow-soft transition">{{ action }}</button>
+</form>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const targetSelect = document.getElementById("cible_type");
+        const statusInput = document.getElementById("statut-input");
+        const statusButtons = Array.from(document.querySelectorAll(".status-button"));
+        const dateFin = document.getElementById("date_fin");
+        const assigneeButtons = Array.from(document.querySelectorAll(".assignee-button"));
+        const isEdit = {{ "true" if task else "false" }};
+
+        const sections = {
+            filleule: document.getElementById("cible_filleule"),
+            parrain: document.getElementById("cible_parrain"),
+            correspondant: document.getElementById("cible_correspondant"),
+        };
+
+        const updateTargets = () => {
+            const selected = targetSelect.value;
+            Object.entries(sections).forEach(([key, section]) => {
+                if (!section) {
+                    return;
+                }
+                const active = key === selected;
+                section.classList.toggle("hidden", !active);
+            });
+        };
+
+        const updateDateFin = () => {
+            const needsDate = statusInput.value === "Realise";
+            dateFin.required = needsDate;
+        };
+
+        const styleStatusButtons = (selectedValue, currentOrder) => {
+            statusButtons.forEach((button) => {
+                const value = button.dataset.value || "";
+                const order = Number(button.dataset.order || 0);
+                const colorClasses = (button.dataset.color || "").split(" ");
+                const isActive = value === selectedValue;
+                button.classList.toggle("text-white", isActive);
+                button.classList.toggle("text-slate-600", !isActive);
+                button.classList.toggle("bg-white", !isActive);
+                button.classList.toggle("border-slate-200", !isActive);
+                colorClasses.forEach((cls) => {
+                    if (!cls) {
+                        return;
+                    }
+                    button.classList.toggle(cls, isActive);
+                });
+
+                if (isEdit && currentOrder >= 0 && order < currentOrder) {
+                    button.disabled = true;
+                    button.classList.add("opacity-50", "cursor-not-allowed");
+                } else {
+                    button.disabled = false;
+                    button.classList.remove("opacity-50", "cursor-not-allowed");
+                }
+            });
+        };
+
+        updateTargets();
+        updateDateFin();
+        const initialStatus = statusInput.value || "A faire";
+        const initialOrder = statusButtons.find((button) => button.dataset.value === initialStatus)?.dataset.order;
+        let currentOrder = initialOrder ? Number(initialOrder) : 0;
+        styleStatusButtons(initialStatus, currentOrder);
+        targetSelect.addEventListener("change", updateTargets);
+
+        statusButtons.forEach((button) => {
+            button.addEventListener("click", () => {
+                const value = button.dataset.value || "";
+                const order = Number(button.dataset.order || 0);
+                if (isEdit && order < currentOrder) {
+                    return;
+                }
+                statusInput.value = value;
+                if (isEdit && order > currentOrder) {
+                    currentOrder = order;
+                }
+                styleStatusButtons(value, currentOrder);
+                updateDateFin();
+            });
+        });
+
+        assigneeButtons.forEach((button) => {
+            button.addEventListener("click", () => {
+                const userId = button.dataset.userId;
+                if (!userId) {
+                    return;
+                }
+                const selected = button.getAttribute("aria-pressed") === "true";
+                const container = button.parentElement;
+                const existingInput = container.querySelector(`[data-assignee-input=\"${userId}\"]`);
+                if (selected) {
+                    button.setAttribute("aria-pressed", "false");
+                    button.classList.remove("bg-emerald-100", "text-emerald-700", "border-emerald-200");
+                    button.classList.add("bg-slate-50", "text-slate-700", "border-slate-200", "hover:border-slate-300");
+                    if (existingInput) {
+                        existingInput.remove();
+                    }
+                } else {
+                    button.setAttribute("aria-pressed", "true");
+                    button.classList.add("bg-emerald-100", "text-emerald-700", "border-emerald-200");
+                    button.classList.remove("bg-slate-50", "text-slate-700", "border-slate-200", "hover:border-slate-300");
+                    if (!existingInput) {
+                        const input = document.createElement("input");
+                        input.type = "hidden";
+                        input.name = "assignees";
+                        input.value = userId;
+                        input.dataset.assigneeInput = userId;
+                        container.appendChild(input);
+                    }
+                }
+            });
+        });
+    });
+</script>
+
+{% if task %}
+<div class="mt-8 rounded-2xl border border-slate-100 bg-white/90 p-4 shadow-soft">
+    <h3 class="font-semibold mb-3">Commentaires cumules</h3>
+    <div class="text-sm whitespace-pre-line">{{ comment_thread if comment_thread else "Aucun commentaire" }}</div>
+</div>
+
+{% if can_comment %}
+<div class="mt-4 rounded-2xl border border-slate-100 bg-white/90 p-4 shadow-soft">
+    <h3 class="font-semibold mb-3">Ajouter un commentaire</h3>
+    <form method="post" action="/taches/{{ task.id_tache }}/comment" class="space-y-3">
+        <textarea name="content" rows="4" required class="border p-2 w-full" placeholder="Ajouter un commentaire..."></textarea>
+        <button class="bg-[#F2932B] text-white px-5 py-2 rounded-full font-semibold hover:shadow-soft transition">Ajouter</button>
+    </form>
+</div>
+{% endif %}
+{% endif %}
+{% endblock %}

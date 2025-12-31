@@ -13,3 +13,5 @@ class User(Base):
     reset_token_expires = Column(DateTime, nullable=True)
 
     roles = relationship("Role", secondary="user_roles", back_populates="users")
+    tasks = relationship("Tache", secondary="task_assignees", back_populates="assignees")
+    task_comments = relationship("TaskComment", back_populates="author")

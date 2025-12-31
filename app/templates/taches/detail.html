@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}Tâches{% endblock %}
+
+{% block content %}
+<div class="flex flex-col gap-4 mb-6 sm:flex-row sm:items-center sm:justify-between">
+    <div>
+        <p class="text-sm uppercase tracking-[0.2em] text-[#F2932B] font-semibold">Tâches</p>
+        <h2 class="font-display text-2xl">{{ task.titre }}</h2>
+        <p class="text-slate-600 text-sm">{{ object_labels.get(task.objet, task.objet) }}</p>
+    </div>
+    <div class="flex flex-wrap items-center gap-3">
+        {% if can_manage %}
+        <a href="/taches/{{ task.id_tache }}/edit" class="inline-flex items-center gap-2 rounded-full border border-[#4969A430] bg-[#4969A418] px-4 py-2 text-sm font-semibold text-[#4969A4] hover:-translate-y-0.5 transition shadow-soft">
+            Modifier
+        </a>
+        {% endif %}
+        <a href="/taches" class="inline-flex items-center px-4 py-2 rounded-full border border-[#F2932B33] text-[#F2932B] font-semibold hover:bg-[#F2932B10] transition">
+            Retour liste
+        </a>
+    </div>
+</div>
+
+<div class="grid gap-4 lg:grid-cols-3">
+    <section class="rounded-2xl border border-slate-100 bg-white/90 p-4 shadow-soft">
+        <h3 class="font-semibold mb-3">Informations</h3>
+        <div class="space-y-1 text-sm leading-snug">
+            <p><strong>Objet :</strong> {{ object_labels.get(task.objet, task.objet) }}</p>
+            <p>
+                <strong>Statut :</strong>
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold {{ status_badges.get(task.statut, 'bg-slate-100 text-slate-700') }}">
+                    {{ status_labels.get(task.statut, task.statut) }}
+                </span>
+            </p>
+            <p><strong>Cible :</strong> {{ target_label }}</p>
+            <p><strong>Creer par :</strong> {{ task.created_by.fullname if task.created_by and task.created_by.fullname else (task.created_by.email if task.created_by else "-") }}</p>
+        </div>
+    </section>
+
+    <section class="rounded-2xl border border-slate-100 bg-white/90 p-4 shadow-soft">
+        <h3 class="font-semibold mb-3">Calendrier</h3>
+        <div class="space-y-1 text-sm leading-snug">
+            <p><strong>Date de debut :</strong> {{ task.date_debut if task.date_debut else "-" }}</p>
+            <p><strong>Date de fin :</strong> {{ task.date_fin if task.date_fin else "-" }}</p>
+            <p><strong>Mis a jour :</strong> {{ task.updated_at.strftime('%Y-%m-%d %H:%M') if task.updated_at else "-" }}</p>
+        </div>
+    </section>
+
+    <section class="rounded-2xl border border-slate-100 bg-white/90 p-4 shadow-soft">
+        <h3 class="font-semibold mb-3">Assignes</h3>
+        <p class="text-sm leading-snug">{{ assignees_display }}</p>
+    </section>
+</div>
+
+<div class="mt-6 rounded-2xl border border-slate-100 bg-white/90 p-4 shadow-soft">
+    <h3 class="font-semibold mb-3">Description</h3>
+    <div class="text-sm leading-snug whitespace-pre-line">{{ task.description if task.description else "-" }}</div>
+</div>
+
+<div class="mt-6 grid gap-4 lg:grid-cols-2">
+    <section class="rounded-2xl border border-slate-100 bg-white/90 p-4 shadow-soft">
+        <h3 class="font-semibold mb-3">Commentaires cumules</h3>
+        <div class="text-sm whitespace-pre-line">{{ comment_thread if comment_thread else "Aucun commentaire" }}</div>
+    </section>
+
+    {% if can_comment %}
+    <section class="rounded-2xl border border-slate-100 bg-white/90 p-4 shadow-soft">
+        <h3 class="font-semibold mb-3">Ajouter un commentaire</h3>
+        <form method="post" action="/taches/{{ task.id_tache }}/comment" class="space-y-3">
+            <textarea name="content" rows="4" required class="border p-2 w-full" placeholder="Ajouter un commentaire..."></textarea>
+            <button class="bg-[#F2932B] text-white px-5 py-2 rounded-full font-semibold hover:shadow-soft transition">Ajouter</button>
+        </form>
+    </section>
+    {% endif %}
+</div>
+
+{% endblock %}

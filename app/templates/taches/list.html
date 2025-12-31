@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+
+{% block title %}Tâches{% endblock %}
+
+{% block content %}
+<div class="flex flex-col gap-4 mb-6 sm:flex-row sm:items-center sm:justify-between">
+    <div>
+        <p class="text-sm uppercase tracking-[0.2em] text-[#F2932B] font-semibold">Tâches</p>
+        <h2 class="font-display text-2xl">Pilotage des actions FAE</h2>
+        <p class="text-slate-600 text-sm">Suivi des demandes, relances et actions internes.</p>
+    </div>
+    <div class="flex flex-wrap items-center gap-3">
+        {% if can_manage %}
+        <a href="/taches/new" class="inline-flex items-center gap-2 rounded-full bg-[#F2932B] px-4 py-2 text-sm font-semibold text-white shadow-soft hover:-translate-y-0.5 transition">
+            Nouvelle tache
+        </a>
+        {% endif %}
+        <a href="/taches/pdf" class="inline-flex items-center gap-2 rounded-full border border-[#4969A430] bg-[#4969A418] px-4 py-2 text-sm font-semibold text-[#4969A4] hover:-translate-y-0.5 transition shadow-soft" target="_blank" rel="noopener">
+            PDF
+        </a>
+        <a href="/" class="inline-flex items-center px-4 py-2 rounded-full border border-[#F2932B33] text-[#F2932B] font-semibold hover:bg-[#F2932B10] transition">
+            Retour tableau de bord
+        </a>
+    </div>
+</div>
+
+<div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 mb-6">
+    {% for status in statuses %}
+    <button type="button"
+            data-status="{{ status_labels.get(status, status) }}"
+            class="tache-status-filter rounded-2xl border border-slate-100 bg-white/90 px-4 py-3 shadow-soft text-left transition hover:-translate-y-0.5 hover:shadow-md">
+        <p class="text-xs uppercase tracking-[0.2em] text-slate-500">{{ status_labels.get(status, status) }}</p>
+        <p class="text-2xl font-semibold text-slate-800">{{ status_counts.get(status, 0) }}</p>
+    </button>
+    {% endfor %}
+</div>
+
+<div class="overflow-hidden rounded-2xl bg-white/95 border border-[#F2932B1f] shadow-soft">
+    <table class="min-w-full text-left">
+        <thead class="bg-gradient-to-r from-[#F2932B14] via-[#F2A75A20] to-[#4969A420] text-slate-700">
+            <tr>
+                <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide">
+                    <div class="flex flex-col gap-2">
+                        <span>Titre</span>
+                        <input data-col="0" class="tache-filter w-full rounded-lg border border-slate-200 bg-white/80 px-2 py-1 text-xs normal-case font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#F2932B40]" placeholder="Filtrer">
+                    </div>
+                </th>
+                <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide">
+                    <div class="flex flex-col gap-2">
+                        <span>Objet</span>
+                        <input data-col="1" class="tache-filter w-full rounded-lg border border-slate-200 bg-white/80 px-2 py-1 text-xs normal-case font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#F2932B40]" placeholder="Filtrer">
+                    </div>
+                </th>
+                <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide">
+                    <div class="flex flex-col gap-2">
+                        <span>Cible</span>
+                        <input data-col="2" class="tache-filter w-full rounded-lg border border-slate-200 bg-white/80 px-2 py-1 text-xs normal-case font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#F2932B40]" placeholder="Filtrer">
+                    </div>
+                </th>
+                <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-center">
+                    <div class="flex flex-col gap-2 items-center">
+                        <span>Statut</span>
+                        <input data-col="3" class="tache-filter w-full rounded-lg border border-slate-200 bg-white/80 px-2 py-1 text-xs normal-case font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#F2932B40]" placeholder="Filtrer">
+                    </div>
+                </th>
+                <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide">
+                    <button type="button" id="sort-debut" class="inline-flex items-center gap-2 text-left hover:text-[#F2932B] transition">
+                        Debut
+                        <span id="sort-icon" class="text-[10px] text-slate-400">↕</span>
+                    </button>
+                </th>
+                <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-right">Actions</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-[#F2932B14]">
+            {% for task in tasks %}
+            <tr class="hover:bg-[#F2932B0f] transition" data-debut="{{ task.date_debut if task.date_debut else '' }}">
+                <td class="px-4 py-3 font-semibold text-slate-800">{{ task.titre }}</td>
+                <td class="px-4 py-3">{{ object_labels.get(task.objet, task.objet) }}</td>
+                <td class="px-4 py-3">{{ target_labels.get(task.id_tache, "-") }}</td>
+                <td class="px-4 py-3 text-center">
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold {{ status_badges.get(task.statut, 'bg-slate-100 text-slate-700') }}">
+                        {{ status_labels.get(task.statut, task.statut) }}
+                    </span>
+                </td>
+                <td class="px-4 py-3">{{ task.date_debut if task.date_debut else "-" }}</td>
+                <td class="px-4 py-3 text-right">
+                    <a href="/taches/{{ task.id_tache }}" class="inline-flex items-center gap-2 text-[#F2932B] font-semibold hover:translate-x-1 transition">
+                        Voir <span>→</span>
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const table = document.querySelector("table");
+        if (!table) {
+            return;
+        }
+        const tbody = table.querySelector("tbody");
+        const rows = Array.from(tbody.querySelectorAll("tr"));
+        const filters = Array.from(table.querySelectorAll(".tache-filter"));
+        const sortButton = document.getElementById("sort-debut");
+        const sortIcon = document.getElementById("sort-icon");
+        const statusFilterButtons = Array.from(document.querySelectorAll(".tache-status-filter"));
+        let sortDirection = 0;
+
+        const normalize = (value) => value.toLowerCase().trim();
+
+        const applyFilters = () => {
+            rows.forEach((row) => {
+                const cells = row.querySelectorAll("td");
+                const matches = filters.every((input) => {
+                    const query = normalize(input.value || "");
+                    if (!query) {
+                        return true;
+                    }
+                    const col = Number(input.dataset.col);
+                    const cell = cells[col];
+                    if (!cell) {
+                        return true;
+                    }
+                    return normalize(cell.textContent).includes(query);
+                });
+                row.classList.toggle("hidden", !matches);
+            });
+        };
+
+        const sortRows = () => {
+            if (sortDirection === 0) {
+                sortIcon.textContent = "↕";
+                rows.forEach((row) => tbody.appendChild(row));
+                applyFilters();
+                return;
+            }
+            rows.sort((a, b) => {
+                const aValue = a.dataset.debut || "";
+                const bValue = b.dataset.debut || "";
+                if (!aValue && !bValue) {
+                    return 0;
+                }
+                if (!aValue) {
+                    return 1;
+                }
+                if (!bValue) {
+                    return -1;
+                }
+                if (aValue === bValue) {
+                    return 0;
+                }
+                return sortDirection === 1 ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+            });
+            rows.forEach((row) => tbody.appendChild(row));
+            sortIcon.textContent = sortDirection === 1 ? "↑" : "↓";
+            applyFilters();
+        };
+
+        filters.forEach((input) => {
+            input.addEventListener("input", applyFilters);
+        });
+
+        const statusInput = filters.find((input) => input.dataset.col === "3");
+        if (statusInput) {
+            statusFilterButtons.forEach((button) => {
+                button.addEventListener("click", () => {
+                    const value = button.dataset.status || "";
+                    statusInput.value = statusInput.value === value ? "" : value;
+                    applyFilters();
+                });
+            });
+        }
+
+        if (sortButton) {
+            sortButton.addEventListener("click", () => {
+                sortDirection = sortDirection === 1 ? -1 : 1;
+                sortRows();
+            });
+        }
+    });
+</script>
+{% endblock %}
