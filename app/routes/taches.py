@@ -3,6 +3,7 @@ from datetime import date, datetime
 from fastapi import APIRouter, Depends, Form, HTTPException, Request
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
+from sqlalchemy import case
 from sqlalchemy.orm import Session, selectinload
 
 from app.authz import has_any_role
@@ -11,11 +12,11 @@ from app.models.correspondant import Correspondant
 from app.models.filleule import Filleule
 from app.models.parrain import Parrain
 from app.models.tache import (
-    TASK_OBJECTS,
     TASK_STATUSES,
     TASK_TARGETS,
     TaskComment,
     Tache,
+    TacheObjet,
 )
 from app.models.user import User
 from app.schemas.tache import TacheCommentCreate, TacheCreate, TacheResponse, TacheUpdate
@@ -109,6 +110,21 @@ def parse_int(value: str | None) -> int | None:
         raise HTTPException(400, "Valeur invalide") from exc
 
 
+def fetch_task_objects(db: Session) -> list[TacheObjet]:
+    return (
+        db.query(TacheObjet)
+        .order_by(case((TacheObjet.code == "autre", 1), else_=0), TacheObjet.code)
+        .all()
+    )
+
+
+def get_task_object(db: Session, objet_id: int) -> TacheObjet:
+    task_objet = db.query(TacheObjet).filter(TacheObjet.id_objet == objet_id).first()
+    if not task_objet:
+        raise HTTPException(400, "Objet invalide")
+    return task_objet
+
+
 def resolve_target_id(
     cible_type: str,
     cible_id_filleule: str | None,
@@ -187,7 +203,11 @@ def taches_list_html(request: Request, db: Session = Depends(get_db)):
     manage = can_manage_tasks(request)
     query = (
         db.query(Tache)
-        .options(selectinload(Tache.assignees), selectinload(Tache.created_by))
+        .options(
+            selectinload(Tache.assignees),
+            selectinload(Tache.created_by),
+            selectinload(Tache.objet),
+        )
         .order_by(Tache.date_debut.desc(), Tache.id_tache.desc())
     )
     if not manage:
@@ -231,6 +251,7 @@ def taches_pdf(request: Request, db: Session = Depends(get_db)):
         .options(
             selectinload(Tache.assignees),
             selectinload(Tache.comments).selectinload(TaskComment.author),
+            selectinload(Tache.objet),
         )
         .filter(Tache.statut.in_(open_statuses))
         .order_by(Tache.statut, Tache.date_debut, Tache.id_tache)
@@ -295,6 +316,7 @@ def tache_new_form(request: Request, db: Session = Depends(get_db)):
     filleules = db.query(Filleule).order_by(Filleule.nom, Filleule.prenom).all()
     parrains = db.query(Parrain).order_by(Parrain.nom, Parrain.prenom).all()
     correspondants = db.query(Correspondant).order_by(Correspondant.nom, Correspondant.prenom).all()
+    objects = fetch_task_objects(db)
     return templates.TemplateResponse(
         "taches/form.html",
         {
@@ -305,7 +327,7 @@ def tache_new_form(request: Request, db: Session = Depends(get_db)):
             "status_labels": TASK_STATUS_LABELS,
             "target_labels": TASK_TARGET_LABELS,
             "statuses": TASK_STATUSES,
-            "objects": TASK_OBJECTS,
+            "objects": objects,
             "targets": TASK_TARGETS,
             "users": users,
             "assigned_ids": [],
@@ -320,7 +342,7 @@ def tache_new_form(request: Request, db: Session = Depends(get_db)):
 def tache_create(
     request: Request,
     titre: str = Form(...),
-    objet: str = Form(...),
+    objet_id: str = Form(...),
     statut: str = Form(...),
     date_debut: str = Form(...),
     date_fin: str = Form(None),
@@ -337,15 +359,30 @@ def tache_create(
     if not can_manage_tasks(request):
         raise HTTPException(403, "Acces interdit")
 
+    objet_id_val = parse_int(objet_id)
+    if objet_id_val is None:
+        raise HTTPException(400, "Objet invalide")
+    task_objet = get_task_object(db, objet_id_val)
+
     if statut not in TASK_STATUSES:
         raise HTTPException(400, "Statut invalide")
 
-    if TASK_STATUSES.index(statut) < TASK_STATUSES.index(task.statut):
-        raise HTTPException(400, "Impossible de revenir en arriere sur le statut")
+    cible_type_value = (cible_type or "").strip() or "autre"
+    if cible_type_value not in TASK_TARGETS:
+        raise HTTPException(400, "Cible invalide")
 
-    date_debut_val = task.date_debut
+    date_debut_val = parse_date(date_debut)
     date_fin_val = parse_date(date_fin)
     validate_task_data(statut, date_debut_val, date_fin_val)
+
+    cible_id = resolve_target_id(
+        cible_type_value,
+        cible_id_filleule,
+        cible_id_parrain,
+        cible_id_correspondant,
+    )
+    if cible_type_value in {"filleule", "parrain", "correspondant"} and not cible_id:
+        raise HTTPException(400, "La cible selectionnee est obligatoire")
 
     assignee_ids = []
     for value in assignees:
@@ -359,7 +396,7 @@ def tache_create(
     task = Tache(
         titre=titre.strip(),
         description=description.strip() if description else None,
-        objet=objet,
+        objet_id=task_objet.id_objet,
         statut=statut,
         date_debut=date_debut_val,
         date_fin=date_fin_val if statut == "Realise" else None,
@@ -386,6 +423,7 @@ def tache_detail(tache_id: int, request: Request, db: Session = Depends(get_db))
             selectinload(Tache.assignees),
             selectinload(Tache.created_by),
             selectinload(Tache.comments).selectinload(TaskComment.author),
+            selectinload(Tache.objet),
         )
         .filter(Tache.id_tache == tache_id)
         .first()
@@ -431,6 +469,7 @@ def tache_edit_form(tache_id: int, request: Request, db: Session = Depends(get_d
         .options(
             selectinload(Tache.assignees),
             selectinload(Tache.comments).selectinload(TaskComment.author),
+            selectinload(Tache.objet),
         )
         .filter(Tache.id_tache == tache_id)
         .first()
@@ -442,6 +481,7 @@ def tache_edit_form(tache_id: int, request: Request, db: Session = Depends(get_d
     filleules = db.query(Filleule).order_by(Filleule.nom, Filleule.prenom).all()
     parrains = db.query(Parrain).order_by(Parrain.nom, Parrain.prenom).all()
     correspondants = db.query(Correspondant).order_by(Correspondant.nom, Correspondant.prenom).all()
+    objects = fetch_task_objects(db)
 
     return templates.TemplateResponse(
         "taches/form.html",
@@ -453,7 +493,7 @@ def tache_edit_form(tache_id: int, request: Request, db: Session = Depends(get_d
             "status_labels": TASK_STATUS_LABELS,
             "target_labels": TASK_TARGET_LABELS,
             "statuses": TASK_STATUSES,
-            "objects": TASK_OBJECTS,
+            "objects": objects,
             "targets": TASK_TARGETS,
             "users": users,
             "assigned_ids": [user.id for user in task.assignees],
@@ -471,7 +511,7 @@ def tache_update(
     tache_id: int,
     request: Request,
     titre: str = Form(...),
-    objet: str = Form(...),
+    objet_id: str = Form(...),
     statut: str = Form(...),
     date_debut: str = Form(...),
     date_fin: str = Form(None),
@@ -497,8 +537,11 @@ def tache_update(
     if not task:
         raise HTTPException(404, "Tache introuvable")
 
-    if objet not in TASK_OBJECTS:
+    objet_id_val = parse_int(objet_id)
+    if objet_id_val is None:
         raise HTTPException(400, "Objet invalide")
+    task_objet = get_task_object(db, objet_id_val)
+
     if statut not in TASK_STATUSES:
         raise HTTPException(400, "Statut invalide")
     cible_type_value = (cible_type or "").strip() or "autre"
@@ -526,6 +569,7 @@ def tache_update(
         assignee_users = db.query(User).filter(User.id.in_(assignee_ids)).all()
 
     task.statut = statut
+    task.objet_id = task_objet.id_objet
     task.date_fin = date_fin_val if statut == "Realise" else None
     task.assignees = assignee_users
 
@@ -591,8 +635,7 @@ def get_tache(tache_id: int, db: Session = Depends(get_db)):
 
 @router.post("/api", response_model=TacheResponse)
 def create_tache(data: TacheCreate, db: Session = Depends(get_db)):
-    if data.objet not in TASK_OBJECTS:
-        raise HTTPException(400, "Objet invalide")
+    task_objet = get_task_object(db, data.objet_id)
     if data.statut not in TASK_STATUSES:
         raise HTTPException(400, "Statut invalide")
     if data.cible_type not in TASK_TARGETS:
@@ -609,7 +652,7 @@ def create_tache(data: TacheCreate, db: Session = Depends(get_db)):
     task = Tache(
         titre=data.titre.strip(),
         description=data.description.strip() if data.description else None,
-        objet=data.objet,
+        objet_id=task_objet.id_objet,
         statut=data.statut,
         date_debut=data.date_debut,
         date_fin=data.date_fin if data.statut == "Realise" else None,
@@ -630,8 +673,7 @@ def update_tache(tache_id: int, data: TacheUpdate, db: Session = Depends(get_db)
     if not task:
         raise HTTPException(404, "Tache introuvable")
 
-    if data.objet not in TASK_OBJECTS:
-        raise HTTPException(400, "Objet invalide")
+    task_objet = get_task_object(db, data.objet_id)
     if data.statut not in TASK_STATUSES:
         raise HTTPException(400, "Statut invalide")
     if data.cible_type not in TASK_TARGETS:
@@ -646,7 +688,7 @@ def update_tache(tache_id: int, data: TacheUpdate, db: Session = Depends(get_db)
         assignee_users = db.query(User).filter(User.id.in_(data.assignee_ids)).all()
 
     task.titre = data.titre.strip()
-    task.objet = data.objet
+    task.objet_id = task_objet.id_objet
     task.statut = data.statut
     task.date_debut = data.date_debut
     task.date_fin = data.date_fin if data.statut == "Realise" else None

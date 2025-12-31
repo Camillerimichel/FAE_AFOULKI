@@ -27,6 +27,7 @@ templates = Jinja2Templates(directory="app/templates")
 def liste_filleules_html(
     request: Request,
     filiere: str | None = Query(default=None),
+    village: str | None = Query(default=None),
     sans_parrains: int | None = None,
     couverture_sante: int | None = None,
     db: Session = Depends(get_db),
@@ -68,6 +69,14 @@ def liste_filleules_html(
                 .subquery()
             )
             query = query.filter(Filleule.id_filleule.in_(ids_subquery))
+    if village:
+        village_value = village.strip().lower()
+        if village_value:
+            query = (
+                query.filter(Filleule.village.isnot(None))
+                .filter(func.trim(Filleule.village) != "")
+                .filter(func.lower(func.trim(Filleule.village)) == village_value)
+            )
     if sans_parrains:
         query = query.filter(~Filleule.parrainages.any())
     if couverture_sante:
@@ -77,6 +86,7 @@ def liste_filleules_html(
             .filter(func.lower(func.trim(Filleule.couverture_sante)) != "none")
         )
 
+    query = query.order_by(Filleule.nom, Filleule.prenom)
     data = query.all()
 
     def periode_from_scolarite(record: Scolarite) -> str | None:
@@ -125,6 +135,117 @@ def liste_filleules_html(
             "count_couverture_sante": count_couverture_sante,
             "debug_couverture_sante_param": couverture_sante,
             "debug_couverture_sante_filtered": len(data),
+        }
+    )
+
+
+@router.get("/html/pdf")
+def liste_filleules_pdf(
+    request: Request,
+    filiere: str | None = Query(default=None),
+    village: str | None = Query(default=None),
+    sans_parrains: int | None = None,
+    couverture_sante: int | None = None,
+    db: Session = Depends(get_db),
+):
+    """
+    Affiche une version PDF (HTML) de la liste des filleules.
+    Page protégée : nécessite une session utilisateur.
+    """
+    if not request.state.user:
+        return RedirectResponse("/auth/login")
+
+    query = db.query(Filleule).options(
+        joinedload(Filleule.scolarites).joinedload(Scolarite.etablissement),
+        joinedload(Filleule.scolarites).joinedload(Scolarite.annee_scolaire_ref),
+        joinedload(Filleule.correspondant),
+        joinedload(Filleule.parrainages).joinedload(Parrainage.parrain),
+    )
+    if filiere:
+        filiere_value = filiere.strip().lower()
+        if filiere_value:
+            ids_subquery = (
+                db.query(Scolarite.id_filleule)
+                .filter(Scolarite.filiere.isnot(None))
+                .filter(func.trim(Scolarite.filiere) != "")
+                .filter(func.lower(Scolarite.filiere) == filiere_value)
+                .distinct()
+                .subquery()
+            )
+            query = query.filter(Filleule.id_filleule.in_(ids_subquery))
+    if village:
+        village_value = village.strip().lower()
+        if village_value:
+            query = (
+                query.filter(Filleule.village.isnot(None))
+                .filter(func.trim(Filleule.village) != "")
+                .filter(func.lower(func.trim(Filleule.village)) == village_value)
+            )
+    if sans_parrains:
+        query = query.filter(~Filleule.parrainages.any())
+    if couverture_sante:
+        query = (
+            query.filter(Filleule.couverture_sante.isnot(None))
+            .filter(func.trim(Filleule.couverture_sante) != "")
+            .filter(func.lower(func.trim(Filleule.couverture_sante)) != "none")
+        )
+
+    data = query.all()
+
+    def periode_from_scolarite(record: Scolarite) -> str | None:
+        if record.annee_scolaire_ref and record.annee_scolaire_ref.periode:
+            return record.annee_scolaire_ref.periode
+        return record.annee_scolaire
+
+    def start_year_key(periode: str | None) -> int:
+        if not periode:
+            return -1
+        cleaned = periode.replace("-", "/")
+        first = cleaned.split("/", 1)[0]
+        digits = "".join(ch for ch in first if ch.isdigit())
+        if len(digits) < 4:
+            return -1
+        try:
+            return int(digits[:4])
+        except ValueError:
+            return -1
+
+    recent_scolarite: dict[int, dict[str, str]] = {}
+    for filleule in data:
+        best_key = (-1, -1)
+        best_item: dict[str, str] | None = None
+        for record in filleule.scolarites:
+            periode = periode_from_scolarite(record)
+            key = (start_year_key(periode), record.id_scolarite or 0)
+            if key > best_key:
+                best_key = key
+                best_item = {
+                    "periode": periode or "-",
+                    "etablissement": record.etablissement.nom if record.etablissement else "-",
+                }
+        if best_item:
+            recent_scolarite[filleule.id_filleule] = best_item
+
+    parrain_labels: dict[int, str] = {}
+    for filleule in data:
+        seen_parrains = set()
+        names = []
+        for parrainage in filleule.parrainages:
+            parrain = parrainage.parrain
+            if not parrain or parrain.id_parrain in seen_parrains:
+                continue
+            seen_parrains.add(parrain.id_parrain)
+            names.append(f"{parrain.prenom} {parrain.nom}".strip())
+        parrain_labels[filleule.id_filleule] = ", ".join(names) if names else "-"
+
+    return templates.TemplateResponse(
+        "filleules/pdf.html",
+        {
+            "request": request,
+            "filleules": data,
+            "recent_scolarite": recent_scolarite,
+            "parrain_labels": parrain_labels,
+            "today_label": datetime.now().strftime("%d/%m/%Y"),
         }
     )
 

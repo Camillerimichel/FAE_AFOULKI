@@ -6,18 +6,16 @@ from sqlalchemy.orm import relationship
 from app.database import Base
 
 TASK_STATUSES = ("A faire", "En cours", "En attente", "Realise")
-TASK_OBJECTS = (
-    "demande_info",
-    "demande_document",
-    "demande_entretien",
-    "demande_aide_sociale",
-    "preparation_remise_bourses",
-    "attribution_bourses",
-    "relance_dons",
-    "envoi_email",
-    "autre",
-)
 TASK_TARGETS = ("filleule", "correspondant", "parrain", "backoffice", "fae", "autre")
+
+
+class TacheObjet(Base):
+    __tablename__ = "tache_objet"
+
+    id_objet = Column(Integer, primary_key=True, index=True)
+    code = Column(String(64), nullable=False, unique=True)
+
+    tasks = relationship("Tache", back_populates="objet")
 
 
 class TaskAssignee(Base):
@@ -41,7 +39,7 @@ class Tache(Base):
     id_tache = Column(Integer, primary_key=True, index=True)
     titre = Column(String(255), nullable=False)
     description = Column(Text)
-    objet = Column(Enum(*TASK_OBJECTS, name="tache_objet"), nullable=False)
+    objet_id = Column(Integer, ForeignKey("tache_objet.id_objet", ondelete="RESTRICT"), nullable=False)
     statut = Column(Enum(*TASK_STATUSES, name="tache_statut"), nullable=False, default="A faire")
     date_debut = Column(Date, nullable=False)
     date_fin = Column(Date)
@@ -55,6 +53,7 @@ class Tache(Base):
         onupdate=datetime.datetime.utcnow,
     )
 
+    objet = relationship("TacheObjet", back_populates="tasks")
     created_by = relationship("User", foreign_keys=[created_by_id])
     assignees = relationship("User", secondary="task_assignees", back_populates="tasks")
     comments = relationship(

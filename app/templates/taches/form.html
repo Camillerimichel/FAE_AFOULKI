@@ -23,16 +23,16 @@
         <label class="block">
             Objet :
             {% if task %}
-            <input type="hidden" name="objet" value="{{ task.objet }}">
+            <input type="hidden" name="objet_id" value="{{ task.objet_id }}">
             <select disabled class="border p-2 w-full h-10 bg-slate-100 text-slate-500">
                 {% for obj in objects %}
-                <option value="{{ obj }}" {% if task and task.objet == obj %}selected{% endif %}>{{ object_labels.get(obj, obj) }}</option>
+                <option value="{{ obj.id_objet }}" {% if task and task.objet_id == obj.id_objet %}selected{% endif %}>{{ object_labels.get(obj.code, obj.code) }}</option>
                 {% endfor %}
             </select>
             {% else %}
-            <select name="objet" required class="border p-2 w-full h-10">
+            <select name="objet_id" required class="border p-2 w-full h-10">
                 {% for obj in objects %}
-                <option value="{{ obj }}">{{ object_labels.get(obj, obj) }}</option>
+                <option value="{{ obj.id_objet }}">{{ object_labels.get(obj.code, obj.code) }}</option>
                 {% endfor %}
             </select>
             {% endif %}

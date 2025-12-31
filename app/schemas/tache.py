@@ -7,7 +7,7 @@ from pydantic import BaseModel, Field
 class TacheBase(BaseModel):
     titre: str
     description: Optional[str] = None
-    objet: str
+    objet_id: int
     statut: str
     date_debut: date
     date_fin: Optional[date] = None

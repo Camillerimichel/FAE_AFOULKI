@@ -196,7 +196,8 @@
                     <div class="date-title">Date de début : {{ date_section.date_label }}</div>
                     {% for item in date_section.tasks %}
                     <div class="task-card">
-                        <div class="task-title">{{ item.task.titre }} — {{ object_labels.get(item.task.objet, item.task.objet) }}</div>
+                        {% set objet_code = item.task.objet.code if item.task.objet else None %}
+                        <div class="task-title">{{ item.task.titre }} — {{ object_labels.get(objet_code, objet_code or "-") }}</div>
                         <div class="task-meta">
                             <strong>Rappel :</strong>
                             {{ item.task.description if item.task.description else "-" }}

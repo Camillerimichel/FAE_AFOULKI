@@ -76,7 +76,8 @@
             {% for task in tasks %}
             <tr class="hover:bg-[#F2932B0f] transition" data-debut="{{ task.date_debut if task.date_debut else '' }}">
                 <td class="px-4 py-3 font-semibold text-slate-800">{{ task.titre }}</td>
-                <td class="px-4 py-3">{{ object_labels.get(task.objet, task.objet) }}</td>
+                {% set objet_code = task.objet.code if task.objet else None %}
+                <td class="px-4 py-3">{{ object_labels.get(objet_code, objet_code or "-") }}</td>
                 <td class="px-4 py-3">{{ target_labels.get(task.id_tache, "-") }}</td>
                 <td class="px-4 py-3 text-center">
                     <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold {{ status_badges.get(task.statut, 'bg-slate-100 text-slate-700') }}">

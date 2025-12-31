@@ -7,7 +7,8 @@
     <div>
         <p class="text-sm uppercase tracking-[0.2em] text-[#F2932B] font-semibold">Tâches</p>
         <h2 class="font-display text-2xl">{{ task.titre }}</h2>
-        <p class="text-slate-600 text-sm">{{ object_labels.get(task.objet, task.objet) }}</p>
+        {% set objet_code = task.objet.code if task.objet else None %}
+        <p class="text-slate-600 text-sm">{{ object_labels.get(objet_code, objet_code or "-") }}</p>
     </div>
     <div class="flex flex-wrap items-center gap-3">
         {% if can_manage %}
@@ -25,7 +26,7 @@
     <section class="rounded-2xl border border-slate-100 bg-white/90 p-4 shadow-soft">
         <h3 class="font-semibold mb-3">Informations</h3>
         <div class="space-y-1 text-sm leading-snug">
-            <p><strong>Objet :</strong> {{ object_labels.get(task.objet, task.objet) }}</p>
+            <p><strong>Objet :</strong> {{ object_labels.get(objet_code, objet_code or "-") }}</p>
             <p>
                 <strong>Statut :</strong>
                 <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold {{ status_badges.get(task.statut, 'bg-slate-100 text-slate-700') }}">

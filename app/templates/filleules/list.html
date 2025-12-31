@@ -9,8 +9,15 @@
         <h2 class="font-display text-2xl">Les protégées Afoulki 👧</h2>
         <p class="text-slate-600 text-sm">Un aperçu rapide des profils et villages.</p>
     </div>
-    <div class="bg-[#F2932B10] border border-[#F2932B20] text-[#F2932B] px-4 py-3 rounded-2xl shadow-soft text-sm">
-        🌼 Merci pour votre accompagnement bienveillant.
+    <div class="flex flex-wrap items-center gap-3">
+        <a href="/filleules/html/pdf{% if request.url.query %}?{{ request.url.query }}{% endif %}"
+           class="inline-flex items-center gap-2 rounded-full border border-[#4969A430] bg-[#4969A418] px-4 py-2 text-sm font-semibold text-[#4969A4] hover:-translate-y-0.5 transition shadow-soft"
+           target="_blank" rel="noopener">
+            PDF
+        </a>
+        <div class="bg-[#F2932B10] border border-[#F2932B20] text-[#F2932B] px-4 py-3 rounded-2xl shadow-soft text-sm">
+            🌼 Merci pour votre accompagnement bienveillant.
+        </div>
     </div>
 </div>
 
@@ -34,7 +41,7 @@
     <table class="min-w-full table-fixed text-left text-sm">
         <thead class="bg-gradient-to-r from-[#F2932B14] via-[#F2A75A20] to-[#4969A420] text-slate-700">
             <tr>
-                <th class="px-4 py-0.5 text-xs font-semibold uppercase tracking-wide">
+                <th class="w-[24%] px-4 py-0.5 text-xs font-semibold uppercase tracking-wide">
                     <div class="flex flex-col gap-2">
                         <span>Nom</span>
                         <input data-col="0" class="filleules-filter w-full rounded-lg border border-slate-200 bg-white/80 px-2 py-0.5 text-xs normal-case font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#F2932B40]" placeholder="Filtrer">
@@ -52,7 +59,7 @@
                         <input data-col="2" class="filleules-filter w-full rounded-lg border border-slate-200 bg-white/80 px-2 py-0.5 text-xs normal-case font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#F2932B40]" placeholder="Filtrer">
                     </div>
                 </th>
-                <th class="w-[30%] px-4 py-0.5 text-xs font-semibold uppercase tracking-wide">
+                <th class="w-[20%] px-4 py-0.5 text-xs font-semibold uppercase tracking-wide">
                     <div class="flex flex-col gap-2">
                         <span>Référent</span>
                         <input data-col="3" class="filleules-filter w-full rounded-lg border border-slate-200 bg-white/80 px-2 py-0.5 text-xs normal-case font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#F2932B40]" placeholder="Filtrer">
@@ -71,10 +78,10 @@
             {% for f in filleules %}
             {% set latest = recent_scolarite.get(f.id_filleule) %}
             <tr class="hover:bg-[#F2932B0f] transition">
-                <td class="px-4 py-0.5">{{ f.nom }}</td>
+                <td class="w-[24%] px-4 py-0.5">{{ f.nom }}</td>
                 <td class="px-4 py-0.5">{{ f.prenom }}</td>
                 <td class="w-24 px-4 py-0.5 text-center">{{ f.annee_rentree if f.annee_rentree else "-" }}</td>
-                <td class="px-4 py-0.5">
+                <td class="w-[20%] px-4 py-0.5">
                     {% if f.correspondant %}
                         {{ f.correspondant.prenom }} {{ f.correspondant.nom }}
                     {% else %}
