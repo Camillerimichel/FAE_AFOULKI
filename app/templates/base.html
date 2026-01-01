@@ -67,7 +67,7 @@
             <a href="/taches" class="px-4 py-2 rounded-full text-white/90 hover:bg-white/15 transition">Tâches</a>
             <a href="/correspondants/html" class="px-4 py-2 rounded-full text-white/90 hover:bg-white/15 transition">Référents</a>
             <a href="/etablissements/html" class="px-4 py-2 rounded-full text-white/90 hover:bg-white/15 transition">Établissements</a>
-            {% if request.state.user %}
+            {% if request.state.user and ("administrateur" in request.state.user_roles or "responsable_fae" in request.state.user_roles) %}
             <a href="/admin" class="px-4 py-2 rounded-full text-white/90 hover:bg-white/15 transition">Administration</a>
             {% endif %}
         </nav>

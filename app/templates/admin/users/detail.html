@@ -19,12 +19,18 @@
 </div>
 
 <div class="mt-6 flex space-x-4">
+    <a href="/admin/users"
+       class="bg-slate-200 text-slate-700 px-4 py-2 rounded">Retour Liste</a>
+    {% if can_edit_user %}
     <a href="/admin/users/{{ user.id }}/edit"
        class="bg-yellow-500 text-white px-4 py-2 rounded">Modifier</a>
+    {% endif %}
 
+    {% if can_admin_users %}
     <a href="/admin/users/{{ user.id }}/delete"
        onclick="return confirm('Supprimer cet utilisateur ?');"
        class="bg-red-600 text-white px-4 py-2 rounded">Supprimer</a>
+    {% endif %}
     <a href="/admin/users"
        class="bg-slate-200 text-slate-700 px-4 py-2 rounded">Annuler</a>
 </div>

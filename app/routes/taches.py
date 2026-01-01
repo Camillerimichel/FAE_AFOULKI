@@ -24,7 +24,7 @@ from app.schemas.tache import TacheCommentCreate, TacheCreate, TacheResponse, Ta
 router = APIRouter(prefix="/taches", tags=["Tâches"])
 templates = Jinja2Templates(directory="app/templates")
 
-MANAGE_ROLES = {"correspondant", "back_office_fae", "responsable_fae", "administrateur"}
+MANAGE_ROLES = {"correspondant", "back_office_fae", "responsable_fae", "administrateur", "membre"}
 
 TASK_OBJECT_LABELS = {
     "demande_info": "Demande d'information",

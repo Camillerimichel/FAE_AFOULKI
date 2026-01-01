@@ -55,6 +55,9 @@
             <a href="/admin/filleules" class="flex items-center justify-between px-3 py-2 rounded-xl hover:bg-white/15 transition">
                 <span>Filleules</span><span class="text-white/70">✨</span>
             </a>
+            <a href="/admin/suivisocial" class="flex items-center justify-between px-3 py-2 rounded-xl hover:bg-white/15 transition">
+                <span>Suivi social</span><span class="text-white/70">💬</span>
+            </a>
             <a href="/admin/parrains" class="flex items-center justify-between px-3 py-2 rounded-xl hover:bg-white/15 transition">
                 <span>Parrains</span><span class="text-white/70">🤝</span>
             </a>
@@ -82,12 +85,16 @@
             <a href="/admin/documents" class="flex items-center justify-between px-3 py-2 rounded-xl hover:bg-white/15 transition">
                 <span>Documents</span><span class="text-white/70">🗂️</span>
             </a>
-            <a href="/admin/suivisocial" class="flex items-center justify-between px-3 py-2 rounded-xl hover:bg-white/15 transition">
-                <span>Suivi social</span><span class="text-white/70">💬</span>
-            </a>
+            {% if request.state.user and ("administrateur" in request.state.user_roles or "responsable_fae" in request.state.user_roles) %}
             <a href="/admin/users" class="flex items-center justify-between px-3 py-2 rounded-xl hover:bg-white/15 transition">
                 <span>Utilisateurs</span><span class="text-white/70">🛠️</span>
             </a>
+            {% endif %}
+            {% if request.state.user and "administrateur" in request.state.user_roles %}
+            <a href="/admin/connexions" class="flex items-center justify-between px-3 py-2 rounded-xl hover:bg-white/15 transition">
+                <span>Suivi connexion</span><span class="text-white/70">🗒️</span>
+            </a>
+            {% endif %}
             <a href="/auth/logout" class="flex items-center justify-between px-3 py-2 rounded-xl hover:bg-white/15 transition">
                 <span>Déconnexion</span><span class="text-white/70">🚪</span>
             </a>

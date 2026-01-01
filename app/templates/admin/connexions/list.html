@@ -1,0 +1,103 @@
+{% extends "admin/admin_base.html" %}
+
+{% block title %}Administration - Suivi des connexions{% endblock %}
+
+{% block content %}
+
+<div class="flex flex-col gap-2 mb-6 sm:flex-row sm:items-center sm:justify-between">
+    <div>
+        <h2 class="text-2xl font-bold">Suivi des connexions</h2>
+        <p class="text-slate-600 text-sm">Historique des connexions et pages consultées.</p>
+    </div>
+    <a href="/admin/users" class="inline-flex items-center px-4 py-2 rounded border border-slate-200 text-slate-700 hover:bg-slate-100 transition">
+        Retour Menu principal
+    </a>
+</div>
+
+<div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <input
+        id="userFilter"
+        type="search"
+        placeholder="Filtrer par nom"
+        class="w-full sm:w-80 rounded border border-slate-200 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+    >
+    <div id="userCount" class="text-sm text-slate-500"></div>
+</div>
+
+{% if groups %}
+<div id="userLogs" class="mt-6 space-y-6">
+    {% for group in groups %}
+    <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-soft" data-user-name="{{ group.user_label }}">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+            <div>
+                <p class="text-xs uppercase tracking-[0.2em] text-slate-400">Nom</p>
+                <h3 class="text-lg font-semibold text-slate-800">{{ group.user_label }}</h3>
+            </div>
+            <span class="text-xs text-slate-500">ID #{{ group.user_id }}</span>
+        </div>
+
+        <div class="mt-4 space-y-3">
+            {% for date_group in group.dates %}
+            <details class="group rounded-xl border border-slate-200 overflow-hidden">
+                <summary class="flex cursor-pointer items-center justify-between bg-slate-50 px-4 py-2">
+                    <div>
+                        <p class="text-xs uppercase tracking-[0.2em] text-slate-500">Date</p>
+                        <p class="text-sm font-semibold text-slate-800">
+                            {{ date_group.date.strftime("%d/%m/%Y") if date_group.date else "-" }}
+                        </p>
+                    </div>
+                    <span class="text-xs text-slate-500 transition group-open:rotate-180">⌄</span>
+                </summary>
+                <div class="divide-y divide-slate-100">
+                    <div class="grid grid-cols-1 gap-2 px-4 py-2 text-[11px] uppercase tracking-wide text-slate-500 sm:grid-cols-[minmax(0,180px)_minmax(0,180px)_minmax(0,1fr)]">
+                        <span>Jour/heure connexion</span>
+                        <span>Adresse IP connexion</span>
+                        <span>Page consultée</span>
+                    </div>
+                    {% for entry in date_group.entries %}
+                    <div class="grid grid-cols-1 gap-2 px-4 py-2 text-sm text-slate-700 sm:grid-cols-[minmax(0,180px)_minmax(0,180px)_minmax(0,1fr)]">
+                        <span>{{ entry.created_at.strftime("%H:%M") if entry.created_at else "-" }}</span>
+                        <span class="text-slate-600">{{ entry.ip_address or "-" }}</span>
+                        <span class="font-medium text-slate-800 break-all">{{ entry.path }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </details>
+            {% endfor %}
+        </div>
+    </section>
+    {% endfor %}
+</div>
+{% else %}
+<p class="mt-6 text-slate-500">Aucune connexion enregistrée.</p>
+{% endif %}
+
+<script>
+(() => {
+    const input = document.getElementById("userFilter");
+    const countEl = document.getElementById("userCount");
+    const sections = Array.from(document.querySelectorAll("[data-user-name]"));
+
+    const updateCount = () => {
+        const visible = sections.filter((section) => !section.classList.contains("hidden")).length;
+        countEl.textContent = `${visible} utilisateur${visible > 1 ? "s" : ""}`;
+    };
+
+    const applyFilter = () => {
+        const query = (input?.value || "").toLowerCase().trim();
+        sections.forEach((section) => {
+            const name = (section.dataset.userName || "").toLowerCase();
+            const show = !query || name.includes(query);
+            section.classList.toggle("hidden", !show);
+        });
+        updateCount();
+    };
+
+    if (input) {
+        input.addEventListener("input", applyFilter);
+    }
+    applyFilter();
+})();
+</script>
+
+{% endblock %}

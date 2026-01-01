@@ -1,13 +1,16 @@
 from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.exception_handlers import http_exception_handler
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 
 # Base SQLAlchemy + création des tables
 from app.database import Base, engine
 from app.models.localite import Localite  # noqa: F401
 from app.models.tache import Tache  # noqa: F401
+from app.models.user_connection_log import UserConnectionLog  # noqa: F401
 
 # Middleware session
 from app.middleware.session import SessionMiddleware
@@ -54,9 +57,22 @@ from app.services.schema_service import (
 # --------------------------------------------------
 
 app = FastAPI(title="FAE Afoulki")
+templates = Jinja2Templates(directory="app/templates")
 
 # Ajouter middleware session
 app.add_middleware(SessionMiddleware)
+
+@app.exception_handler(HTTPException)
+async def custom_http_exception_handler(request: Request, exc: HTTPException):
+    if exc.status_code == 403:
+        accept = request.headers.get("accept", "")
+        if "text/html" in accept:
+            return templates.TemplateResponse(
+                "errors/403.html",
+                {"request": request, "detail": exc.detail or "Accès interdit"},
+                status_code=403,
+            )
+    return await http_exception_handler(request, exc)
 
 # Créer les tables SQLAlchemy si non existantes
 Base.metadata.create_all(bind=engine)

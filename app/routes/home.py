@@ -1,6 +1,7 @@
 import json
 
 from fastapi import APIRouter, Request
+from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 
 from app.services.stats_service import (
@@ -18,6 +19,8 @@ router = APIRouter()
 
 @router.get("/", tags=["Home"])
 async def dashboard(request: Request):
+    if not request.state.user:
+        return RedirectResponse("/auth/login", status_code=302)
     stats = {
         "filleules": 0,
         "parrains": 0,

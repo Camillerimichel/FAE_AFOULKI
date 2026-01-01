@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Accès interdit{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-xl text-center">
+    <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-100 text-3xl text-amber-600 shadow-soft">
+        ⛔
+    </div>
+    <h2 class="mt-4 text-2xl font-bold">Accès interdit</h2>
+    <p class="mt-2 text-slate-600">
+        Votre compte n'a pas les droits nécessaires pour accéder à cette page.
+    </p>
+    <div class="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
+        <a
+            href="/"
+            class="inline-flex items-center justify-center rounded-full bg-brandBlue px-5 py-2.5 text-white transition hover:bg-[#3f5d91]"
+        >
+            Retour au tableau de bord
+        </a>
+        <a
+            href="/auth/logout"
+            class="inline-flex items-center justify-center rounded-full border border-slate-200 px-5 py-2.5 text-slate-700 transition hover:bg-slate-100"
+        >
+            Changer d'utilisateur
+        </a>
+    </div>
+    {% if detail %}
+    <p class="mt-4 text-xs text-slate-400">{{ detail }}</p>
+    {% endif %}
+</div>
+{% endblock %}

@@ -12,6 +12,7 @@ from app.routes.admin.admin_typesdocuments import router as admin_typesdocuments
 from app.routes.admin.admin_documents import router as admin_documents_router
 from app.routes.admin.admin_suivisocial import router as admin_suivisocial_router
 from app.routes.admin.admin_users import router as admin_users_router
+from app.routes.admin.admin_connexions import router as admin_connexions_router
 
 router = APIRouter(prefix="/admin", tags=["Admin"])
 
@@ -27,3 +28,4 @@ router.include_router(admin_typesdocuments_router)
 router.include_router(admin_documents_router)
 router.include_router(admin_suivisocial_router)
 router.include_router(admin_users_router)
+router.include_router(admin_connexions_router)

@@ -9,32 +9,182 @@
 
 <a href="/" class="inline-flex items-center px-3 py-2 rounded border border-slate-200 text-slate-700 hover:bg-slate-100 transition mb-4">Retour menu principal</a>
 
+{% if can_admin_users %}
 <a href="/admin/users/new" class="bg-blue-600 text-white px-4 py-2 rounded">Ajouter un utilisateur</a>
+{% endif %}
 
-<table class="w-full mt-6 bg-white shadow">
-    <tr class="bg-gray-200 text-left">
-        <th class="p-3">Nom complet</th>
-        <th class="p-3">Email</th>
-        <th class="p-3">Rôles</th>
-        <th></th>
-    </tr>
+<div class="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+        <input
+            id="userSearch"
+            type="search"
+            placeholder="Filtrer par nom, email, role"
+            class="w-full sm:w-72 rounded border border-slate-200 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+        >
+        <select
+            id="roleFilter"
+            class="w-full sm:w-60 rounded border border-slate-200 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+        >
+            <option value="">Tous les roles</option>
+        </select>
+    </div>
+    <div id="userCount" class="text-sm text-slate-500"></div>
+</div>
 
-    {% for u in users %}
-    <tr class="border-b">
-        <td class="p-3">{{ u.fullname if u.fullname else "-" }}</td>
-        <td class="p-3">{{ u.email }}</td>
-        <td class="p-3">
-            {% if u.roles %}
-                {{ u.roles | map(attribute='label') | join(', ') }}
-            {% else %}
-                -
-            {% endif %}
-        </td>
-        <td class="p-3 text-right">
-            <a href="/admin/users/{{ u.id }}" class="text-blue-600">Voir</a>
-        </td>
-    </tr>
-    {% endfor %}
+<table id="usersTable" class="w-full mt-4 bg-white shadow text-sm">
+    <thead>
+        <tr class="bg-gray-200 text-left">
+            <th class="px-3 py-2">
+                <button type="button" data-sort-col="0" class="flex items-center gap-2 font-semibold text-slate-800">
+                    Nom complet <span data-sort-indicator>&lt;&gt;</span>
+                </button>
+            </th>
+            <th class="px-3 py-2">
+                <button type="button" data-sort-col="1" class="flex items-center gap-2 font-semibold text-slate-800">
+                    Email <span data-sort-indicator>&lt;&gt;</span>
+                </button>
+            </th>
+            <th class="px-3 py-2">
+                <button type="button" data-sort-col="2" class="flex items-center gap-2 font-semibold text-slate-800">
+                    Roles <span data-sort-indicator>&lt;&gt;</span>
+                </button>
+            </th>
+            <th class="px-3 py-2"></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for u in users %}
+        {% set fullname = u.fullname if u.fullname else "-" %}
+        {% if u.roles %}
+        {% set role_labels = u.roles | map(attribute='label') | join(', ') %}
+        {% else %}
+        {% set role_labels = "-" %}
+        {% endif %}
+        <tr
+            class="border-b"
+            data-name="{{ fullname }}"
+            data-email="{{ u.email }}"
+            data-roles="{{ role_labels }}"
+        >
+            <td class="px-3 py-2">{{ fullname }}</td>
+            <td class="px-3 py-2">{{ u.email }}</td>
+            <td class="px-3 py-2">{{ role_labels }}</td>
+            <td class="px-3 py-2 text-right">
+                <a href="/admin/users/{{ u.id }}" class="text-blue-600">Voir</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
 </table>
+
+<script>
+(() => {
+    const table = document.getElementById("usersTable");
+    if (!table) {
+        return;
+    }
+
+    const tbody = table.querySelector("tbody");
+    const rows = Array.from(tbody.querySelectorAll("tr"));
+    const searchInput = document.getElementById("userSearch");
+    const roleFilter = document.getElementById("roleFilter");
+    const countEl = document.getElementById("userCount");
+    const sortButtons = table.querySelectorAll("[data-sort-col]");
+
+    const normalize = (value) => (value || "").toString().toLowerCase().trim();
+
+    const updateCount = () => {
+        const visible = rows.filter((row) => !row.classList.contains("hidden")).length;
+        countEl.textContent = `${visible} utilisateur${visible > 1 ? "s" : ""}`;
+    };
+
+    const buildRoleOptions = () => {
+        if (!roleFilter) {
+            return;
+        }
+        const roles = new Set();
+        rows.forEach((row) => {
+            const roleText = row.dataset.roles || "";
+            roleText.split(",").forEach((role) => {
+                const trimmed = role.trim();
+                if (trimmed && trimmed !== "-") {
+                    roles.add(trimmed);
+                }
+            });
+        });
+        Array.from(roles)
+            .sort((a, b) => a.localeCompare(b, "fr", { sensitivity: "base" }))
+            .forEach((role) => {
+                const option = document.createElement("option");
+                option.value = role;
+                option.textContent = role;
+                roleFilter.appendChild(option);
+            });
+    };
+
+    const applyFilters = () => {
+        const query = normalize(searchInput ? searchInput.value : "");
+        const role = normalize(roleFilter ? roleFilter.value : "");
+        rows.forEach((row) => {
+            const name = normalize(row.dataset.name);
+            const email = normalize(row.dataset.email);
+            const roles = normalize(row.dataset.roles);
+            const matchesQuery =
+                !query || name.includes(query) || email.includes(query) || roles.includes(query);
+            const matchesRole =
+                !role ||
+                roles
+                    .split(",")
+                    .map((item) => normalize(item))
+                    .includes(role);
+            row.classList.toggle("hidden", !(matchesQuery && matchesRole));
+        });
+        updateCount();
+    };
+
+    let currentSort = { col: null, dir: 1 };
+    const collator = new Intl.Collator("fr", { sensitivity: "base", numeric: true });
+
+    const sortRows = (colIndex) => {
+        const dir = currentSort.col === colIndex ? -currentSort.dir : 1;
+        currentSort = { col: colIndex, dir };
+        const sortedRows = rows.slice().sort((a, b) => {
+            const aText = a.children[colIndex]?.textContent?.trim() || "";
+            const bText = b.children[colIndex]?.textContent?.trim() || "";
+            const aValue = aText === "-" ? "" : aText;
+            const bValue = bText === "-" ? "" : bText;
+            return collator.compare(aValue, bValue) * dir;
+        });
+        sortedRows.forEach((row) => tbody.appendChild(row));
+        sortButtons.forEach((button) => {
+            const indicator = button.querySelector("[data-sort-indicator]");
+            if (!indicator) {
+                return;
+            }
+            if (Number(button.dataset.sortCol) === colIndex) {
+                indicator.textContent = dir === 1 ? "^" : "v";
+            } else {
+                indicator.textContent = "<>";
+            }
+        });
+    };
+
+    sortButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+            sortRows(Number(button.dataset.sortCol));
+        });
+    });
+
+    if (searchInput) {
+        searchInput.addEventListener("input", applyFilters);
+    }
+    if (roleFilter) {
+        roleFilter.addEventListener("change", applyFilters);
+    }
+
+    buildRoleOptions();
+    applyFilters();
+})();
+</script>
 
 {% endblock %}

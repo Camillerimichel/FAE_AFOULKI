@@ -3,6 +3,8 @@ from fastapi import Request
 
 ADMIN_ROLES = {"administrateur", "responsable_fae", "back_office_fae"}
 USER_ADMIN_ROLES = {"administrateur"}
+DASHBOARD_ROLES = {"administrateur", "responsable_fae"}
+USER_VIEW_ROLES = {"administrateur", "responsable_fae"}
 
 
 def get_user_roles(request: Request) -> set[str]:

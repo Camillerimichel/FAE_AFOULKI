@@ -28,6 +28,7 @@
 
     <div class="mb-4">
         <p class="font-semibold mb-2">Rôles :</p>
+        {% if can_edit_roles %}
         <div class="grid gap-2 sm:grid-cols-2">
             {% for role in roles %}
             <label class="flex items-center gap-2 text-sm">
@@ -37,6 +38,15 @@
             </label>
             {% endfor %}
         </div>
+        {% else %}
+        <p class="text-sm text-slate-600">
+            {% if user and user.roles %}
+                {{ user.roles | map(attribute='label') | join(', ') }}
+            {% else %}
+                -
+            {% endif %}
+        </p>
+        {% endif %}
     </div>
 
     <button class="bg-blue-600 text-white px-4 py-2 rounded">{{ action }}</button>

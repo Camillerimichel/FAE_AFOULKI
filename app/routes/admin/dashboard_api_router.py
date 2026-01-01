@@ -3,6 +3,7 @@ from fastapi.responses import JSONResponse
 from sqlalchemy import func
 from sqlalchemy.orm import aliased
 
+from app.authz import DASHBOARD_ROLES, has_any_role
 from app.database import SessionLocal
 from app.models.filleule import Filleule
 from app.models.etablissement import Etablissement
@@ -14,6 +15,8 @@ router = APIRouter(prefix="/admin/api", tags=["Admin API"])
 def require_admin(request: Request):
     if not request.state.user:
         raise HTTPException(401, "Non authentifié")
+    if not has_any_role(request, DASHBOARD_ROLES):
+        raise HTTPException(403, "Acces interdit")
 
 
 @router.get("/filleuls-par-etab")
