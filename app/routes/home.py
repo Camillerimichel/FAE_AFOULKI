@@ -9,6 +9,7 @@ from app.services.stats_service import (
     get_city_origin_stats,
     get_dashboard_stats,
     get_filiere_stats,
+    get_filleules_rentree_stats,
     get_essaouira_map,
     get_annees_scolaires,
 )
@@ -40,6 +41,8 @@ async def dashboard(request: Request):
     city_stats = {"cities": [], "missing": []}
     filiere_stats = []
     annees_scolaires = []
+    historique_rentree = []
+    historique_max = 0
     map_data = None
     if request.state.user:
         stats = await get_dashboard_stats()
@@ -47,6 +50,9 @@ async def dashboard(request: Request):
         city_stats = await get_city_origin_stats()
         filiere_stats = await get_filiere_stats()
         annees_scolaires = await get_annees_scolaires()
+        historique = await get_filleules_rentree_stats()
+        historique_rentree = historique["data"]
+        historique_max = historique["max_count"]
         map_data = get_essaouira_map()
     return templates.TemplateResponse(
         "dashboard.html",
@@ -57,6 +63,8 @@ async def dashboard(request: Request):
             "city_stats": city_stats,
             "filiere_stats": filiere_stats,
             "annees_scolaires": annees_scolaires,
+            "historique_rentree": historique_rentree,
+            "historique_max": historique_max,
             "map_json": json.dumps(map_data) if map_data else "null",
             "city_json": json.dumps(city_stats["cities"]),
         },

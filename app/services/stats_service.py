@@ -1,4 +1,5 @@
 import json
+import re
 from pathlib import Path
 
 from sqlalchemy import and_, func, or_
@@ -18,6 +19,7 @@ from app.models.annee_scolaire import AnneeScolaire
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 CITY_COORDS_PATH = DATA_DIR / "city_coords.json"
 ESSAOUIRA_MAP_PATH = DATA_DIR / "essaouira_map.json"
+YEAR_PATTERN = re.compile(r"\d{4}")
 
 
 def normalize_city_name(name: str) -> str:
@@ -140,7 +142,10 @@ async def get_city_origin_stats():
     for entry in city_map.values():
         entry["filleules"].sort(key=lambda item: (item["nom"].lower(), item["prenom"].lower()))
 
-    cities = sorted(city_map.values(), key=lambda item: item["name"].lower())
+    cities = sorted(
+        city_map.values(),
+        key=lambda item: (-item["count"], item["name"].lower()),
+    )
     missing = []
     for entry in cities:
         normalized = normalize_city_name(entry["name"])
@@ -156,6 +161,36 @@ async def get_city_origin_stats():
             missing.append(entry["name"])
 
     return {"cities": cities, "missing": missing}
+
+
+def _extract_year(value: str) -> int | None:
+    match = YEAR_PATTERN.search(value)
+    if match:
+        return int(match.group())
+    return None
+
+
+async def get_filleules_rentree_stats():
+    db: Session = SessionLocal()
+    rows = (
+        db.query(Filleule.annee_rentree, func.count(Filleule.id_filleule))
+        .filter(Filleule.annee_rentree.isnot(None))
+        .filter(func.trim(Filleule.annee_rentree) != "")
+        .group_by(Filleule.annee_rentree)
+        .all()
+    )
+    db.close()
+
+    data = []
+    for annee, count in rows:
+        label = str(annee).strip()
+        if not label:
+            continue
+        data.append({"label": label, "count": count, "year": _extract_year(label)})
+
+    data.sort(key=lambda item: (item["year"] is None, item["year"] or 0, item["label"]))
+    max_count = max((item["count"] for item in data), default=0)
+    return {"data": data, "max_count": max_count}
 
 async def get_chart_data():
     db = SessionLocal()

@@ -84,6 +84,68 @@
             </div>
         </details>
 
+        <details id="historique" class="rounded-3xl bg-white/95 border border-[#F2932B1f] shadow-soft p-6 sm:p-8 scroll-mt-24" data-dashboard-accordion>
+            <summary class="cursor-pointer">
+                <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                    <div>
+                        <p class="text-sm uppercase tracking-[0.2em] text-[#F2932B] font-semibold">Historique</p>
+                        <h3 class="font-display text-2xl">Entrées par année</h3>
+                        <p class="text-slate-600 text-sm">Nombre de filleules entrées par année de rentrée.</p>
+                    </div>
+                    <div class="text-xs text-slate-500 bg-[#F2932B10] border border-[#F2932B20] px-3 py-2 rounded-2xl">
+                        ● {{ historique_rentree | length }} années
+                    </div>
+                </div>
+            </summary>
+
+            <div class="mt-6 rounded-2xl border border-[#F2932B1f] bg-white/90 p-4">
+                {% if historique_rentree %}
+                {% set max_count = 20 %}
+                {% set chart_height = 168 %}
+                <div class="overflow-x-auto">
+                    <div class="flex gap-4 min-w-max px-2">
+                        <div class="flex flex-col justify-between text-xs text-slate-400 h-48 pb-6">
+                            <span>{{ max_count }}</span>
+                            <span>15</span>
+                            <span>10</span>
+                            <span>5</span>
+                            <span>0</span>
+                        </div>
+                        <div class="relative flex-1">
+                            <div class="absolute inset-0 flex flex-col justify-between pointer-events-none pb-6">
+                                <div class="border-t border-slate-100"></div>
+                                <div class="border-t border-slate-100"></div>
+                                <div class="border-t border-slate-100"></div>
+                                <div class="border-t border-slate-100"></div>
+                                <div class="border-t border-slate-100"></div>
+                            </div>
+                            <div class="relative flex items-end gap-4 h-48 min-w-max">
+                                {% for item in historique_rentree %}
+                                {% set clamped = item.count if item.count < max_count else max_count %}
+                                {% set bar_height = (clamped / max_count * chart_height) %}
+                                <a
+                                    href="/filleules/html?annee_rentree={{ item.label | urlencode }}"
+                                    class="flex flex-col items-center justify-end gap-2 hover:text-[#F2932B] transition"
+                                    title="Voir les filleules {{ item.label }}"
+                                >
+                                    <span class="text-xs text-slate-500">{{ item.count }}</span>
+                                    <div
+                                        class="w-10 sm:w-12 rounded-t-xl bg-[#4969A4] shadow-soft"
+                                        style="height: {{ bar_height | round(0) }}px; min-height: 6px;"
+                                    ></div>
+                                    <span class="text-xs text-slate-600">{{ item.label }}</span>
+                                </a>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <p class="text-slate-500 text-sm">Aucune donnée de rentrée disponible.</p>
+                {% endif %}
+            </div>
+        </details>
+
         <details id="filieres" class="rounded-3xl bg-white/95 border border-[#F2932B1f] shadow-soft p-6 sm:p-8 scroll-mt-24" data-dashboard-accordion>
             <summary class="cursor-pointer">
                 <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">

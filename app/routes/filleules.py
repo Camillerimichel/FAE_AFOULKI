@@ -27,6 +27,7 @@ templates = Jinja2Templates(directory="app/templates")
 def liste_filleules_html(
     request: Request,
     filiere: str | None = Query(default=None),
+    annee_rentree: str | None = Query(default=None),
     village: str | None = Query(default=None),
     sans_parrains: int | None = None,
     couverture_sante: int | None = None,
@@ -69,6 +70,14 @@ def liste_filleules_html(
                 .subquery()
             )
             query = query.filter(Filleule.id_filleule.in_(ids_subquery))
+    if annee_rentree:
+        annee_value = annee_rentree.strip().lower()
+        if annee_value:
+            query = (
+                query.filter(Filleule.annee_rentree.isnot(None))
+                .filter(func.trim(Filleule.annee_rentree) != "")
+                .filter(func.lower(func.trim(Filleule.annee_rentree)) == annee_value)
+            )
     if village:
         village_value = village.strip().lower()
         if village_value:
@@ -143,6 +152,7 @@ def liste_filleules_html(
 def liste_filleules_pdf(
     request: Request,
     filiere: str | None = Query(default=None),
+    annee_rentree: str | None = Query(default=None),
     village: str | None = Query(default=None),
     sans_parrains: int | None = None,
     couverture_sante: int | None = None,
@@ -173,6 +183,14 @@ def liste_filleules_pdf(
                 .subquery()
             )
             query = query.filter(Filleule.id_filleule.in_(ids_subquery))
+    if annee_rentree:
+        annee_value = annee_rentree.strip().lower()
+        if annee_value:
+            query = (
+                query.filter(Filleule.annee_rentree.isnot(None))
+                .filter(func.trim(Filleule.annee_rentree) != "")
+                .filter(func.lower(func.trim(Filleule.annee_rentree)) == annee_value)
+            )
     if village:
         village_value = village.strip().lower()
         if village_value:
